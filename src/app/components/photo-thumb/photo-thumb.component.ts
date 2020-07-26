@@ -5,9 +5,9 @@ import {Photo} from "../../helper/photo";
   selector: 'photo-thumb',
   template: `
     <div class="photo-thumb">
-      <img
-        [attr.src]="'storage/'+photo.image_versions['thumb'].root_store+'/'+photo.image_versions['thumb'].relative_path"
-        [attr.alt]="photo.title">
+      <img *ngIf="photo.image_versions['thumb']"
+           [attr.src]="'storage/'+photo.image_versions['thumb'].root_store+'/'+photo.image_versions['thumb'].relative_path"
+           [attr.alt]="photo.title">
     </div>
   `,
   styles: [`
