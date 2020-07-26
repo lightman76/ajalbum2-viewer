@@ -16,12 +16,15 @@ import {Photo} from "../../helper/photo";
     .date-header {
       border-top: 1px solid #999;
       font-weight: bold;
+      font-size: 20px;
     }
+
     .photo-list {
-      display:flex;
+      display: flex;
       flex-direction: row;
       flex-wrap: wrap;
     }
+
     .photo-item {
       flex: 0 0 250px;
       margin: 10px;

@@ -17,15 +17,25 @@ export class SearchQuery {
     return new SearchQuery(this);
   }
 
+  toJsonHash() {
+    return {
+      search_text: this.searchText,
+      start_date: this.startDate,
+      end_date: this.endDate,
+      tag_ids: this.tagIds,
+      feature_threshold: this.featureThreshold
+    }
+  }
+
   public static parseNumber(d) {
-    if(typeof d == "string") {
+    if (typeof d == "string") {
       return parseInt(d);
     } else {
       return d; //already a number
     }
   }
 
-  public static parseArrayOfNumbers(d:any):Array<number> {
+  public static parseArrayOfNumbers(d: any): Array<number> {
     if(d == null) return null;
     if(typeof d == "string") {
       if(d.startsWith("[")) {

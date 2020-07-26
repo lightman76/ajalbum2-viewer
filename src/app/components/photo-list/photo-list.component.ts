@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
 import {PhotoResultSetService} from "../../services/photo-result-set.service";
@@ -8,9 +8,6 @@ import {PhotosForDay} from "../../helper/photos-for-day";
 @Component({
   selector: 'photo-list',
   template: `
-    <div>Hello world</div>
-    <div>Params: {{params|json}}</div>
-    <hr/>
     <div class="results">
     <photos-for-day [pfd]="pfd" *ngFor="let pfd of photosByDate"></photos-for-day>
     </div>
