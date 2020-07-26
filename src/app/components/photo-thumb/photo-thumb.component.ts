@@ -5,7 +5,9 @@ import {Photo} from "../../helper/photo";
   selector: 'photo-thumb',
   template: `
     <div class="photo-thumb">
-      {{photo.title}}
+      <img
+        [attr.src]="'storage/'+photo.image_versions['thumb'].root_store+'/'+photo.image_versions['thumb'].relative_path"
+        [attr.alt]="photo.title">
     </div>
   `,
   styles: [`
@@ -15,6 +17,12 @@ import {Photo} from "../../helper/photo";
       width: 250px;
       height: 250px;
     }
+
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+    }
+
   `],
 })
 export class PhotoThumbComponent {

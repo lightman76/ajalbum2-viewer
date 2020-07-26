@@ -17,7 +17,7 @@ export class PhotosForDay {
   }
 
   addPhoto(photo:Photo) {
-    console.log("Adding photo for date="+this.forDate, photo);
+    //console.log("Adding photo for date="+this.forDate, photo);
     let oldPhotos = this.photos;
     this.photos = oldPhotos.slice();
     this.photos.push(photo);
