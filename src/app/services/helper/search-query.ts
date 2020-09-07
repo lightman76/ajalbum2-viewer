@@ -3,7 +3,8 @@ export class SearchQuery {
   startDate:Date;
   endDate:Date;
   tagIds:Array<number>;
-  featureThreshold:number;
+  featureThreshold: number;
+  offsetDate: string;
 
   constructor(params:any) {
     this.searchText = params["searchText"];
@@ -23,7 +24,9 @@ export class SearchQuery {
       start_date: this.startDate,
       end_date: this.endDate,
       tag_ids: this.tagIds,
-      feature_threshold: this.featureThreshold
+      feature_threshold: this.featureThreshold,
+      offset_date: this.offsetDate,
+      target_max_results: 50
     }
   }
 
