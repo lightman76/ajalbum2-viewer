@@ -76,7 +76,7 @@ export class PhotosForDay {
   }
 
   getPhotoForTimeId(timeId) {
-    console.log("attempting to get photo for timeId=" + timeId, this.photosByPhotoTimeId[timeId])
+    //console.log("attempting to get photo for timeId=" + timeId, this.photosByPhotoTimeId[timeId])
     return this.photosByPhotoTimeId[timeId];
   }
 

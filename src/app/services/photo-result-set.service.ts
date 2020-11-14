@@ -70,7 +70,7 @@ export class PhotoResultSetService {
   }
 
   getPhotoForId(photoTimeIdNum: number): Promise<Photo> {
-    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side usings seconds instead of ms.
+    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side using seconds instead of ms.
     console.log("getPhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
     return new Promise<Photo>((resolve, reject) => {
 
@@ -84,18 +84,20 @@ export class PhotoResultSetService {
         let sub = this.photosByDay$.subscribe((pfds) => {
           let day = PhotosForDay.dateToDayStr(photoTimeId);
           let pfd = this.photosByDayHash[day];
-          console.log("  getPhotoForId: retrying: pfd loaded=" + (pfd && pfd.photoResultsLoaded))
-          setTimeout(() => {
-            if (pfd && pfd.photoResultsLoaded) {
-              sub.unsubscribe();
-              let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
-              if (photo) {
-                resolve(photo);
-              } else {
-                reject("Photo not found");
+          if (pfd) {
+            console.log("  getPhotoForId: retrying: pfd loaded=" + (pfd && pfd.photoResultsLoaded) + " for day " + day)
+            setTimeout(() => {
+              if (pfd && pfd.photoResultsLoaded) {
+                sub.unsubscribe();
+                let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
+                if (photo) {
+                  resolve(photo);
+                } else {
+                  reject("Photo not found");
+                }
               }
-            }
-          });
+            }, 100);
+          }
         });
         return null;
       }
