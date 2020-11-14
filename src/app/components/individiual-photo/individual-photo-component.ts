@@ -11,7 +11,7 @@ import {Photo} from "../../helper/photo";
     <div class="individual-photo-container">
       <div class="is_loading" *ngIf="!photoId && !photo">No photo id found...</div>
       <div class="is_loading" *ngIf="photoId && !photo">Loading...</div>
-      <div class="is_loading" *ngIf="photoId && photo">
+      <div class="photo-normal" *ngIf="photoId && photo">
         <img *ngIf="photo.image_versions['screenHd']"
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+photo.image_versions['screenHd'].relative_path"
              [attr.alt]="photo.title">
@@ -19,6 +19,16 @@ import {Photo} from "../../helper/photo";
     </div>
   `,
   styles: [`
+    .photo-normal {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .photo-normal img {
+      object-fit: contain;
+      height: 100%;
+      width: 100%;
+    }
   `],
 
 
