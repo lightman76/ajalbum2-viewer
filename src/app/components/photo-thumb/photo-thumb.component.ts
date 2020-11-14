@@ -17,6 +17,7 @@ import {Router} from "@angular/router";
       border: 1px solid #666;
       width: 250px;
       height: 250px;
+      cursor: pointer;
     }
 
     .photo-thumb img {
