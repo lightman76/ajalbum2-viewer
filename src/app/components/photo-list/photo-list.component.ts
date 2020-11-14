@@ -14,8 +14,8 @@ import {PhotosForDay} from "../../helper/photos-for-day";
   `,
   styles: [`
     :host {
-      padding-left: 20px;
-      padding-right: 20px;
+    / / padding-left: 20 px;
+    / / padding-right: 20 px;
       display: block;
       overflow: hidden;
       width: 100vw;

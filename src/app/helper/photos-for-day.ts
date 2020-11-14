@@ -29,6 +29,9 @@ export class PhotosForDay {
     this.photoResultSetService.getViewerWidth$().subscribe(() => {
       this.recomputeHeight();
     });
+    setTimeout(() => {
+      this.recomputeHeight();
+    }, 500);
   }
 
   public static dateToDayStr(d: Date) {

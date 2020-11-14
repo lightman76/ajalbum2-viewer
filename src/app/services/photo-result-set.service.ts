@@ -32,7 +32,7 @@ export class PhotoResultSetService {
     this.photosByDayList = [];
     this.photosByDayHash = {};
     this.photosByDay$ = new BehaviorSubject<Array<PhotosForDay>>(this.photosByDayList);
-    this.viewerWidth$ = new BehaviorSubject<number>(window.innerWidth - 60);
+    this.viewerWidth$ = new BehaviorSubject<number>(window.innerWidth - 20);
     this.viewerHeight$ = new BehaviorSubject<number>(window.innerHeight);
     this.thumbnailDims$ = new BehaviorSubject<RectangleDimensions>(new RectangleDimensions(270, 270));
     this.scrollOffset$ = new BehaviorSubject<number>(0);
