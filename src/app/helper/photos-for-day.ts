@@ -80,6 +80,26 @@ export class PhotosForDay {
     return this.photosByPhotoTimeId[timeId];
   }
 
+  getFuturePhotoFromId(timeId) {
+    let timeIds = Object.keys(this.photosByPhotoTimeId);
+    timeIds = timeIds.sort();
+    let idx = timeIds.indexOf(timeId);
+    if (idx >= 0 && idx < timeIds.length - 1) {
+      return this.photosByPhotoTimeId[timeIds[idx + 1]];
+    }
+    return null;
+  }
+
+  getPastPhotoFromId(timeId) {
+    let timeIds = Object.keys(this.photosByPhotoTimeId);
+    timeIds = timeIds.sort();
+    let idx = timeIds.indexOf(timeId);
+    if (idx > 0) {
+      return this.photosByPhotoTimeId[timeIds[idx - 1]];
+    }
+    return null;
+  }
+
   //NOTE: this is NOT (necessarily) a count of the number of photos in the PhotoList
   getPhotoCount$() {
     return this.photoCount$;

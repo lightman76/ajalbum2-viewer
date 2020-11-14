@@ -104,6 +104,90 @@ export class PhotoResultSetService {
     });
   }
 
+  getFuturePhotoFromId(photoTimeIdNum: number): Promise<Photo> {
+    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side using seconds instead of ms.
+    console.log("getFuturePhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
+    return new Promise<Photo>((resolve, reject) => {
+
+      let day = PhotosForDay.dateToDayStr(photoTimeId);
+      let pfd = this.photosByDayHash[day];
+      console.log("  getPhotoForId: pfd loaded=" + (pfd && pfd.photoResultsLoaded))
+      if (pfd && pfd.photoResultsLoaded) {
+        let photo = pfd.getFuturePhotoFromId(photoTimeIdNum);
+        if (photo) {
+          resolve(photo);
+        } else {
+          //TODO - find future day and return last photo
+          //reject("Photo not found");
+        }
+      } else {
+        this.fetchStartingAtDay(photoTimeId);
+        let sub = this.photosByDay$.subscribe((pfds) => {
+          let day = PhotosForDay.dateToDayStr(photoTimeId);
+          let pfd = this.photosByDayHash[day];
+          if (pfd) {
+            console.log("  getPhotoForId: retrying: pfd loaded=" + (pfd && pfd.photoResultsLoaded) + " for day " + day)
+            setTimeout(() => {
+              if (pfd && pfd.photoResultsLoaded) {
+                sub.unsubscribe();
+                let photo = pfd.getFuturePhotoFromId(photoTimeIdNum);
+                if (photo) {
+                  resolve(photo);
+                } else {
+                  //TODO - find future day and return last photo
+                  //reject("Photo not found");
+                }
+              }
+            }, 100);
+          }
+        });
+        return null;
+      }
+    });
+  }
+
+  getPastPhotoFromId(photoTimeIdNum: number): Promise<Photo> {
+    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side using seconds instead of ms.
+    console.log("getFuturePhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
+    return new Promise<Photo>((resolve, reject) => {
+
+      let day = PhotosForDay.dateToDayStr(photoTimeId);
+      let pfd = this.photosByDayHash[day];
+      console.log("  getPhotoForId: pfd loaded=" + (pfd && pfd.photoResultsLoaded))
+      if (pfd && pfd.photoResultsLoaded) {
+        let photo = pfd.getPastPhotoFromId(photoTimeIdNum);
+        if (photo) {
+          resolve(photo);
+        } else {
+          //TODO - find past day and return first photo
+          //reject("Photo not found");
+        }
+      } else {
+        this.fetchStartingAtDay(photoTimeId);
+        let sub = this.photosByDay$.subscribe((pfds) => {
+          let day = PhotosForDay.dateToDayStr(photoTimeId);
+          let pfd = this.photosByDayHash[day];
+          if (pfd) {
+            console.log("  getPhotoForId: retrying: pfd loaded=" + (pfd && pfd.photoResultsLoaded) + " for day " + day)
+            setTimeout(() => {
+              if (pfd && pfd.photoResultsLoaded) {
+                sub.unsubscribe();
+                let photo = pfd.getPastPhotoFromId(photoTimeIdNum);
+                if (photo) {
+                  resolve(photo);
+                } else {
+                  //TODO - find past day and return first photo
+                  //reject("Photo not found");
+                }
+              }
+            }, 100);
+          }
+        });
+        return null;
+      }
+    });
+  }
+
 
   recomputeDateHeightOffsets() {
     let bottomOfLast = 0;
