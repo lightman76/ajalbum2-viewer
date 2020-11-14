@@ -47,9 +47,10 @@ export class PhotoResultSetService {
   }
 
   //when search updated, clear prior results
-  updateSearch(
-    inSearch:SearchQuery,
-  ) {
+  updateSearch(inSearch: SearchQuery) {
+    //console.info("PhotoResultSet: Updating current query: ",inSearch, this.search, " Are same? "+(this.search && this.search.equals(inSearch)))
+    if (this.search && this.search.equals(inSearch)) return;
+    //console.info("  PhotoResultSet: It's a new query - actually run: ",inSearch)
     this.searchSpecificSubscriptions.forEach((sub) => {
       try {
         sub.unsubscribe();
@@ -68,6 +69,40 @@ export class PhotoResultSetService {
     return this.photosByDay$;
   }
 
+  getPhotoForId(photoTimeIdNum: number): Promise<Photo> {
+    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side usings seconds instead of ms.
+    console.log("getPhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
+    return new Promise<Photo>((resolve, reject) => {
+
+      let day = PhotosForDay.dateToDayStr(photoTimeId);
+      let pfd = this.photosByDayHash[day];
+      console.log("  getPhotoForId: pfd loaded=" + (pfd && pfd.photoResultsLoaded))
+      if (pfd && pfd.photoResultsLoaded) {
+        resolve(pfd.getPhotoForTimeId(photoTimeIdNum));
+      } else {
+        this.fetchStartingAtDay(photoTimeId);
+        let sub = this.photosByDay$.subscribe((pfds) => {
+          let day = PhotosForDay.dateToDayStr(photoTimeId);
+          let pfd = this.photosByDayHash[day];
+          console.log("  getPhotoForId: retrying: pfd loaded=" + (pfd && pfd.photoResultsLoaded))
+          setTimeout(() => {
+            if (pfd && pfd.photoResultsLoaded) {
+              sub.unsubscribe();
+              let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
+              if (photo) {
+                resolve(photo);
+              } else {
+                reject("Photo not found");
+              }
+            }
+          });
+        });
+        return null;
+      }
+    });
+  }
+
+
   recomputeDateHeightOffsets() {
     let bottomOfLast = 0;
     console.log("  Recompute height offsets");
@@ -79,11 +114,11 @@ export class PhotoResultSetService {
   }
 
   recomputePagesInViewForOffset(scrollOffset) {
-    console.log("  Reprocessing offset " + scrollOffset);
+    //console.log("  Reprocessing offset " + scrollOffset);
     let vpHeight = this.viewerHeight$.getValue();
     let rangeTop = scrollOffset - 2 * vpHeight;
     let rangeBottom = scrollOffset + 3 * vpHeight;
-    console.log("    Reprocessing range=" + rangeTop + "/" + rangeBottom);
+    //console.log("    Reprocessing range=" + rangeTop + "/" + rangeBottom);
 
 
     this.photosByDayList.forEach((pfd) => {
@@ -93,7 +128,7 @@ export class PhotoResultSetService {
       )) {
         //It's in the view area
         pfd.dateInViewRange = true;
-        console.log("      Checking " + pfd.forDate + " results loaded=" + pfd.photoResultsLoaded + " resultsLoading=" + this.resultsAreLoading + " offsetFromTop=" + pfd.offsetFromTop + " height=" + pfd.getDisplayHeight$().getValue())
+        //console.log("      Checking " + pfd.forDate + " results loaded=" + pfd.photoResultsLoaded + " resultsLoading=" + this.resultsAreLoading + " offsetFromTop=" + pfd.offsetFromTop + " height=" + pfd.getDisplayHeight$().getValue())
         if (!pfd.photoResultsLoaded && !this.resultsAreLoading) {
           console.log("      Preparing to load for " + pfd.forDate + " results loaded=" + pfd.photoResultsLoaded + " resultsLoading=" + this.resultsAreLoading)
           this.fetchStartingAtDay(pfd.forDate);
@@ -166,7 +201,7 @@ export class PhotoResultSetService {
   private getPhotosForDay(date: Date, processedDates: any): PhotosForDay {
     let day = PhotosForDay.dateToDayStr(date);
     let pfd = this.photosByDayHash[day];
-    console.log("    Looking up Photo For Day " + day + ".  Found existing? " + (pfd != null));
+    console.log("    Looking up Photos For Day " + day + ".  Found existing? " + (pfd != null));
     if (pfd == null) {
       pfd = new PhotosForDay(date, this);
       let oldList = this.photosByDayList;

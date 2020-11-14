@@ -18,6 +18,14 @@ export class SearchQuery {
     return new SearchQuery(this);
   }
 
+  equals(that) {
+    return this.searchText === that.searchText &&
+      this.startDate === that.startDate &&
+      this.endDate === that.endDate &&
+      this.featureThreshold === that.featureThreshold &&
+      JSON.stringify(this.tagIds) === JSON.stringify(that.tagIds); //TODO: account for tag order?
+  }
+
   toJsonHash() {
     return {
       search_text: this.searchText,

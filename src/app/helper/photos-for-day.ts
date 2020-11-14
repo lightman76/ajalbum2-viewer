@@ -4,6 +4,7 @@ import {PhotoResultSetService} from "../services/photo-result-set.service";
 
 export class PhotosForDay {
   private photos: Array<Photo>;
+  private photosByPhotoTimeId: { [key: string]: Photo };
   forDate: Date
   photoResultsLoaded: boolean = false;
   private photoList$: BehaviorSubject<Array<Photo>>;
@@ -15,6 +16,7 @@ export class PhotosForDay {
   constructor(forDate: Date, private photoResultSetService: PhotoResultSetService) {
     this.forDate = new Date(forDate.getFullYear(), forDate.getMonth(), forDate.getDate(), 0, 0, 0, 0);
     this.photos = [];
+    this.photosByPhotoTimeId = {};
     this.photoList$ = new BehaviorSubject<Array<Photo>>(this.photos);
     this.photoCount$ = new BehaviorSubject<number>(0);
     this.displayHeight$ = new BehaviorSubject<number>(40);
@@ -66,7 +68,13 @@ export class PhotosForDay {
       //Uhoh, this shouldn't happen (unless photos are loaded between our call to get date outline and querying for the day)
       this.photoCount$.next(this.photos.length);
     }
+    this.photosByPhotoTimeId[photo.time_id] = photo;
     this.photoResultsLoaded = true; //if we have one, we'll say it's loaded...
+  }
+
+  getPhotoForTimeId(timeId) {
+    console.log("attempting to get photo for timeId=" + timeId, this.photosByPhotoTimeId[timeId])
+    return this.photosByPhotoTimeId[timeId];
   }
 
   //NOTE: this is NOT (necessarily) a count of the number of photos in the PhotoList
