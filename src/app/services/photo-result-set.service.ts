@@ -44,6 +44,9 @@ export class PhotoResultSetService {
       leading: true,
       trailing: true
     });
+    window.addEventListener("resize", () => {
+      this.viewerWidth$.next(window.innerWidth - 20);
+    })
   }
 
   //when search updated, clear prior results
