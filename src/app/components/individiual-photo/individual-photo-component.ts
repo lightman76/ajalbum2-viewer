@@ -163,14 +163,14 @@ export class IndividualPhotoComponent {
   futurePhoto(evt) {
     this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
       console.log("Future photo ", photo)
-      this.router.navigateByUrl("/photo/" + photo.time_id);
+      if (photo) this.router.navigateByUrl("/photo/" + photo.time_id);
     });
   }
 
   pastPhoto(evt) {
     this.resultSetService.getPastPhotoFromId(this.photoId).then((photo) => {
       console.log("Past photo ", photo)
-      this.router.navigateByUrl("/photo/" + photo.time_id);
+      if (photo) this.router.navigateByUrl("/photo/" + photo.time_id);
     });
   }
 }

@@ -103,6 +103,14 @@ export class PhotosForDay {
     return null;
   }
 
+  getFirstPhoto() {
+    return this.photos.length > 0 ? this.photos[0] : null;
+  }
+
+  getLastPhoto() {
+    return this.photos.length > 0 ? this.photos[this.photos.length - 1] : null;
+  }
+
   //NOTE: this is NOT (necessarily) a count of the number of photos in the PhotoList
   getPhotoCount$() {
     return this.photoCount$;

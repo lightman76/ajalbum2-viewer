@@ -133,6 +133,27 @@ export class PhotoResultSetService {
         } else {
           //TODO - find future day and return last photo
           //reject("Photo not found");
+          var idx = this.photosByDayList.indexOf(pfd);
+          if (idx > 0) {
+            var nextDayPfd = this.photosByDayList[idx - 1];
+            resolve(nextDayPfd.getLastPhoto());
+
+            if (nextDayPfd && !nextDayPfd.photoResultsLoaded) {
+              this.fetchStartingAtDay(nextDayPfd.forDate);
+              let sub = this.photosByDay$.subscribe((pfds) => {
+                var nextDayPfd = this.photosByDayList[idx - 1];
+                resolve(nextDayPfd.getLastPhoto());
+                sub.unsubscribe();
+              });
+            } else {
+              if (nextDayPfd) {
+                resolve(nextDayPfd.getLastPhoto());
+              } else {
+                reject("Beginning of results")
+              }
+            }
+
+          }
         }
       } else {
         this.fetchStartingAtDay(photoTimeId);
@@ -175,6 +196,24 @@ export class PhotoResultSetService {
         } else {
           //TODO - find past day and return first photo
           //reject("Photo not found");
+          var idx = this.photosByDayList.indexOf(pfd);
+          if (idx >= 0 && idx < this.photosByDayList.length) {
+            var prevDayPfd = this.photosByDayList[idx + 1];
+            if (prevDayPfd && !prevDayPfd.photoResultsLoaded) {
+              this.fetchStartingAtDay(prevDayPfd.forDate);
+              let sub = this.photosByDay$.subscribe((pfds) => {
+                var prevDayPfd = this.photosByDayList[idx + 1];
+                resolve(prevDayPfd.getFirstPhoto());
+                sub.unsubscribe();
+              });
+            } else {
+              if (prevDayPfd) {
+                resolve(prevDayPfd.getFirstPhoto());
+              } else {
+                reject("End of results")
+              }
+            }
+          }
         }
       } else {
         this.fetchStartingAtDay(photoTimeId);
