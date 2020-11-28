@@ -10,6 +10,7 @@ import {Photo} from "../../helper/photo";
   template: `
     <div class="individual-photo-container">
       <div class="return-to-search" (click)="returnToSearch($event)">X</div>
+      <div class="zoom-toggle" (click)="zoomToggle($event)">Zoom</div>
       <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)">
         <div class="navigation-button-icon">&lt;</div>
       </div>
@@ -18,9 +19,9 @@ import {Photo} from "../../helper/photo";
       </div>
       <div class="is_loading" *ngIf="!photoId && !photo">No photo id found...</div>
       <div class="is_loading" *ngIf="photoId && !photo">Loading...</div>
-      <div class="photo-normal" *ngIf="photoId && photo">
+      <div [ngClass]="{'photo-normal':zoomLevel === 1.0, 'photo-zoomed':zoomLevel !== 1.0}" *ngIf="photoId && photo">
         <img *ngIf="photo.image_versions['screenHd']"
-             [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+photo.image_versions['screenHd'].relative_path"
+             [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
     </div>
@@ -51,6 +52,31 @@ import {Photo} from "../../helper/photo";
     }
 
     .return-to-search:hover {
+      color: rgba(0, 0, 0, 1);
+      background-color: rgba(150, 150, 150, 1.0);
+    }
+
+    .zoom-toggle {
+      position: fixed;
+      top: 20px;
+      right: 50px;
+      width: 50px;
+      height: 30px;
+      color: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      padding-top: 5px;
+      text-align: center;
+      font-weight: bold;
+      font-family: "Arial", sans-serif;
+      font-size: 18px;
+      background-color: rgba(150, 150, 150, 0.2);
+      transition-property: background-color, color;
+      transition-duration: 250ms;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .zoom-toggle:hover {
       color: rgba(0, 0, 0, 1);
       background-color: rgba(150, 150, 150, 1.0);
     }
@@ -116,6 +142,18 @@ import {Photo} from "../../helper/photo";
       height: 100%;
       width: 100%;
     }
+
+    .photo-zoomed {
+      height: 100vh;
+      width: 100vw;
+      overflow: auto;
+    }
+
+    .photo-zoomed img {
+      object-fit: none;
+      height: auto;
+      width: auto;
+    }
   `],
 
 
@@ -125,6 +163,7 @@ export class IndividualPhotoComponent {
   queryParams: any;
   photoId: number;
   photo: Photo;
+  zoomLevel = 1.0;
 
   constructor(
     private route: ActivatedRoute,
@@ -157,10 +196,12 @@ export class IndividualPhotoComponent {
   }
 
   returnToSearch(evt) {
+    evt.preventDefault();
     this.router.navigateByUrl("/");
   }
 
   futurePhoto(evt) {
+    evt.preventDefault();
     this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
       console.log("Future photo ", photo)
       if (photo) this.router.navigateByUrl("/photo/" + photo.time_id);
@@ -168,9 +209,19 @@ export class IndividualPhotoComponent {
   }
 
   pastPhoto(evt) {
+    evt.preventDefault();
     this.resultSetService.getPastPhotoFromId(this.photoId).then((photo) => {
       console.log("Past photo ", photo)
       if (photo) this.router.navigateByUrl("/photo/" + photo.time_id);
     });
+  }
+
+  zoomToggle(evt) {
+    evt.preventDefault();
+    if (this.zoomLevel === 1.0) {
+      this.zoomLevel = 2.0;
+    } else {
+      this.zoomLevel = 1.0;
+    }
   }
 }
