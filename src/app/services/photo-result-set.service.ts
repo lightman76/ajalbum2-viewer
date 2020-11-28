@@ -45,8 +45,19 @@ export class PhotoResultSetService {
       trailing: true
     });
     window.addEventListener("resize", () => {
+      this.recomputeThumbSize();
       this.viewerWidth$.next(window.innerWidth - 20);
-    })
+    });
+    this.recomputeThumbSize();
+  }
+
+  recomputeThumbSize() {
+    if (window.innerWidth < 810) {
+      let size = (window.innerWidth - 20) / 3
+      this.thumbnailDims$.next(new RectangleDimensions(size, size));
+    } else {
+      this.thumbnailDims$.next(new RectangleDimensions(270, 270));
+    }
   }
 
   //when search updated, clear prior results

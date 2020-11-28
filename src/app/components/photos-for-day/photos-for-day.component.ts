@@ -25,7 +25,9 @@ import {Photo} from "../../helper/photo";
     .date-header {
       border-top: 1px solid #999;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 24px;
+      padding-top: 10px;
+      padding-left: 15px;
     }
 
     .photo-list {
@@ -36,8 +38,9 @@ import {Photo} from "../../helper/photo";
     }
 
     .photo-item {
-      flex: 0 0 250px;
-      margin: 10px;
+      flex: 0 0 260px;
+      max-width: 30vw;
+      margin: 5px;
     }
   `],
 

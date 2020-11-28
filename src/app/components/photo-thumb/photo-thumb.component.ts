@@ -15,12 +15,14 @@ import {Router} from "@angular/router";
     .photo-thumb {
       box-sizing: border-box;
       border: 1px solid #666;
-      width: 250px;
-      height: 250px;
+      width: 100%;
+      height: 100%;
       cursor: pointer;
+      border-radius: 15px;
     }
 
     .photo-thumb img {
+      border-radius: 15px;
       width: 100%;
       height: 100%;
     }
