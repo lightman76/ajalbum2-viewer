@@ -4,18 +4,27 @@ import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
 import {PhotoResultSetService} from "../../services/photo-result-set.service";
 import {Photo} from "../../helper/photo";
+import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@fortawesome/pro-solid-svg-icons";
 
 @Component({
   selector: 'individual-photo',
   template: `
     <div class="individual-photo-container">
-      <div class="return-to-search" (click)="returnToSearch($event)">X</div>
-      <div class="zoom-toggle" (click)="zoomToggle($event)">Zoom</div>
+      <div class="return-to-search" (click)="returnToSearch($event)">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </div>
+      <div class="zoom-toggle" (click)="zoomToggle($event)">
+        <fa-icon [icon]="faSearch"></fa-icon>
+      </div>
       <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)">
-        <div class="navigation-button-icon">&lt;</div>
+        <div class="navigation-button-icon">
+          <fa-icon [icon]="faChevronCircleLeft"></fa-icon>
+        </div>
       </div>
       <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)">
-        <div class="navigation-button-icon">&gt;</div>
+        <div class="navigation-button-icon">
+          <fa-icon [icon]="faChevronCircleRight"></fa-icon>
+        </div>
       </div>
       <div class="is_loading" *ngIf="!photoId && !photo">No photo id found...</div>
       <div class="is_loading" *ngIf="photoId && !photo">Loading...</div>
@@ -60,7 +69,7 @@ import {Photo} from "../../helper/photo";
       position: fixed;
       top: 20px;
       right: 50px;
-      width: 50px;
+      width: 30px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
       border-radius: 15px;
@@ -87,6 +96,7 @@ import {Photo} from "../../helper/photo";
       bottom: 40px;
       width: 10vw;
       min-width: 45px;
+      max-width: 75px;
       padding-top: calc(50vh - 15px);
       height: calc(100vh - 80px);
       text-align: center;
@@ -164,6 +174,10 @@ export class IndividualPhotoComponent {
   photoId: number;
   photo: Photo;
   zoomLevel = 1.0;
+  faSearch = faSearch;
+  faTimes = faTimes;
+  faChevronCircleLeft = faChevronCircleLeft;
+  faChevronCircleRight = faChevronCircleRight;
 
   constructor(
     private route: ActivatedRoute,

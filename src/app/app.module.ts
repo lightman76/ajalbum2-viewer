@@ -12,6 +12,7 @@ import {PhotoResultSetService} from "./services/photo-result-set.service";
 import {PhotosForDayComponent} from "./components/photos-for-day/photos-for-day.component";
 import {PhotoThumbComponent} from "./components/photo-thumb/photo-thumb.component";
 import {IndividualPhotoComponent} from "./components/individiual-photo/individual-photo-component";
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import {IndividualPhotoComponent} from "./components/individiual-photo/individua
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    FontAwesomeModule,
   ],
   providers: [
     ConfigService,
