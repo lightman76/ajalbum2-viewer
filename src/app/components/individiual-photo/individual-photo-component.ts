@@ -9,7 +9,8 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
 @Component({
   selector: 'individual-photo',
   template: `
-    <div class="individual-photo-container">
+    <div class="individual-photo-container"
+    >
       <div class="return-to-search" (click)="returnToSearch($event)">
         <fa-icon [icon]="faTimes"></fa-icon>
       </div>
@@ -18,17 +19,24 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
       </div>
       <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)">
         <div class="navigation-button-icon">
-          <fa-icon [icon]="faChevronCircleLeft"></fa-icon>
+          <fa-icon [icon]="faChevronCircleLeft" [size]="'2x'"></fa-icon>
         </div>
       </div>
       <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)">
         <div class="navigation-button-icon">
-          <fa-icon [icon]="faChevronCircleRight"></fa-icon>
+          <fa-icon [icon]="faChevronCircleRight" [size]="'2x'"></fa-icon>
         </div>
       </div>
       <div class="is_loading" *ngIf="!photoId && !photo">No photo id found...</div>
       <div class="is_loading" *ngIf="photoId && !photo">Loading...</div>
-      <div [ngClass]="{'photo-normal':zoomLevel === 1.0, 'photo-zoomed':zoomLevel !== 1.0}" *ngIf="photoId && photo">
+      <div [ngClass]="{'photo-normal':zoomLevel === 1.0, 'photo-zoomed':zoomLevel !== 1.0}"
+           *ngIf="photoId && photo"
+           #imgContainer
+           [ngStyle]="{'top':topOffset+'px','left':leftOffset+'px'}"
+           (panstart)="onPanstart($event,imgContainer)"
+           (panmove)="onPanMove($event)"
+           (panend)="onPanEnd($event)"
+           (swipe)="onSwipe($event)">
         <img *ngIf="photo.image_versions['screenHd']"
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
@@ -42,7 +50,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
 
     .return-to-search {
       position: fixed;
-      top: 20px;
+      top: 10px;
       right: 20px;
       width: 30px;
       height: 30px;
@@ -58,6 +66,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
       transition-duration: 250ms;
       cursor: pointer;
       z-index: 20;
+      user-select: none;
     }
 
     .return-to-search:hover {
@@ -67,7 +76,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
 
     .zoom-toggle {
       position: fixed;
-      top: 20px;
+      top: 10px;
       right: 50px;
       width: 30px;
       height: 30px;
@@ -83,6 +92,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
       transition-duration: 250ms;
       cursor: pointer;
       z-index: 20;
+      user-select: none;
     }
 
     .zoom-toggle:hover {
@@ -106,6 +116,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
       z-index: 10;
       transition-property: background-color, color;
       transition-duration: 250ms;
+      user-select: none;
     }
 
     .navigation-button-future {
@@ -120,14 +131,12 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
     .navigation-button-icon {
       width: 30px;
       height: 30px;
-      border-radius: 15px;
       padding-top: 5px;
       font-weight: bold;
       font-family: sans-serif;
       font-size: 18px;
       text-align: center;
-      color: rgba(0, 0, 0, 0.5);
-      background-color: rgba(150, 150, 150, 0.2);
+      color: rgba(65, 65, 65, 0.45);
       transition-property: background-color, color;
       transition-duration: 250ms;
       cursor: pointer;
@@ -139,34 +148,37 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
 
     .navigation-button:hover .navigation-button-icon {
       color: rgba(0, 0, 0, 1);
-      background-color: rgba(150, 150, 150, 1);
+
     }
 
     .photo-normal {
       height: 100vh;
       width: 100vw;
+      user-select: none;
     }
 
     .photo-normal img {
       object-fit: contain;
       height: 100%;
       width: 100%;
+      user-select: none;
     }
 
     .photo-zoomed {
       height: 100vh;
       width: 100vw;
       overflow: auto;
+      user-select: none;
+      position: relative;
     }
 
     .photo-zoomed img {
       object-fit: none;
       height: auto;
       width: auto;
+      user-select: none;
     }
   `],
-
-
 })
 export class IndividualPhotoComponent {
   params: any;
@@ -178,6 +190,12 @@ export class IndividualPhotoComponent {
   faTimes = faTimes;
   faChevronCircleLeft = faChevronCircleLeft;
   faChevronCircleRight = faChevronCircleRight;
+  isPanning = false;
+  topOffset = 0;
+  leftOffset = 0;
+  panningOffsetX = 0;
+  panningOffsetY = 0;
+  panningEl = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -218,15 +236,34 @@ export class IndividualPhotoComponent {
     evt.preventDefault();
     this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
       console.log("Future photo ", photo)
-      if (photo) this.router.navigateByUrl("/photo/" + photo.time_id);
+      if (photo) {
+        this.resetView();
+        this.router.navigateByUrl("/photo/" + photo.time_id);
+      }
     });
+  }
+
+  resetView() {
+    this.zoomLevel = 1.0;
+    this.topOffset = 0;
+    this.leftOffset = 0;
+    this.panningOffsetX = 0;
+    this.panningOffsetY = 0;
+    if (this.panningEl) {
+      this.panningEl.scrollTop = 0;
+      this.panningEl.scrollLeft = 0;
+      this.panningEl = null;
+    }
   }
 
   pastPhoto(evt) {
     evt.preventDefault();
     this.resultSetService.getPastPhotoFromId(this.photoId).then((photo) => {
       console.log("Past photo ", photo)
-      if (photo) this.router.navigateByUrl("/photo/" + photo.time_id);
+      if (photo) {
+        this.resetView();
+        this.router.navigateByUrl("/photo/" + photo.time_id);
+      }
     });
   }
 
@@ -238,4 +275,38 @@ export class IndividualPhotoComponent {
       this.zoomLevel = 1.0;
     }
   }
+
+  onSwipe(evt) {
+    if (this.zoomLevel === 1.0 && Math.abs(evt.deltaX) > 40) {
+      if (evt.deltaX > 0) {
+        this.futurePhoto(evt);
+      } else {
+        this.pastPhoto(evt);
+      }
+    }
+  }
+
+  onPanstart(evt, imgContainer) {
+    if (this.zoomLevel !== 1.0) {
+      this.isPanning = true;
+      this.panningEl = imgContainer;
+      this.panningOffsetX = this.panningEl.scrollLeft;
+      this.panningOffsetY = this.panningEl.scrollTop;
+    }
+  }
+
+  onPanMove(evt) {
+    if (this.isPanning) {
+      console.log("Got pan " + evt.deltaX + "/" + evt.deltaY)
+      this.panningEl.scrollTop = this.panningOffsetY - evt.deltaY;
+      this.panningEl.scrollLeft = this.panningOffsetX - evt.deltaX;
+    }
+  }
+
+  onPanEnd(evt) {
+    if (this.isPanning) {
+      this.isPanning = false;
+    }
+  }
+
 }

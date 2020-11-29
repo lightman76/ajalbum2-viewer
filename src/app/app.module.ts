@@ -1,5 +1,6 @@
-import {NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
+import {Injectable, NgModule} from '@angular/core';
+import * as Hammer from 'hammerjs';
+import {BrowserModule, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule} from '@angular/platform-browser';
 import {HttpClientModule} from '@angular/common/http';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -13,6 +14,13 @@ import {PhotosForDayComponent} from "./components/photos-for-day/photos-for-day.
 import {PhotoThumbComponent} from "./components/photo-thumb/photo-thumb.component";
 import {IndividualPhotoComponent} from "./components/individiual-photo/individual-photo-component";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+
+@Injectable()
+export class MyHammerConfig extends HammerGestureConfig {
+  overrides = <any>{
+    swipe: {direction: Hammer.DIRECTION_HORIZONTAL},
+  };
+}
 
 @NgModule({
   declarations: [
@@ -28,11 +36,16 @@ import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
     AppRoutingModule,
     BrowserAnimationsModule,
     FontAwesomeModule,
+    HammerModule
   ],
   providers: [
     ConfigService,
     PhotoService,
     PhotoResultSetService,
+    {
+      provide: HAMMER_GESTURE_CONFIG,
+      useClass: MyHammerConfig
+    }
   ],
   bootstrap: [AppComponent]
 })
