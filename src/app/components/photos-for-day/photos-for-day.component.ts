@@ -14,8 +14,7 @@ import {Photo} from "../../helper/photo";
     </div>
   `,
   host: {
-    "[style.height]": "pfd.displayHeight$.getValue()+'px'",
-    "[style.backgroundColor]": "(pfd.photoResultsLoaded ? 'green' : 'red')"
+    "[style.height]": "pfd.displayHeight$.getValue()+'px'"
   },
   styles: [`
     :host {

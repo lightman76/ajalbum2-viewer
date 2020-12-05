@@ -4,7 +4,7 @@ import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
 import {PhotoResultSetService} from "../../services/photo-result-set.service";
 import {Photo} from "../../helper/photo";
-import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@fortawesome/pro-solid-svg-icons";
+import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "@fortawesome/pro-solid-svg-icons";
 
 @Component({
   selector: 'individual-photo',
@@ -15,7 +15,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
         <fa-icon [icon]="faTimes"></fa-icon>
       </div>
       <div class="zoom-toggle" (click)="zoomToggle($event)">
-        <fa-icon [icon]="faSearch"></fa-icon>
+        <fa-icon [icon]="faSearchPlus"></fa-icon>
       </div>
       <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)">
         <div class="navigation-button-icon">
@@ -187,7 +187,7 @@ export class IndividualPhotoComponent {
   photoId: number;
   photo: Photo;
   zoomLevel = 1.0;
-  faSearch = faSearch;
+  faSearchPlus = faSearchPlus;
   faTimes = faTimes;
   faChevronCircleLeft = faChevronCircleLeft;
   faChevronCircleRight = faChevronCircleRight;
