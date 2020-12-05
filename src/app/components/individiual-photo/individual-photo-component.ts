@@ -41,6 +41,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearch, faTimes} from "@for
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
+      <individual-photo-info [photo]="photo"></individual-photo-info>
     </div>
   `,
   styles: [`

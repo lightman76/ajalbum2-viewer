@@ -14,6 +14,7 @@ import {PhotosForDayComponent} from "./components/photos-for-day/photos-for-day.
 import {PhotoThumbComponent} from "./components/photo-thumb/photo-thumb.component";
 import {IndividualPhotoComponent} from "./components/individiual-photo/individual-photo-component";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {IndividualPhotoInfoComponent} from "./components/individiual-photo/individual-photo-info.component";
 
 @Injectable()
 export class MyHammerConfig extends HammerGestureConfig {
@@ -28,7 +29,8 @@ export class MyHammerConfig extends HammerGestureConfig {
     PhotoListComponent,
     PhotosForDayComponent,
     PhotoThumbComponent,
-    IndividualPhotoComponent
+    IndividualPhotoComponent,
+    IndividualPhotoInfoComponent
   ],
   imports: [
     BrowserModule,
