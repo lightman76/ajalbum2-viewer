@@ -38,8 +38,56 @@ export class SearchQuery {
     }
   }
 
-  toQueryString() {
+  toQueryParamHash() {
+    let queryHash = {};
+    if (this.searchText) {
+      queryHash["searchText"] = this.searchText;
+    }
+    if (this.startDate) {
+      queryHash["startDate"] = this.startDate;
+    }
+    if (this.endDate) {
+      queryHash["endDate"] = this.endDate;
+    }
+    if (this.tagIds) {
+      queryHash["tagIds"] = this.tagIds;
+    }
+    if (this.featureThreshold) {
+      queryHash["featureThreshold"] = this.featureThreshold;
+    }
 
+    return queryHash;
+  }
+
+  toQueryString() {
+    let queryString = "";
+    let firstTerm = true;
+    if (this.searchText) {
+      queryString += this.buildQueryTerm("searchText", this.searchText, firstTerm);
+      firstTerm = false;
+    }
+    if (this.startDate) {
+      queryString += this.buildQueryTerm("startDate", this.startDate, firstTerm);
+      firstTerm = false;
+    }
+    if (this.endDate) {
+      queryString += this.buildQueryTerm("endDate", this.endDate, firstTerm);
+      firstTerm = false;
+    }
+    if (this.tagIds) {
+      queryString += this.buildQueryTerm("tagIds", this.tagIds, firstTerm);
+      firstTerm = false;
+    }
+    if (this.featureThreshold) {
+      queryString += this.buildQueryTerm("featureThreshold", this.featureThreshold, firstTerm);
+      firstTerm = false;
+    }
+
+    return queryString === "" ? null : queryString;
+  }
+
+  private buildQueryTerm(field, val, firstTerm) {
+    return (firstTerm ? "" : "&") + encodeURIComponent(field) + "=" + encodeURIComponent(val);
   }
 
   public static parseNumber(d) {

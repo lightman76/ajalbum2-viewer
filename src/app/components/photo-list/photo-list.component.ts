@@ -1,5 +1,5 @@
 import {Component} from "@angular/core";
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
 import {PhotoResultSetService} from "../../services/photo-result-set.service";
@@ -51,6 +51,7 @@ export class PhotoListComponent {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private photoService: PhotoService,
     private resultSetService: PhotoResultSetService,
   ) {
@@ -71,6 +72,11 @@ export class PhotoListComponent {
 
   onSearchUpdated(query) {
     this.currentSearch = query;
+    const queryParams: Params = this.currentSearch.toQueryParamHash();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: queryParams, //note, can use queryParamsHandling: "merge" to merge with existing rather than replace
+    });
     this.resultSetService.updateSearch(query);
   }
 
