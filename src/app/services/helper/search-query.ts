@@ -7,7 +7,7 @@ export class SearchQuery {
   offsetDate: string;
 
   constructor(params:any) {
-    this.searchText = params["searchText"];
+    this.searchText = params["searchText"] === "" ? null : params["searchText"];
     this.startDate = SearchQuery.parseDateFromParams(params["startDate"]);
     this.endDate = SearchQuery.parseDateFromParams(params["endDate"]);
     this.tagIds = SearchQuery.parseArrayOfNumbers(params["tagIds"]);
@@ -36,6 +36,10 @@ export class SearchQuery {
       offset_date: this.offsetDate,
       target_max_results: 50
     }
+  }
+
+  toQueryString() {
+
   }
 
   public static parseNumber(d) {

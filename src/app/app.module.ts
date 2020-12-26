@@ -15,6 +15,12 @@ import {PhotoThumbComponent} from "./components/photo-thumb/photo-thumb.componen
 import {IndividualPhotoComponent} from "./components/individiual-photo/individual-photo-component";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {IndividualPhotoInfoComponent} from "./components/individiual-photo/individual-photo-info.component";
+import {SearchComponent} from "./components/search/search.component";
+import {MatAutocompleteModule} from "@angular/material/autocomplete";
+import {MatTooltipModule} from "@angular/material/tooltip";
+import {MatInputModule} from "@angular/material/input";
+import {ReactiveFormsModule} from "@angular/forms";
+import {MatButtonModule} from "@angular/material/button";
 
 @Injectable()
 export class MyHammerConfig extends HammerGestureConfig {
@@ -30,7 +36,8 @@ export class MyHammerConfig extends HammerGestureConfig {
     PhotosForDayComponent,
     PhotoThumbComponent,
     IndividualPhotoComponent,
-    IndividualPhotoInfoComponent
+    IndividualPhotoInfoComponent,
+    SearchComponent
   ],
   imports: [
     BrowserModule,
@@ -38,7 +45,12 @@ export class MyHammerConfig extends HammerGestureConfig {
     AppRoutingModule,
     BrowserAnimationsModule,
     FontAwesomeModule,
-    HammerModule
+    HammerModule,
+    MatAutocompleteModule,
+    MatInputModule,
+    MatTooltipModule,
+    ReactiveFormsModule,
+    MatButtonModule,
   ],
   providers: [
     ConfigService,

@@ -8,6 +8,9 @@ import {PhotosForDay} from "../../helper/photos-for-day";
 @Component({
   selector: 'photo-list',
   template: `
+    <div class="control-bar">
+      <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
+    </div>
     <div class="results" (scroll)="handleScroll($event)">
       <photos-for-day [pfd]="pfd" *ngFor="let pfd of photosByDate"></photos-for-day>
     </div>
@@ -24,9 +27,14 @@ import {PhotosForDay} from "../../helper/photos-for-day";
       height: 100vh;
     }
 
+    .control-bar {
+      height: 45px;
+      width: 100vw;
+    }
+
     .results {
       width: 100%;
-      height: 100vh;
+      height: calc(100% - 45px);
       overflow: auto;
     }
   `],
@@ -39,6 +47,7 @@ export class PhotoListComponent {
   photosByDate: Array<PhotosForDay>;
   private lastScrollOffset = 0;
   private requestedAnimationFrame = false;
+  currentSearch: SearchQuery;
 
   constructor(
     private route: ActivatedRoute,
@@ -53,9 +62,16 @@ export class PhotoListComponent {
       this.params = params;
       this.resultSetService.getPhotosByDay$().subscribe((photosByDate) => {
         this.photosByDate = photosByDate;
-      })
-      this.resultSetService.updateSearch(new SearchQuery(params));
+      });
+      this.currentSearch = new SearchQuery(params);
+      console.log("Updating search query from queryParams to " + JSON.stringify(this.currentSearch));
+      this.resultSetService.updateSearch(this.currentSearch);
     });
+  }
+
+  onSearchUpdated(query) {
+    this.currentSearch = query;
+    this.resultSetService.updateSearch(query);
   }
 
   handleScroll(evt) {
