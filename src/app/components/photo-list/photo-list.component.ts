@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, ElementRef} from "@angular/core";
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
@@ -57,6 +57,7 @@ export class PhotoListComponent {
     private router: Router,
     private photoService: PhotoService,
     private resultSetService: PhotoResultSetService,
+    private elRef: ElementRef,
   ) {
   }
 
@@ -106,6 +107,13 @@ export class PhotoListComponent {
       queryParams: queryParams, //note, can use queryParamsHandling: "merge" to merge with existing rather than replace
     });
     this.resultSetService.updateSearch(query);
+    if (this.focusPhotoId === null) {
+      //Need to scroll results back to top
+      try {
+        this.elRef.nativeElement.getElementsByClassName('results')[0].scrollTop = 0;
+      } catch (e) {
+      }
+    }
   }
 
   handleScroll(evt) {

@@ -41,7 +41,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
-      <individual-photo-info [photo]="photo"></individual-photo-info>
+      <individual-photo-info [photo]="photo" *ngIf="photo"></individual-photo-info>
     </div>
   `,
   styles: [`
@@ -124,9 +124,17 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
       left: 0;
     }
 
+    .navigation-button-future .navigation-button-icon {
+      margin-left: 5px;
+    }
+
     .navigation-button-past {
       right: 0;
       text-align: right;
+    }
+
+    .navigation-button-past .navigation-button-icon {
+      margin-left: 35px;
     }
 
     .navigation-button-icon {
@@ -210,7 +218,8 @@ export class IndividualPhotoComponent {
     this.route.queryParams.subscribe(queryParams => {
       //TODO: get linked search params from here
       this.queryParams = queryParams;
-      this.resultSetService.updateSearch(new SearchQuery(queryParams));
+      let query = new SearchQuery(queryParams);
+      this.resultSetService.updateSearch(query);
     });
 
     this.route.params.subscribe(params => {
