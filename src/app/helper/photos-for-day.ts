@@ -43,6 +43,11 @@ export class PhotosForDay {
     return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
   }
 
+  public static dayStrToDate(dayStr: string): Date {
+    if (dayStr == null) return null;
+    return new Date(dayStr); //Javascript date constructor can parse this.
+  }
+
   getPhotoList$() {
     return this.photoList$;
   }

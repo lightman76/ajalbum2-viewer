@@ -25,6 +25,8 @@ export class PhotoResultSetService {
   private scrollOffset$: BehaviorSubject<number>;
   private debouncedRecomputeDateHeightOffsets: any;
   private resultsAreLoading: boolean = false;
+  private initialLoadUpToDate: string = null;
+  private outlineNextOffsetDate = null;
 
   constructor(
     private photoService: PhotoService,
@@ -76,6 +78,7 @@ export class PhotoResultSetService {
     this.photosByDayHash = {};
     //TODO: probably need to push out on the subjects...
     this.search = inSearch.clone();
+    this.initialLoadUpToDate = this.search.offsetDate;
     this.initiateSearch();
   }
 
@@ -311,11 +314,20 @@ export class PhotoResultSetService {
     this.photoService.getSearchDateOutline(this.search, offsetDate).subscribe((results) => {
       this.parseOutlineResults(results);
       this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
+      if (this.initialLoadUpToDate) {
+        let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
+        let loadToDate = new Date(this.initialLoadUpToDate)
+        console.log("   ## Looking for initial load date of " + loadToDate + ".  Currently at " + earliestDate + ".  Next offset date=" + this.outlineNextOffsetDate);
+        if (earliestDate > loadToDate) {
+          this.fetchResultsOutline(this.outlineNextOffsetDate);
+        }
+      }
     });
   }
 
   private parseOutlineResults(results: ISearchDateOutlineResult) {
     let processedDates = {};
+    this.outlineNextOffsetDate = new Date(results.next_offset_date);
     results.result_count_by_date.forEach((dayOutline) => {
       let parsedDateW = new Date(dayOutline.date);
       let offsetMin = parsedDateW.getTimezoneOffset();

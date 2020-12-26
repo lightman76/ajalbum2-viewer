@@ -12,7 +12,8 @@ import {PhotosForDay} from "../../helper/photos-for-day";
       <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
     </div>
     <div class="results" (scroll)="handleScroll($event)">
-      <photos-for-day [pfd]="pfd" *ngFor="let pfd of photosByDate"></photos-for-day>
+      <photos-for-day [pfd]="pfd" [focusPhotoId]="focusPhotoId" *ngFor="let pfd of photosByDate"
+                      [currentQuery]="currentSearch"></photos-for-day>
     </div>
   `,
   styles: [`
@@ -47,7 +48,9 @@ export class PhotoListComponent {
   photosByDate: Array<PhotosForDay>;
   private lastScrollOffset = 0;
   private requestedAnimationFrame = false;
+  focusPhotoId = null;
   currentSearch: SearchQuery;
+  private fragment;
 
   constructor(
     private route: ActivatedRoute,
@@ -58,6 +61,23 @@ export class PhotoListComponent {
   }
 
   ngOnInit() {
+    this.route.fragment.subscribe(fragment => {
+      this.fragment = fragment;
+      if (this.fragment) {
+        if (this.currentSearch) {
+          let photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
+          if (photoIdRegEx) {
+            let photoId = photoIdRegEx[1];
+            this.focusPhotoId = parseInt(photoId);
+            let date = new Date(parseInt(photoId) * 1000);
+            this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
+            this.resultSetService.updateSearch(this.currentSearch);
+          }
+        }
+      } else {
+        this.focusPhotoId = null;
+      }
+    });
     this.route.queryParams.subscribe(params => {
       //TODO: get linked search params from here
       this.params = params;
@@ -65,7 +85,15 @@ export class PhotoListComponent {
         this.photosByDate = photosByDate;
       });
       this.currentSearch = new SearchQuery(params);
-      console.log("Updating search query from queryParams to " + JSON.stringify(this.currentSearch));
+      if (this.fragment) {
+        let photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
+        if (photoIdRegEx) {
+          let photoId = photoIdRegEx[1];
+          this.focusPhotoId = parseInt(photoId);
+          let date = new Date(parseInt(photoId) * 1000);
+          this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
+        }
+      }
       this.resultSetService.updateSearch(this.currentSearch);
     });
   }

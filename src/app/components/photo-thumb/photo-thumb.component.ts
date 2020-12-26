@@ -1,11 +1,12 @@
 import {Component, Input} from "@angular/core";
 import {Photo} from "../../helper/photo";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
+import {SearchQuery} from "../../services/helper/search-query";
 
 @Component({
   selector: 'photo-thumb',
   template: `
-    <div class="photo-thumb" (click)="onClick($event)">
+    <div class="photo-thumb" (click)="onClick($event)" tabindex="0" [attr.id]="'photo_thumb_'+photo.time_id">
       <img *ngIf="photo.image_versions['thumb']"
            [attr.src]="'storage/'+photo.image_versions['thumb'].root_store+'/'+photo.image_versions['thumb'].relative_path"
            [attr.alt]="photo.title">
@@ -31,15 +32,18 @@ import {Router} from "@angular/router";
 })
 export class PhotoThumbComponent {
   @Input() photo: Photo;
+  @Input() currentQuery: SearchQuery;
 
-  constructor(private router: Router) {
+  constructor(private router: Router,
+              private route: ActivatedRoute) {
   }
 
   ngOnInit() {
   }
 
   onClick(evt) {
-    console.log("Preparing to navigate: " + this.photo.time_id)
-    this.router.navigateByUrl("/photo/" + this.photo.time_id);
+    console.log("Preparing to navigate: " + this.photo.time_id);
+    let params = this.currentQuery.toQueryParamHash();
+    this.router.navigate(["/photo", this.photo.time_id], {relativeTo: this.route, queryParams: params});
   }
 }

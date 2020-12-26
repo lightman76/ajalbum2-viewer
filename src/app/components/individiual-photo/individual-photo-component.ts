@@ -230,7 +230,10 @@ export class IndividualPhotoComponent {
 
   returnToSearch(evt) {
     evt.preventDefault();
-    this.router.navigateByUrl("/");
+    let curPhotoId = this.params.photoId;
+    let newParams = {...this.queryParams};
+    delete newParams['photoId'];
+    this.router.navigate(["../"], {relativeTo: this.route, fragment: "photo__" + curPhotoId, queryParams: newParams});
   }
 
   futurePhoto(evt) {
@@ -239,7 +242,22 @@ export class IndividualPhotoComponent {
       console.log("Future photo ", photo)
       if (photo) {
         this.resetView();
-        this.router.navigateByUrl("/photo/" + photo.time_id);
+        let newParams = {...this.queryParams};
+        delete newParams["photoId"];
+        this.router.navigate(["../", photo.time_id], {relativeTo: this.route, queryParams: newParams});
+      }
+    });
+  }
+
+  pastPhoto(evt) {
+    evt.preventDefault();
+    this.resultSetService.getPastPhotoFromId(this.photoId).then((photo) => {
+      console.log("Past photo ", photo)
+      if (photo) {
+        this.resetView();
+        let newParams = {...this.queryParams};
+        delete newParams["photoId"];
+        this.router.navigate(["../", photo.time_id], {relativeTo: this.route, queryParams: newParams});
       }
     });
   }
@@ -255,17 +273,6 @@ export class IndividualPhotoComponent {
       this.panningEl.scrollLeft = 0;
       this.panningEl = null;
     }
-  }
-
-  pastPhoto(evt) {
-    evt.preventDefault();
-    this.resultSetService.getPastPhotoFromId(this.photoId).then((photo) => {
-      console.log("Past photo ", photo)
-      if (photo) {
-        this.resetView();
-        this.router.navigateByUrl("/photo/" + photo.time_id);
-      }
-    });
   }
 
   zoomToggle(evt) {

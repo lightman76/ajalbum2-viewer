@@ -12,6 +12,7 @@ export class SearchQuery {
     this.endDate = SearchQuery.parseDateFromParams(params["endDate"]);
     this.tagIds = SearchQuery.parseArrayOfNumbers(params["tagIds"]);
     this.featureThreshold = SearchQuery.parseNumber(params["featureThreshold"]);
+    this.offsetDate = params["offsetDate"] !== "" ? params["offsetDate"] : null;
   }
 
   clone() {

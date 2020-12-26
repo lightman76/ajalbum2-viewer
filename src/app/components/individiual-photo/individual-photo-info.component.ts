@@ -18,7 +18,7 @@ import {faChevronCircleDown, faChevronCircleUp} from "@fortawesome/pro-solid-svg
         <fa-icon [icon]="faChevronCircleUp" [size]="'2x'"></fa-icon>
       </span>
     </div>
-    <div class="info__single-line">
+    <div class="info__single-line" *ngIf="photo">
       <span class="photo-date-time">
         {{photo.time | date:'short'}}
       </span>
@@ -28,7 +28,7 @@ import {faChevronCircleDown, faChevronCircleUp} from "@fortawesome/pro-solid-svg
     </div>
     <div class="info__full1">
       <div class="full__line1">
-        <span class="photo-date-time">
+        <span class="photo-date-time" *ngIf="photo">
           {{photo.time | date:'short'}}
         </span>
         <span class="title">
