@@ -1,4 +1,4 @@
-import {Component, HostListener} from "@angular/core";
+import {Component, ElementRef, HostListener} from "@angular/core";
 import {ActivatedRoute, Router} from '@angular/router';
 import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
@@ -38,7 +38,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
            (panend)="onPanEnd($event)"
            (swipe)="onSwipe($event)">
         <img *ngIf="photo.image_versions['screenHd']"
-             [ngStyle]="{'zoom':zoomLevel}"
+             [ngStyle]="{width: (zoomWidth ? zoomWidth+'px' : 'auto'), height: (zoomHeight ? zoomHeight+'px' : 'auto')}"
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
@@ -169,8 +169,8 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
 
     .photo-normal img {
       object-fit: contain;
-      height: 100%;
-      width: 100%;
+      height: 100% !important;
+      width: 100% !important;
       user-select: none;
     }
 
@@ -186,6 +186,8 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
       object-fit: contain;
       height: 100vh;
       width: 100vw;
+      min-height: 100vh;
+      min-width: 100vw;
       user-select: none;
     }
   `],
@@ -196,6 +198,9 @@ export class IndividualPhotoComponent {
   photoId: number;
   photo: Photo;
   zoomLevel = 1.0;
+  aspectRatio = 1.0;
+  zoomWidth = 1920;
+  zoomHeight = 1280
   faSearchPlus = faSearchPlus;
   faTimes = faTimes;
   faChevronCircleLeft = faChevronCircleLeft;
@@ -212,6 +217,7 @@ export class IndividualPhotoComponent {
     private router: Router,
     private photoService: PhotoService,
     private resultSetService: PhotoResultSetService,
+    private elRef: ElementRef,
   ) {
   }
 
@@ -231,6 +237,7 @@ export class IndividualPhotoComponent {
         this.photoId = parseInt(params["photoId"]);
         this.resultSetService.getPhotoForId(this.photoId).then((photo) => {
           this.photo = photo;
+          this.aspectRatio = photo.image_versions['screenHd']['height'] ? photo.image_versions['screenHd']['width'] * 1.0 / photo.image_versions['screenHd']['height'] : 1.0;
         });
       } else {
         console.error("  IndividualPhoto: No photoId found!", params)
@@ -286,15 +293,39 @@ export class IndividualPhotoComponent {
   }
 
   @HostListener('wheel', ['$event']) onMouseWheel(event: WheelEvent) {
-    let prevZoomLevel = this.zoomLevel;
-    this.zoomLevel += event.deltaY * 0.10;
-    if (this.zoomLevel < 1.0) {
-      this.zoomLevel = 1.0;
-    } else if (this.zoomLevel > 100) {
-      this.zoomLevel = 100;
+    if (event.ctrlKey) {
+      let prevZoomLevel = this.zoomLevel;
+      this.zoomLevel += (-1 * event.deltaY) * 0.01;
+      if (this.zoomLevel < 1.0) {
+        this.zoomLevel = 1.0;
+      } else if (this.zoomLevel > 100) {
+        this.zoomLevel = 100;
+      }
+      this.updateZoomDims();
+      //Now compensate positioning to zoom in on mouse pointer
+
     }
-    //Now compensate positioning to zoom in on mouse pointer
-    //TODO:::
+  }
+
+  updateZoomDims() {
+    if (this.zoomLevel === 1.0) {
+      this.zoomWidth = null;
+      this.zoomHeight = null;
+      return;
+    }
+    let clientWidth = window.innerWidth;
+    let clientHeight = window.innerHeight;
+    if (this.aspectRatio > clientWidth / clientHeight) {
+      //width dominated
+      this.zoomWidth = clientWidth * this.zoomLevel;
+      this.zoomHeight = null;
+      console.log("Zoom: Width: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + this.zoomWidth + "/" + this.zoomHeight);
+    } else {
+      //height dominated
+      this.zoomHeight = clientHeight * this.zoomLevel;
+      this.zoomWidth = null;
+      console.log("Zoom: Height: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + this.zoomWidth + "/" + this.zoomHeight);
+    }
   }
 
 
