@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, HostListener} from "@angular/core";
 import {ActivatedRoute, Router} from '@angular/router';
 import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
@@ -38,6 +38,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
            (panend)="onPanEnd($event)"
            (swipe)="onSwipe($event)">
         <img *ngIf="photo.image_versions['screenHd']"
+             [ngStyle]="{'zoom':zoomLevel}"
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
@@ -182,9 +183,9 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
     }
 
     .photo-zoomed img {
-      object-fit: none;
-      height: auto;
-      width: auto;
+      object-fit: contain;
+      height: 100vh;
+      width: 100vw;
       user-select: none;
     }
   `],
@@ -227,7 +228,7 @@ export class IndividualPhotoComponent {
       this.params = params;
       if (params.photoId) {
         console.log("  IndividualPhoto: Got PhotoID as " + params["photoId"]);
-        this.photoId = params["photoId"];
+        this.photoId = parseInt(params["photoId"]);
         this.resultSetService.getPhotoForId(this.photoId).then((photo) => {
           this.photo = photo;
         });
@@ -283,6 +284,19 @@ export class IndividualPhotoComponent {
       this.panningEl = null;
     }
   }
+
+  @HostListener('wheel', ['$event']) onMouseWheel(event: WheelEvent) {
+    let prevZoomLevel = this.zoomLevel;
+    this.zoomLevel += event.deltaY * 0.10;
+    if (this.zoomLevel < 1.0) {
+      this.zoomLevel = 1.0;
+    } else if (this.zoomLevel > 100) {
+      this.zoomLevel = 100;
+    }
+    //Now compensate positioning to zoom in on mouse pointer
+    //TODO:::
+  }
+
 
   zoomToggle(evt) {
     evt.preventDefault();

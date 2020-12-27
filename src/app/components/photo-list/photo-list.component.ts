@@ -70,7 +70,7 @@ export class PhotoListComponent {
           if (photoIdRegEx) {
             let photoId = photoIdRegEx[1];
             this.focusPhotoId = parseInt(photoId);
-            let date = new Date(parseInt(photoId) * 1000);
+            let date = new Date(parseInt(photoId));
             this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
             this.resultSetService.updateSearch(this.currentSearch);
           }
@@ -91,7 +91,7 @@ export class PhotoListComponent {
         if (photoIdRegEx) {
           let photoId = photoIdRegEx[1];
           this.focusPhotoId = parseInt(photoId);
-          let date = new Date(parseInt(photoId) * 1000);
+          let date = new Date(parseInt(photoId));
           this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
         }
       }

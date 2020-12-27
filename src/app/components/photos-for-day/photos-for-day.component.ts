@@ -91,7 +91,7 @@ export class PhotosForDayComponent {
 
   checkForFocusPhoto() {
     if (this.focusPhotoId) {
-      let d = new Date(this.focusPhotoId * 1000);
+      let d = new Date(this.focusPhotoId);
       if (PhotosForDay.dateToDayStr(d) === PhotosForDay.dateToDayStr(this.pfd.forDate)) {
         //Scroll this into view
         try {

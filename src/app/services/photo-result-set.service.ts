@@ -87,7 +87,7 @@ export class PhotoResultSetService {
   }
 
   getPhotoForId(photoTimeIdNum: number): Promise<Photo> {
-    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side using seconds instead of ms.
+    let photoTimeId = new Date(photoTimeIdNum);
     console.log("getPhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
     return new Promise<Photo>((resolve, reject) => {
 
@@ -122,7 +122,7 @@ export class PhotoResultSetService {
   }
 
   getFuturePhotoFromId(photoTimeIdNum: number): Promise<Photo> {
-    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side using seconds instead of ms.
+    let photoTimeId = new Date(photoTimeIdNum);
     console.log("getFuturePhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
     return new Promise<Photo>((resolve, reject) => {
 
@@ -185,7 +185,7 @@ export class PhotoResultSetService {
   }
 
   getPastPhotoFromId(photoTimeIdNum: number): Promise<Photo> {
-    let photoTimeId = new Date(photoTimeIdNum * 1000); //TEMPORARY - multiply by 1000 due to error in ruby side using seconds instead of ms.
+    let photoTimeId = new Date(photoTimeIdNum);
     console.log("getFuturePhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
     return new Promise<Photo>((resolve, reject) => {
 
