@@ -36,6 +36,9 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
            (panstart)="onPanstart($event,imgContainer)"
            (panmove)="onPanMove($event)"
            (panend)="onPanEnd($event)"
+           (pinchstart)="onPinchStart($event)"
+           (pinchmove)="onPinchMove($event)"
+           (pinchend)="onPinchEnd($event)"
            (swipe)="onSwipe($event)">
         <img *ngIf="photo.image_versions['screenHd']"
              #imgHost
@@ -209,10 +212,16 @@ export class IndividualPhotoComponent {
   faChevronCircleLeft = faChevronCircleLeft;
   faChevronCircleRight = faChevronCircleRight;
   isPanning = false;
+  isPinching = false;
   panningOffsetX = 0;
   panningOffsetY = 0;
   panningEl = null;
   lastZoomEvent = null;
+
+  pinchOffsetX = 0;
+  pinchOffsetY = 0;
+  pinchInitialDist = 0;
+  lastPinchEvent = null;
 
   @ViewChild('imgContainer') imgContainer: ElementRef<HTMLDivElement>;
   @ViewChild('imgHost') imgHost: ElementRef<HTMLImageElement>;
@@ -311,6 +320,8 @@ export class IndividualPhotoComponent {
     }
   }
 
+  pinchInitialZoom = 1;
+
   handleMouseWheelZoom() {
     var event = this.lastZoomEvent;
     if (event === null) return;
@@ -351,33 +362,6 @@ export class IndividualPhotoComponent {
       this.imgContainer.nativeElement.scrollLeft = newScrollLeft;
       this.imgContainer.nativeElement.scrollTop = newScrollTop;
     }, 1);
-  }
-
-  updateZoomDims() {
-    if (this.zoomLevel === 1.0) {
-      this.imgHost.nativeElement.style.width = "100vw";
-      this.imgHost.nativeElement.style.height = "100vh";
-      return [0, 0];
-    }
-    let clientWidth = window.innerWidth;
-    let clientHeight = window.innerHeight;
-    let clientAspectRatio = clientWidth / clientHeight;
-    let zoomWidth = null;
-    let zoomHeight = null;
-    if (this.aspectRatio > clientAspectRatio) {
-      //width dominated
-      zoomWidth = Math.floor(clientWidth * this.zoomLevel);
-      zoomHeight = Math.floor(zoomWidth / clientAspectRatio);
-      //console.log("Zoom: Width: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + this.zoomWidth + "/" + this.zoomHeight);
-    } else {
-      //height dominated
-      zoomHeight = Math.floor(clientHeight * this.zoomLevel);
-      zoomWidth = Math.floor(zoomHeight * clientAspectRatio);
-      console.log("Zoom: Height: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + zoomWidth + "/" + zoomHeight);
-    }
-    this.imgHost.nativeElement.style.width = zoomWidth + "px";
-    this.imgHost.nativeElement.style.height = zoomHeight + "px";
-    return [zoomWidth, zoomHeight];
   }
 
 
@@ -423,4 +407,97 @@ export class IndividualPhotoComponent {
     }
   }
 
+  updateZoomDims() {
+    if (this.zoomLevel === 1.0) {
+      this.imgHost.nativeElement.style.width = "100vw";
+      this.imgHost.nativeElement.style.height = "100vh";
+      return [0, 0];
+    }
+    let clientWidth = window.innerWidth;
+    let clientHeight = window.innerHeight;
+    let clientAspectRatio = clientWidth / clientHeight;
+    let zoomWidth = null;
+    let zoomHeight = null;
+    if (this.aspectRatio > clientAspectRatio) {
+      //width dominated
+      zoomWidth = Math.floor(clientWidth * this.zoomLevel);
+      zoomHeight = Math.floor(zoomWidth / clientAspectRatio);
+      //console.log("Zoom: Width: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + this.zoomWidth + "/" + this.zoomHeight);
+    } else {
+      //height dominated
+      zoomHeight = Math.floor(clientHeight * this.zoomLevel);
+      zoomWidth = Math.floor(zoomHeight * clientAspectRatio);
+      console.log("Zoom: Height: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + zoomWidth + "/" + zoomHeight);
+    }
+    this.imgHost.nativeElement.style.width = zoomWidth + "px";
+    this.imgHost.nativeElement.style.height = zoomHeight + "px";
+    return [zoomWidth, zoomHeight];
+  }
+
+  onPinchStart(evt) {
+    this.isPinching = true;
+    this.pinchOffsetX = evt.center.x;
+    this.pinchOffsetY = evt.center.y;
+    this.pinchInitialZoom = this.zoomLevel;
+  }
+
+  onPinchMove(evt) {
+    if (this.isPinching) {
+      this.lastPinchEvent = evt;
+      window.requestAnimationFrame(() => {
+        this.handlePinchMove();
+      });
+
+    }
+  }
+
+  handlePinchMove() {
+    var event = this.lastPinchEvent;
+    if (event === null) return;
+    this.lastPinchEvent = null;
+    let prevZoomLevel = this.zoomLevel;
+    this.zoomLevel = event.scale * this.pinchInitialZoom;
+    if (this.zoomLevel < 1.0) {
+      this.zoomLevel = 1.0;
+    } else if (this.zoomLevel > 100) {
+      this.zoomLevel = 100;
+    }
+
+    let lastWidth = this.imgContainer.nativeElement.scrollWidth;
+    let lastHeight = this.imgContainer.nativeElement.scrollHeight;
+    let scrollLeft = this.imgContainer.nativeElement.scrollLeft;
+    let scrollTop = this.imgContainer.nativeElement.scrollTop;
+    let dims = this.updateZoomDims();
+    let imgWidth = dims[0];
+    let imgHeight = dims[1];
+    let newScrollLeft = 0;
+    let newScrollTop = 0;
+    if (this.zoomLevel !== 1.0) {
+      //Now compensate positioning to zoom in on mouse pointer
+      let evtX = this.pinchOffsetX;
+      let evtY = this.pinchOffsetY;
+      let relPosX = (scrollLeft + evtX) * 1.0 / lastWidth;
+      let relPosY = (scrollTop + evtY) * 1.0 / lastHeight;
+
+      newScrollLeft = Math.round(imgWidth * relPosX) - evtX;
+      newScrollTop = Math.round(imgHeight * relPosY) - evtY;
+
+      console.log("  PinchZoomPosCorrection: prevZoomLevel=" + prevZoomLevel + " evtCoords=" + evtX + "/" + evtY + "; scrollOffsets=" + scrollLeft + "/" + scrollTop + " relPos=" + relPosX + "/" + relPosY + " newScroll=" + newScrollLeft + "/" + newScrollTop);
+    }
+    this.imgContainer.nativeElement.scrollLeft = newScrollLeft;
+    this.imgContainer.nativeElement.scrollTop = newScrollTop;
+    setTimeout(() => {
+      //have to do it again after timeout for the initial zoom when scrollbars are added...
+      this.imgContainer.nativeElement.scrollLeft = newScrollLeft;
+      this.imgContainer.nativeElement.scrollTop = newScrollTop;
+    }, 1);
+
+
+  }
+
+  onPinchEnd(evt) {
+    if (this.isPinching) {
+      this.isPinching = false;
+    }
+  }
 }
