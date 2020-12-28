@@ -5,6 +5,7 @@ export class SearchQuery {
   tagIds:Array<number>;
   featureThreshold: number;
   offsetDate: string;
+  timezoneOffsetMin: number;
 
   constructor(params:any) {
     this.searchText = params["searchText"] === "" ? null : params["searchText"];
@@ -13,6 +14,7 @@ export class SearchQuery {
     this.tagIds = SearchQuery.parseArrayOfNumbers(params["tagIds"]);
     this.featureThreshold = SearchQuery.parseNumber(params["featureThreshold"]);
     this.offsetDate = params["offsetDate"] !== "" ? params["offsetDate"] : null;
+    this.timezoneOffsetMin = -1 * (new Date().getTimezoneOffset());
   }
 
   clone() {
@@ -35,7 +37,8 @@ export class SearchQuery {
       tag_ids: this.tagIds,
       feature_threshold: this.featureThreshold,
       offset_date: this.offsetDate,
-      target_max_results: 50
+      target_max_results: 50,
+      timezone_offset_min: this.timezoneOffsetMin,
     }
   }
 

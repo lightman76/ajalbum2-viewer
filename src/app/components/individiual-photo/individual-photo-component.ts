@@ -216,7 +216,6 @@ export class IndividualPhotoComponent {
 
   @ViewChild('imgContainer') imgContainer: ElementRef<HTMLDivElement>;
   @ViewChild('imgHost') imgHost: ElementRef<HTMLImageElement>;
-  @ViewChild('scrollbarDetector') scrollbarDetector: ElementRef<HTMLImageElement>;
 
   constructor(
     private route: ActivatedRoute,
@@ -243,7 +242,11 @@ export class IndividualPhotoComponent {
         this.photoId = parseInt(params["photoId"]);
         this.resultSetService.getPhotoForId(this.photoId).then((photo) => {
           this.photo = photo;
-          this.aspectRatio = photo.image_versions['screenHd']['height'] ? photo.image_versions['screenHd']['width'] * 1.0 / photo.image_versions['screenHd']['height'] : 1.0;
+          if (photo) {
+            this.aspectRatio = photo.image_versions['screenHd']['height'] ? photo.image_versions['screenHd']['width'] * 1.0 / photo.image_versions['screenHd']['height'] : 1.0;
+          } else {
+            console.error("  IndividualPhoto: Photo not found for ID!", this.photoId);
+          }
         });
       } else {
         console.error("  IndividualPhoto: No photoId found!", params)
@@ -408,7 +411,7 @@ export class IndividualPhotoComponent {
 
   onPanMove(evt) {
     if (this.isPanning) {
-      console.log("Got pan " + evt.deltaX + "/" + evt.deltaY)
+      //console.log("Got pan " + evt.deltaX + "/" + evt.deltaY)
       this.panningEl.scrollTop = this.panningOffsetY - evt.deltaY;
       this.panningEl.scrollLeft = this.panningOffsetX - evt.deltaX;
     }

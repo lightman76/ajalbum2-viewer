@@ -329,9 +329,8 @@ export class PhotoResultSetService {
     let processedDates = {};
     this.outlineNextOffsetDate = new Date(results.next_offset_date);
     results.result_count_by_date.forEach((dayOutline) => {
-      let parsedDateW = new Date(dayOutline.date);
-      let offsetMin = parsedDateW.getTimezoneOffset();
-      let parsedDate = new Date(parsedDateW.getTime() + offsetMin * 60 * 1000)
+      let parsedDate = new Date(dayOutline.date + "T00:00:00");
+      //let parsedDate = new Date(parsedDateW.getTime())
       let photosByDay = this.getPhotosForDay(parsedDate, processedDates);
       photosByDay.getPhotoCount$().next(dayOutline.num_items);
     });
@@ -341,8 +340,7 @@ export class PhotoResultSetService {
     let processedDates = {};
     results.photos.forEach((ip) => {
       let photo = Photo.fromIPhoto(ip);
-      let offsetMin = photo.time.getTimezoneOffset();
-      let localTime = new Date(photo.time.getTime() + offsetMin * 60 * 1000)
+      let localTime = new Date(photo.time.getTime())
       let photosByDay = this.getPhotosForDay(localTime, processedDates);
       photosByDay.addPhoto(photo);
     });

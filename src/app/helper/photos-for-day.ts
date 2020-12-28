@@ -43,6 +43,12 @@ export class PhotosForDay {
     return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
   }
 
+  public static dateToUtcDayStr(d: Date) {
+    if (d == null) return null;
+    //TODO: do I need to check the tz and convert to local TZ if not already?
+    return d.getUTCFullYear() + "-" + (d.getUTCMonth() + 1) + "-" + d.getUTCDate();
+  }
+
   public static dayStrToDate(dayStr: string): Date {
     if (dayStr == null) return null;
     return new Date(dayStr); //Javascript date constructor can parse this.
@@ -91,7 +97,7 @@ export class PhotosForDay {
   getFuturePhotoFromId(timeId) {
     let timeIds = Object.keys(this.photosByPhotoTimeId);
     timeIds = timeIds.sort();
-    let idx = timeIds.indexOf(timeId);
+    let idx = timeIds.indexOf("" + timeId);
     if (idx >= 0 && idx < timeIds.length - 1) {
       return this.photosByPhotoTimeId[timeIds[idx + 1]];
     }
@@ -101,7 +107,7 @@ export class PhotosForDay {
   getPastPhotoFromId(timeId) {
     let timeIds = Object.keys(this.photosByPhotoTimeId);
     timeIds = timeIds.sort();
-    let idx = timeIds.indexOf(timeId);
+    let idx = timeIds.indexOf("" + timeId);
     if (idx > 0) {
       return this.photosByPhotoTimeId[timeIds[idx - 1]];
     }
