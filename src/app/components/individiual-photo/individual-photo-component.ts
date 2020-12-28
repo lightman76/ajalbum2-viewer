@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener} from "@angular/core";
+import {Component, ElementRef, HostListener, ViewChild} from "@angular/core";
 import {ActivatedRoute, Router} from '@angular/router';
 import {PhotoService} from "../../services/photo.service";
 import {SearchQuery} from "../../services/helper/search-query";
@@ -30,15 +30,15 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
       <div class="is_loading" *ngIf="!photoId && !photo">No photo id found...</div>
       <div class="is_loading" *ngIf="photoId && !photo">Loading...</div>
       <div [ngClass]="{'photo-normal':zoomLevel === 1.0, 'photo-zoomed':zoomLevel !== 1.0}"
+           class="image-container"
            *ngIf="photoId && photo"
            #imgContainer
-           [ngStyle]="{'top':topOffset+'px','left':leftOffset+'px'}"
            (panstart)="onPanstart($event,imgContainer)"
            (panmove)="onPanMove($event)"
            (panend)="onPanEnd($event)"
            (swipe)="onSwipe($event)">
         <img *ngIf="photo.image_versions['screenHd']"
-             [ngStyle]="{width: (zoomWidth ? zoomWidth+'px' : 'auto'), height: (zoomHeight ? zoomHeight+'px' : 'auto')}"
+             #imgHost
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
@@ -74,6 +74,10 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
     .return-to-search:hover {
       color: rgba(0, 0, 0, 1);
       background-color: rgba(150, 150, 150, 1.0);
+    }
+
+    .image-container {
+      position: relative;
     }
 
     .zoom-toggle {
@@ -164,6 +168,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
     .photo-normal {
       height: 100vh;
       width: 100vw;
+      overflow: hidden;
       user-select: none;
     }
 
@@ -184,8 +189,8 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
 
     .photo-zoomed img {
       object-fit: contain;
-      height: 100vh;
-      width: 100vw;
+      height: 100%;
+      width: 100%;
       min-height: 100vh;
       min-width: 100vw;
       user-select: none;
@@ -199,18 +204,19 @@ export class IndividualPhotoComponent {
   photo: Photo;
   zoomLevel = 1.0;
   aspectRatio = 1.0;
-  zoomWidth = 1920;
-  zoomHeight = 1280
   faSearchPlus = faSearchPlus;
   faTimes = faTimes;
   faChevronCircleLeft = faChevronCircleLeft;
   faChevronCircleRight = faChevronCircleRight;
   isPanning = false;
-  topOffset = 0;
-  leftOffset = 0;
   panningOffsetX = 0;
   panningOffsetY = 0;
   panningEl = null;
+  lastZoomEvent = null;
+
+  @ViewChild('imgContainer') imgContainer: ElementRef<HTMLDivElement>;
+  @ViewChild('imgHost') imgHost: ElementRef<HTMLImageElement>;
+  @ViewChild('scrollbarDetector') scrollbarDetector: ElementRef<HTMLImageElement>;
 
   constructor(
     private route: ActivatedRoute,
@@ -281,8 +287,6 @@ export class IndividualPhotoComponent {
 
   resetView() {
     this.zoomLevel = 1.0;
-    this.topOffset = 0;
-    this.leftOffset = 0;
     this.panningOffsetX = 0;
     this.panningOffsetY = 0;
     if (this.panningEl) {
@@ -294,38 +298,83 @@ export class IndividualPhotoComponent {
 
   @HostListener('wheel', ['$event']) onMouseWheel(event: WheelEvent) {
     if (event.ctrlKey) {
-      let prevZoomLevel = this.zoomLevel;
-      this.zoomLevel += (-1 * event.deltaY) * 0.01;
-      if (this.zoomLevel < 1.0) {
-        this.zoomLevel = 1.0;
-      } else if (this.zoomLevel > 100) {
-        this.zoomLevel = 100;
-      }
-      this.updateZoomDims();
-      //Now compensate positioning to zoom in on mouse pointer
-
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+      this.lastZoomEvent = event;
+      window.requestAnimationFrame(() => {
+        this.handleMouseWheelZoom();
+      });
     }
+  }
+
+  handleMouseWheelZoom() {
+    var event = this.lastZoomEvent;
+    if (event === null) return;
+    this.lastZoomEvent = null;
+    let prevZoomLevel = this.zoomLevel;
+    this.zoomLevel += (-1 * event.deltaY) * 0.05;
+    if (this.zoomLevel < 1.0) {
+      this.zoomLevel = 1.0;
+    } else if (this.zoomLevel > 100) {
+      this.zoomLevel = 100;
+    }
+
+    let lastWidth = this.imgContainer.nativeElement.scrollWidth;
+    let lastHeight = this.imgContainer.nativeElement.scrollHeight;
+    let scrollLeft = this.imgContainer.nativeElement.scrollLeft;
+    let scrollTop = this.imgContainer.nativeElement.scrollTop;
+    let dims = this.updateZoomDims();
+    let imgWidth = dims[0];
+    let imgHeight = dims[1];
+    let newScrollLeft = 0;
+    let newScrollTop = 0;
+    if (this.zoomLevel !== 1.0) {
+      //Now compensate positioning to zoom in on mouse pointer
+      let evtX = event.clientX;
+      let evtY = event.clientY;
+      let relPosX = (scrollLeft + evtX) * 1.0 / lastWidth;
+      let relPosY = (scrollTop + evtY) * 1.0 / lastHeight;
+
+      newScrollLeft = Math.round(imgWidth * relPosX) - evtX;
+      newScrollTop = Math.round(imgHeight * relPosY) - evtY;
+
+      console.log("  ZoomPosCorrection: prevZoomLevel=" + prevZoomLevel + " evtCoords=" + evtX + "/" + evtY + "; scrollOffsets=" + scrollLeft + "/" + scrollTop + " relPos=" + relPosX + "/" + relPosY + " newScroll=" + newScrollLeft + "/" + newScrollTop);
+    }
+    this.imgContainer.nativeElement.scrollLeft = newScrollLeft;
+    this.imgContainer.nativeElement.scrollTop = newScrollTop;
+    setTimeout(() => {
+      //have to do it again after timeout for the initial zoom when scrollbars are added...
+      this.imgContainer.nativeElement.scrollLeft = newScrollLeft;
+      this.imgContainer.nativeElement.scrollTop = newScrollTop;
+    }, 1);
   }
 
   updateZoomDims() {
     if (this.zoomLevel === 1.0) {
-      this.zoomWidth = null;
-      this.zoomHeight = null;
-      return;
+      this.imgHost.nativeElement.style.width = "100vw";
+      this.imgHost.nativeElement.style.height = "100vh";
+      return [0, 0];
     }
     let clientWidth = window.innerWidth;
     let clientHeight = window.innerHeight;
-    if (this.aspectRatio > clientWidth / clientHeight) {
+    let clientAspectRatio = clientWidth / clientHeight;
+    let zoomWidth = null;
+    let zoomHeight = null;
+    if (this.aspectRatio > clientAspectRatio) {
       //width dominated
-      this.zoomWidth = clientWidth * this.zoomLevel;
-      this.zoomHeight = null;
-      console.log("Zoom: Width: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + this.zoomWidth + "/" + this.zoomHeight);
+      zoomWidth = Math.floor(clientWidth * this.zoomLevel);
+      zoomHeight = Math.floor(zoomWidth / clientAspectRatio);
+      //console.log("Zoom: Width: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + this.zoomWidth + "/" + this.zoomHeight);
     } else {
       //height dominated
-      this.zoomHeight = clientHeight * this.zoomLevel;
-      this.zoomWidth = null;
-      console.log("Zoom: Height: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + this.zoomWidth + "/" + this.zoomHeight);
+      zoomHeight = Math.floor(clientHeight * this.zoomLevel);
+      zoomWidth = Math.floor(zoomHeight * clientAspectRatio);
+      console.log("Zoom: Height: client=" + clientWidth + "/" + clientHeight + "; zoom=" + this.zoomLevel + "; aspectRatio=" + this.aspectRatio + "; zoomedDims=" + zoomWidth + "/" + zoomHeight);
     }
+    this.imgHost.nativeElement.style.width = zoomWidth + "px";
+    this.imgHost.nativeElement.style.height = zoomHeight + "px";
+    return [zoomWidth, zoomHeight];
   }
 
 

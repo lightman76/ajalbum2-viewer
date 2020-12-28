@@ -143,8 +143,8 @@ export class PhotoResultSetService {
 
             if (nextDayPfd && !nextDayPfd.photoResultsLoaded) {
               this.fetchStartingAtDay(nextDayPfd.forDate);
-              let sub = this.photosByDay$.subscribe((pfds) => {
-                var nextDayPfd = this.photosByDayList[idx - 1];
+              var sub = this.photosByDay$.subscribe((pfds) => {
+                let nextDayPfd = this.photosByDayList[idx - 1];
                 resolve(nextDayPfd.getLastPhoto());
                 sub.unsubscribe();
               });
