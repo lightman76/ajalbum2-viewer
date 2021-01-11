@@ -4,6 +4,9 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {PhotoService} from "../../services/photo.service";
 import {PhotoResultSetService} from "../../services/photo-result-set.service";
 import {faChevronCircleDown, faChevronCircleUp} from "@fortawesome/pro-solid-svg-icons";
+import {BehaviorSubject} from "rxjs";
+import {ITag} from "../../services/helper/i-tag";
+import {TagService} from "../../services/tag.service";
 
 @Component({
   selector: 'individual-photo-info',
@@ -41,6 +44,9 @@ import {faChevronCircleDown, faChevronCircleUp} from "@fortawesome/pro-solid-svg
         </span>
       </div>
       <div class="full__line3">
+        <span *ngFor="let tagSub of tagSubjs">
+          <tag [tagSubject]="tagSub" *ngIf="tagSub"></tag>
+        </span>
         <!--TODO: tags, etc. -->
       </div>
     </div>
@@ -131,6 +137,7 @@ export class IndividualPhotoInfoComponent {
   faChevronCircleDown = faChevronCircleDown;
 
   @Input() photo: Photo;
+  tagSubjs: Array<BehaviorSubject<ITag>>;
 
   displayStatus: string = "single-line";
 
@@ -139,10 +146,21 @@ export class IndividualPhotoInfoComponent {
     private router: Router,
     private photoService: PhotoService,
     private resultSetService: PhotoResultSetService,
+    private tagService: TagService,
   ) {
   }
 
   ngOnInit() {
+    let tagsById = this.tagService.getTag$forIds(this.photo.tags);
+    let tagArr = [];
+    console.log("Photo: retrieved tag subjects1 as ", tagsById)
+    Object.keys(tagsById).forEach((k) => {
+      let tag = tagsById[k];
+      tagArr.push(tag);
+    });
+    //TODO: should probably sort the tags
+    this.tagSubjs = tagArr;
+    console.log("Photo: retrieved tag subjects as ", this.tagSubjs)
   }
 
   showMore(evt) {

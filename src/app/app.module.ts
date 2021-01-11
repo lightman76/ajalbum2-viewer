@@ -21,6 +21,8 @@ import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatInputModule} from "@angular/material/input";
 import {ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
+import {TagComponent} from "./components/tag/tag-component";
+import {TagService} from "./services/tag.service";
 
 @Injectable()
 export class MyHammerConfig extends HammerGestureConfig {
@@ -37,7 +39,8 @@ export class MyHammerConfig extends HammerGestureConfig {
     PhotoThumbComponent,
     IndividualPhotoComponent,
     IndividualPhotoInfoComponent,
-    SearchComponent
+    SearchComponent,
+    TagComponent
   ],
   imports: [
     BrowserModule,
@@ -56,6 +59,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     ConfigService,
     PhotoService,
     PhotoResultSetService,
+    TagService,
     {
       provide: HAMMER_GESTURE_CONFIG,
       useClass: MyHammerConfig
