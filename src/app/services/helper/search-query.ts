@@ -1,4 +1,5 @@
 export class SearchQuery {
+  userName:string;
   searchText:string;
   startDate:Date;
   endDate:Date;
@@ -8,6 +9,7 @@ export class SearchQuery {
   timezoneOffsetMin: number;
 
   constructor(params:any) {
+    this.userName = params["userName"];
     this.searchText = params["searchText"] === "" ? null : params["searchText"];
     this.startDate = SearchQuery.parseDateFromParams(params["startDate"]);
     this.endDate = SearchQuery.parseDateFromParams(params["endDate"]);
@@ -23,6 +25,7 @@ export class SearchQuery {
 
   equals(that) {
     return this.searchText === that.searchText &&
+      this.userName === that.userName &&
       this.startDate === that.startDate &&
       this.endDate === that.endDate &&
       this.featureThreshold === that.featureThreshold &&
@@ -31,6 +34,7 @@ export class SearchQuery {
 
   toJsonHash() {
     return {
+      user: this.userName,
       search_text: this.searchText,
       start_date: this.startDate,
       end_date: this.endDate,
@@ -39,11 +43,14 @@ export class SearchQuery {
       offset_date: this.offsetDate,
       target_max_results: 50,
       timezone_offset_min: this.timezoneOffsetMin,
-    }
+    };
   }
 
   toQueryParamHash() {
     let queryHash = {};
+    if (this.userName) {
+      queryHash["userName"] = this.userName;
+    }
     if (this.searchText) {
       queryHash["searchText"] = this.searchText;
     }
@@ -66,6 +73,10 @@ export class SearchQuery {
   toQueryString() {
     let queryString = "";
     let firstTerm = true;
+    if (this.userName) {
+      queryString += this.buildQueryTerm("userName", this.userName, firstTerm);
+      firstTerm = false;
+    }
     if (this.searchText) {
       queryString += this.buildQueryTerm("searchText", this.searchText, firstTerm);
       firstTerm = false;

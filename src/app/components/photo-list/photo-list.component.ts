@@ -51,6 +51,7 @@ export class PhotoListComponent {
   focusPhotoId = null;
   currentSearch: SearchQuery;
   private fragment;
+  private userName;
 
   constructor(
     private route: ActivatedRoute,
@@ -59,9 +60,11 @@ export class PhotoListComponent {
     private resultSetService: PhotoResultSetService,
     private elRef: ElementRef,
   ) {
+    console.log("Creating photo list component")
   }
 
   ngOnInit() {
+    console.log("ngOnInit photo list component")
     this.route.fragment.subscribe(fragment => {
       this.fragment = fragment;
       if (this.fragment) {
@@ -79,13 +82,18 @@ export class PhotoListComponent {
         this.focusPhotoId = null;
       }
     });
+    this.route.params.subscribe(params=>{
+      console.log("PATH PARAMS: ",params);
+      this.userName = params.userName;
+    });
     this.route.queryParams.subscribe(params => {
-      //TODO: get linked search params from here
+      console.log("QUERY PARAMS: ",params);
       this.params = params;
       this.resultSetService.getPhotosByDay$().subscribe((photosByDate) => {
         this.photosByDate = photosByDate;
       });
       this.currentSearch = new SearchQuery(params);
+      this.currentSearch.userName = this.userName;
       if (this.fragment) {
         let photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
         if (photoIdRegEx) {

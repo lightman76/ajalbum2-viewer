@@ -223,6 +223,8 @@ export class IndividualPhotoComponent {
   pinchInitialDist = 0;
   lastPinchEvent = null;
 
+  userName = null;
+
   @ViewChild('imgContainer') imgContainer: ElementRef<HTMLDivElement>;
   @ViewChild('imgHost') imgHost: ElementRef<HTMLImageElement>;
 
@@ -247,9 +249,10 @@ export class IndividualPhotoComponent {
       //TODO: get linked search params from here
       this.params = params;
       if (params.photoId) {
+        this.userName = params['userName'];
         console.log("  IndividualPhoto: Got PhotoID as " + params["photoId"]);
         this.photoId = parseInt(params["photoId"]);
-        this.resultSetService.getPhotoForId(this.photoId).then((photo) => {
+        this.resultSetService.getPhotoForId(this.userName, this.photoId).then((photo) => {
           this.photo = photo;
           if (photo) {
             this.aspectRatio = photo.image_versions['screenHd']['height'] ? photo.image_versions['screenHd']['width'] * 1.0 / photo.image_versions['screenHd']['height'] : 1.0;
@@ -274,7 +277,7 @@ export class IndividualPhotoComponent {
   futurePhoto(evt) {
     evt.preventDefault();
     this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
-      console.log("Future photo ", photo)
+      console.log("Future photo ", photo);
       if (photo) {
         this.resetView();
         let newParams = {...this.queryParams};
@@ -287,7 +290,7 @@ export class IndividualPhotoComponent {
   pastPhoto(evt) {
     evt.preventDefault();
     this.resultSetService.getPastPhotoFromId(this.photoId).then((photo) => {
-      console.log("Past photo ", photo)
+      console.log("Past photo ", photo);
       if (photo) {
         this.resetView();
         let newParams = {...this.queryParams};

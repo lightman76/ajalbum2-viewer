@@ -86,9 +86,9 @@ export class PhotoResultSetService {
     return this.photosByDay$;
   }
 
-  getPhotoForId(photoTimeIdNum: number): Promise<Photo> {
+  getPhotoForId(userName:string, photoTimeIdNum: number): Promise<Photo> {
     let photoTimeId = new Date(photoTimeIdNum);
-    console.log("getPhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
+    console.log("getPhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId+" for user "+userName);
     return new Promise<Photo>((resolve, reject) => {
 
       let day = PhotosForDay.dateToDayStr(photoTimeId);
@@ -316,7 +316,7 @@ export class PhotoResultSetService {
       this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
       if (this.initialLoadUpToDate) {
         let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
-        let loadToDate = new Date(this.initialLoadUpToDate)
+        let loadToDate = new Date(this.initialLoadUpToDate);
         console.log("   ## Looking for initial load date of " + loadToDate + ".  Currently at " + earliestDate + ".  Next offset date=" + this.outlineNextOffsetDate);
         if (earliestDate > loadToDate) {
           this.fetchResultsOutline(this.outlineNextOffsetDate);
