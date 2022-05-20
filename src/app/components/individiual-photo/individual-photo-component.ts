@@ -271,7 +271,7 @@ export class IndividualPhotoComponent {
     let curPhotoId = this.params.photoId;
     let newParams = {...this.queryParams};
     delete newParams['photoId'];
-    this.router.navigate(["../"], {relativeTo: this.route, fragment: "photo__" + curPhotoId, queryParams: newParams});
+    this.router.navigate(["../../list"], {relativeTo: this.route, fragment: "photo__" + curPhotoId, queryParams: newParams});
   }
 
   futurePhoto(evt) {

@@ -44,6 +44,6 @@ export class PhotoThumbComponent {
   onClick(evt) {
     console.log("Preparing to navigate: " + this.photo.time_id);
     let params = this.currentQuery.toQueryParamHash();
-    this.router.navigate(["/photo", this.photo.time_id], {relativeTo: this.route, queryParams: params});
+    this.router.navigate(["/"+this.currentQuery.userName+"/photo", this.photo.time_id], {queryParams: params});
   }
 }
