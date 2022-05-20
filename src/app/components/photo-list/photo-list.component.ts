@@ -69,11 +69,11 @@ export class PhotoListComponent {
       this.fragment = fragment;
       if (this.fragment) {
         if (this.currentSearch) {
-          let photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
+          const photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
           if (photoIdRegEx) {
-            let photoId = photoIdRegEx[1];
+            const photoId = photoIdRegEx[1];
             this.focusPhotoId = parseInt(photoId);
-            let date = new Date(parseInt(photoId));
+            const date = new Date(parseInt(photoId));
             this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
             this.resultSetService.updateSearch(this.currentSearch);
           }
@@ -82,12 +82,12 @@ export class PhotoListComponent {
         this.focusPhotoId = null;
       }
     });
-    this.route.params.subscribe(params=>{
-      console.log("PATH PARAMS: ",params);
+    this.route.params.subscribe(params => {
+      console.log("PATH PARAMS: ", params);
       this.userName = params.userName;
     });
     this.route.queryParams.subscribe(params => {
-      console.log("QUERY PARAMS: ",params);
+      console.log("QUERY PARAMS: ", params);
       this.params = params;
       this.resultSetService.getPhotosByDay$().subscribe((photosByDate) => {
         this.photosByDate = photosByDate;
@@ -95,11 +95,11 @@ export class PhotoListComponent {
       this.currentSearch = new SearchQuery(params);
       this.currentSearch.userName = this.userName;
       if (this.fragment) {
-        let photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
+        const photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
         if (photoIdRegEx) {
-          let photoId = photoIdRegEx[1];
+          const photoId = photoIdRegEx[1];
           this.focusPhotoId = parseInt(photoId);
-          let date = new Date(parseInt(photoId));
+          const date = new Date(parseInt(photoId));
           this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
         }
       }

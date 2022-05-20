@@ -9,6 +9,10 @@
     },
     "array-type": false,
     "arrow-return-shorthand": true,
+    "comment-format": [
+      false,
+      "check-space"
+    ],
     "curly": true,
     "deprecation": {
       "severity": "warning"
@@ -75,10 +79,6 @@
     "object-literal-key-quotes": [
       true,
       "as-needed"
-    ],
-    "quotemark": [
-      true,
-      "single"
     ],
     "semicolon": {
       "options": [
