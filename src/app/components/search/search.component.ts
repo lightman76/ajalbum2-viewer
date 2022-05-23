@@ -11,11 +11,11 @@ import {SearchQuery} from "../../services/helper/search-query";
         <mat-form-field>
           <mat-label>Search</mat-label>
           <input matInput type="search" formControlName="searchTerms">
-          <button mat-icon-button color="primary" matSuffix aria-label="Search" type="submit">
+          <button mat-icon-button color="primary" matSuffix aria-label="Search" type="submit" *ngIf="!searchForm.value.searchTerms">
             <fa-icon [icon]="faSearch"></fa-icon>
           </button>
           <button mat-icon-button color="accent" *ngIf="searchForm.value.searchTerms" matSuffix aria-label="Clear"
-                  (click)="clearForm($event)">
+                  (click)="clearForm($event, searchForm.value)">
             <fa-icon [icon]="faTimes"></fa-icon>
           </button>
         </mat-form-field>
@@ -78,7 +78,8 @@ export class SearchComponent {
     this.searchUpdated.emit(newQuery);
   }
 
-  clearForm(evt) {
+  clearForm(evt, formData) {
     this.searchForm.get('searchTerms').setValue("");
+    this.runSearch(null, formData);
   }
 }
