@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, Input, SimpleChanges} from "@angular/core";
 import {Photo} from "../../helper/photo";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PhotoService} from "../../services/photo.service";
@@ -151,16 +151,29 @@ export class IndividualPhotoInfoComponent {
   }
 
   ngOnInit() {
+    this.refreshPhotoInfo();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if(changes && changes['photo']) {
+      let change = changes['photo'];
+      if(change.currentValue != null) {
+        this.refreshPhotoInfo();
+      }
+    }
+  }
+
+  refreshPhotoInfo() {
     let tagsById = this.tagService.getTag$forIds(this.photo.tags);
     let tagArr = [];
-    console.log("Photo: retrieved tag subjects1 as ", tagsById)
+    console.log("Photo: retrieved tag subjects1 as ", tagsById);
     Object.keys(tagsById).forEach((k) => {
       let tag = tagsById[k];
       tagArr.push(tag);
     });
     //TODO: should probably sort the tags
     this.tagSubjs = tagArr;
-    console.log("Photo: retrieved tag subjects as ", this.tagSubjs)
+    //console.log("Photo: retrieved tag subjects as ", this.tagSubjs);
   }
 
   showMore(evt) {
