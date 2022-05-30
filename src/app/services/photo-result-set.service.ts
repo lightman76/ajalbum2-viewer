@@ -247,11 +247,11 @@ export class PhotoResultSetService {
 
   recomputeDateHeightOffsets() {
     let bottomOfLast = 0;
-    console.log("  Recompute height offsets");
+    //console.log("  Recompute height offsets");
     this.photosByDayList.forEach((pfd, idx) => {
       pfd.offsetFromTop = bottomOfLast;
       bottomOfLast = pfd.offsetFromTop + pfd.getDisplayHeight$().getValue();
-      console.log("    " + pfd.forDate.getFullYear() + (pfd.forDate.getMonth() + 1) + pfd.forDate.getDate() + " " + pfd.offsetFromTop + " height=" + pfd.getDisplayHeight$().getValue() + " bottomOfLast=" + bottomOfLast)
+      //console.log("    " + pfd.forDate.getFullYear() + (pfd.forDate.getMonth() + 1) + pfd.forDate.getDate() + " " + pfd.offsetFromTop + " height=" + pfd.getDisplayHeight$().getValue() + " bottomOfLast=" + bottomOfLast)
     });
   }
 
@@ -350,7 +350,7 @@ export class PhotoResultSetService {
   private getPhotosForDay(date: Date, processedDates: any): PhotosForDay {
     let day = PhotosForDay.dateToDayStr(date);
     let pfd = this.photosByDayHash[day];
-    console.log("    Looking up Photos For Day " + day + ".  Found existing? " + (pfd != null));
+    //console.log("    Looking up Photos For Day " + day + ".  Found existing? " + (pfd != null));
     if (pfd == null) {
       pfd = new PhotosForDay(date, this);
       let oldList = this.photosByDayList;

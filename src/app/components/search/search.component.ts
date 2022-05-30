@@ -15,6 +15,7 @@ import {SearchQuery} from "../../services/helper/search-query";
             <fa-icon [icon]="faSearch"></fa-icon>
           </button>
           <button mat-icon-button color="accent" *ngIf="searchForm.value.searchTerms" matSuffix aria-label="Clear"
+                  type="button"
                   (click)="clearForm($event, searchForm.value)">
             <fa-icon [icon]="faTimes"></fa-icon>
           </button>
@@ -80,6 +81,6 @@ export class SearchComponent {
 
   clearForm(evt, formData) {
     this.searchForm.get('searchTerms').setValue("");
-    this.runSearch(null, formData);
+    this.runSearch(null, {userName: this.searchQuery.userName});
   }
 }

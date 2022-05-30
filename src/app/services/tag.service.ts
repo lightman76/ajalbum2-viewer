@@ -76,7 +76,7 @@ export class TagService {
         let id = parseInt(idStr);
         let tag = data.tags[id];
         let t$ = this.tagSubjectsById[id];
-        console.log("Retrieved " + JSON.stringify(tag) + " for id=" + id + "; tagSubj=", t$)
+        //console.log("Retrieved " + JSON.stringify(tag) + " for id=" + id + "; tagSubj=", t$)
         t$.next(tag);
       });
     });
