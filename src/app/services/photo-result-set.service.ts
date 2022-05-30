@@ -34,7 +34,7 @@ export class PhotoResultSetService {
     this.photosByDayList = [];
     this.photosByDayHash = {};
     this.photosByDay$ = new BehaviorSubject<Array<PhotosForDay>>(this.photosByDayList);
-    this.viewerWidth$ = new BehaviorSubject<number>(window.innerWidth - 20);
+    this.viewerWidth$ = new BehaviorSubject<number>(window.innerWidth);
     this.viewerHeight$ = new BehaviorSubject<number>(window.innerHeight);
     this.thumbnailDims$ = new BehaviorSubject<RectangleDimensions>(new RectangleDimensions(270, 270));
     this.scrollOffset$ = new BehaviorSubject<number>(0);
@@ -48,17 +48,17 @@ export class PhotoResultSetService {
     });
     window.addEventListener("resize", () => {
       this.recomputeThumbSize();
-      this.viewerWidth$.next(window.innerWidth - 20);
+      this.viewerWidth$.next(window.innerWidth);
     });
     this.recomputeThumbSize();
   }
 
   recomputeThumbSize() {
     if (window.innerWidth < 810) {
-      let size = (window.innerWidth - 20) / 3
+      const size = Math.floor((window.innerWidth) / 3.0);
       this.thumbnailDims$.next(new RectangleDimensions(size, size));
     } else {
-      this.thumbnailDims$.next(new RectangleDimensions(270, 270));
+      this.thumbnailDims$.next(new RectangleDimensions(260, 260));
     }
   }
 

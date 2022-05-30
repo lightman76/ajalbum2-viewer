@@ -5,7 +5,7 @@ import {PhotoResultSetService} from "../services/photo-result-set.service";
 export class PhotosForDay {
   private photos: Array<Photo>;
   private photosByPhotoTimeId: { [key: string]: Photo };
-  forDate: Date
+  forDate: Date;
   photoResultsLoaded: boolean = false;
   private photoList$: BehaviorSubject<Array<Photo>>;
   displayHeight$: BehaviorSubject<number>;
@@ -29,9 +29,6 @@ export class PhotosForDay {
     this.photoResultSetService.getViewerWidth$().subscribe(() => {
       this.recomputeHeight();
     });
-    this.photoResultSetService.getViewerWidth$().subscribe(() => {
-      this.recomputeHeight();
-    })
     setTimeout(() => {
       this.recomputeHeight();
     }, 500);
@@ -63,8 +60,8 @@ export class PhotosForDay {
 
     this.displayHeight$.next(
       Math.ceil(
-        1.0 * this.photoCount$.getValue() /
-        Math.floor(1.0 * this.photoResultSetService.getViewerWidth$().getValue() / thumbDims.width)) * thumbDims.height + 40);
+        ((1.0 * this.photoCount$.getValue()) /
+        (1.0 * Math.floor(1.0 * this.photoResultSetService.getViewerWidth$().getValue() / thumbDims.width)))) * thumbDims.height + 50);
   }
 
   clearList() {

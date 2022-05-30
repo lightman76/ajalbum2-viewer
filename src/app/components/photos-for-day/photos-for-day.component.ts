@@ -30,6 +30,8 @@ import {SearchQuery} from "../../services/helper/search-query";
       font-size: 24px;
       padding-top: 10px;
       padding-left: 15px;
+      box-sizing: border-box;
+      height: 35px;
     }
 
     .photo-list {
@@ -37,14 +39,18 @@ import {SearchQuery} from "../../services/helper/search-query";
       flex-direction: row;
       flex-wrap: wrap;
       overflow: hidden;
+      align-items: center;
+      justify-content: center;
     }
 
     .photo-item {
       flex: 0 0 260px;
       height: 260px;
-      max-width: 30vw;
-      max-height: 30vw;
-      margin: 5px;
+      max-width: 33.3vw;
+      max-height: 33.3vw;
+      box-sizing: border-box;
+      padding: 5px;
+      align-self: center;
     }
   `],
 
