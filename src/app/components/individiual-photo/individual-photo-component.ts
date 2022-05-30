@@ -11,18 +11,18 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
   template: `
     <div class="individual-photo-container"
     >
-      <div class="return-to-search" (click)="returnToSearch($event)">
+      <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'">
         <fa-icon [icon]="faTimes"></fa-icon>
       </div>
-      <div class="zoom-toggle" (click)="zoomToggle($event)">
+      <div class="zoom-toggle" (click)="zoomToggle($event)" [matTooltip]="'Toggle zoom'">
         <fa-icon [icon]="faSearchPlus"></fa-icon>
       </div>
-      <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)">
+      <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)" [matTooltip]="'Previous photo'" [matTooltipPosition]="'right'">
         <div class="navigation-button-icon">
           <fa-icon [icon]="faChevronCircleLeft" [size]="'2x'"></fa-icon>
         </div>
       </div>
-      <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)">
+      <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)" [matTooltip]="'Next Photo'" [matTooltipPosition]="'left'">
         <div class="navigation-button-icon">
           <fa-icon [icon]="faChevronCircleRight" [size]="'2x'"></fa-icon>
         </div>
@@ -111,13 +111,13 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
 
     .navigation-button {
       position: fixed;
-      top: 40px;
-      bottom: 40px;
+      top: 60px;
+      bottom: 60px;
       width: 10vw;
       min-width: 45px;
       max-width: 75px;
       padding-top: calc(50vh - 15px);
-      height: calc(100vh - 80px);
+      height: calc(100vh - 120px);
       text-align: center;
       font-weight: bold;
       font-family: sans-serif;
@@ -128,20 +128,20 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
       user-select: none;
     }
 
-    .navigation-button-future {
+    .navigation-button-past {
       left: 0;
     }
 
-    .navigation-button-future .navigation-button-icon {
+    .navigation-button-past .navigation-button-icon {
       margin-left: 5px;
     }
 
-    .navigation-button-past {
+    .navigation-button-future {
       right: 0;
       text-align: right;
     }
 
-    .navigation-button-past .navigation-button-icon {
+    .navigation-button-future .navigation-button-icon {
       margin-left: 35px;
     }
 

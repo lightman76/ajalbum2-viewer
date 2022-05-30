@@ -13,11 +13,13 @@ import {TagService} from "../../services/tag.service";
   template: `
     <div class="info__nub">
       <span class="show-less-btn" *ngIf="displayStatus === 'single-line' || displayStatus === 'full1'"
-            [matTooltip]="'Show less.'" (click)="showLess($event)">
+            [matTooltip]="'Show less.'" [matTooltipShowDelay]="750"
+            (click)="showLess($event)">
         <fa-icon [icon]="faChevronCircleDown" [size]="'2x'"></fa-icon>
       </span>
       <span class="show-more-btn" *ngIf="displayStatus === 'single-line' || displayStatus === 'minimized'"
-            [matTooltip]="'Show more.'" (click)="showMore($event)">
+            [matTooltip]="'Show more.'" [matTooltipShowDelay]="750"
+            (click)="showMore($event)">
         <fa-icon [icon]="faChevronCircleUp" [size]="'2x'"></fa-icon>
       </span>
     </div>
@@ -78,6 +80,10 @@ import {TagService} from "../../services/tag.service";
       color: rgba(55, 55, 55, 1);
     }
 
+    .show-more-btn, .show-less-btn {
+      display: inline-block;
+    }
+
     .show-less-btn {
       margin-right: 3px;
     }
@@ -86,7 +92,30 @@ import {TagService} from "../../services/tag.service";
       display: block;
       overflow: hidden;
       height: 0;
-      background-color: rgba(200, 200, 200, 0.5);
+      background-color: rgba(200, 200, 200, 0.6);
+      transition-property: height;
+      transition-duration: 250ms;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      padding-left: 15px;
+      padding-right: 15px;
+      padding-top: 3px;
+    }
+    .info__single-line:focus-within {
+      background-color: rgba(200,200,200,1.0);
+    }
+
+    @media(hover) {
+      .info__single-line:hover {
+        background-color: rgba(200,200,200,1.0);
+      }
+    }
+
+    .info__full1 {
+      display: block;
+      overflow: hidden;
+      height: 0;
+      background-color: rgba(200, 200, 200, 0.6);
       transition-property: height;
       transition-duration: 250ms;
       border-top-left-radius: 8px;
@@ -96,19 +125,16 @@ import {TagService} from "../../services/tag.service";
       padding-top: 3px;
     }
 
-    .info__full1 {
-      display: block;
-      overflow: hidden;
-      height: 0;
-      background-color: rgba(200, 200, 200, 0.5);
-      transition-property: height;
-      transition-duration: 250ms;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-      padding-left: 15px;
-      padding-right: 15px;
-      padding-top: 3px;
+    .info__full1:focus-within {
+      background-color: rgba(200,200,200,1.0);
     }
+
+    @media(hover) {
+      .info__full1:hover {
+        background-color: rgba(200,200,200,1.0);
+      }
+    }
+
 
     :host.show__nub {
     }
