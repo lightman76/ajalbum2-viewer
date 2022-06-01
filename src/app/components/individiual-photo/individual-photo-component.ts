@@ -1,10 +1,10 @@
-import {Component, ElementRef, HostListener, ViewChild} from "@angular/core";
+import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {PhotoService} from "../../services/photo.service";
-import {SearchQuery} from "../../services/helper/search-query";
-import {PhotoResultSetService} from "../../services/photo-result-set.service";
-import {Photo} from "../../helper/photo";
-import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "@fortawesome/pro-solid-svg-icons";
+import {PhotoService} from '../../services/photo.service';
+import {SearchQuery} from '../../services/helper/search-query';
+import {PhotoResultSetService} from '../../services/photo-result-set.service';
+import {Photo} from '../../helper/photo';
+import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '@fortawesome/pro-solid-svg-icons';
 
 @Component({
   selector: 'individual-photo',
@@ -48,6 +48,11 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from "
       <individual-photo-info [photo]="photo" *ngIf="photo"></individual-photo-info>
     </div>
   `,
+  host: {
+    '(document:keydown.arrowleft)': 'pastPhoto($event)',
+    '(document:keydown.arrowright)': 'futurePhoto($event)',
+  },
+
   styles: [`
     .individual-photo-container {
       position: relative;
