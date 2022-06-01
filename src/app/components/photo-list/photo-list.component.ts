@@ -1,9 +1,9 @@
-import {Component, ElementRef} from "@angular/core";
+import {Component, ElementRef} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {PhotoService} from "../../services/photo.service";
-import {SearchQuery} from "../../services/helper/search-query";
-import {PhotoResultSetService} from "../../services/photo-result-set.service";
-import {PhotosForDay} from "../../helper/photos-for-day";
+import {PhotoService} from '../../services/photo.service';
+import {SearchQuery} from '../../services/helper/search-query';
+import {PhotoResultSetService} from '../../services/photo-result-set.service';
+import {PhotosForDay} from '../../helper/photos-for-day';
 
 @Component({
   selector: 'photo-list',
@@ -29,13 +29,13 @@ import {PhotosForDay} from "../../helper/photos-for-day";
     }
 
     .control-bar {
-      height: 45px;
+      height: 65px;
       width: 100vw;
     }
 
     .results {
       width: 100%;
-      height: calc(100% - 45px);
+      height: calc(100% - 65px);
       overflow: auto;
     }
   `],
@@ -108,6 +108,7 @@ export class PhotoListComponent {
   }
 
   onSearchUpdated(query) {
+    console.log('  PhotoList: Search Updated: ', query);
     this.currentSearch = query;
     const queryParams: Params = this.currentSearch.toQueryParamHash();
     this.router.navigate([], {

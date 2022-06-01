@@ -1,9 +1,9 @@
-import {Injectable} from "@angular/core";
-import {BehaviorSubject, throwError} from "rxjs";
-import {ITag} from "./helper/i-tag";
-import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
-import {ConfigService} from "./config.service";
-import {catchError, retry} from "rxjs/operators";
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, throwError} from 'rxjs';
+import {ITag} from './helper/i-tag';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {ConfigService} from './config.service';
+import {catchError, retry} from 'rxjs/operators';
 
 @Injectable()
 export class TagService {
@@ -41,14 +41,44 @@ export class TagService {
     });
   }
 
+  getAllTags(userName: string): Promise<Array<BehaviorSubject<ITag>>> {
+    return new Promise<Array<BehaviorSubject<ITag>>>((resolve, reject) => {
+      if (!userName) {
+        reject('Missing user name');
+        return;
+      }
+      let headers = new HttpHeaders({'Content-Type': 'application/json'});
+      let req = this.http.get<IAllTagResults>(this.configService.getApiRoot() + '/' + encodeURIComponent(userName) + '/tags',
+        {headers: headers}).pipe(retry(3), catchError(this.errorHandler));
+      req.subscribe((data) => {
+        let results = [];
+        data.all_tags.forEach((tag) => {
+          let t$ = this.tagSubjectsById[tag.id];
+          if (t$) {
+            if (JSON.stringify(t$.getValue()) !== JSON.stringify(tag)) {
+              //tag changed - update it
+              t$.next(tag);
+            }
+          } else {
+            t$ = this.tagSubjectsById[tag.id] = new BehaviorSubject(tag);
+          }
+          results.push(t$);
+        });
+        resolve(results);
+      }, (err) => {
+        reject(err);
+      });
+    });
+  }
+
   getTag$forIds(ids: Array<number>) {
     let unknownTagIds = [];
     let ret: { [key: string]: BehaviorSubject<ITag> } = {};
-    console.log("Photo has tag ids=" + ids);
+    console.log('Photo has tag ids=' + ids);
     ids.forEach((id) => {
       let t$ = this.tagSubjectsById[id];
       if (!t$) {
-        let tag = <ITag><any>{
+        let tag = <ITag> <any> {
           id: id,
           tag_type: true
         };
@@ -109,5 +139,9 @@ class ITagResults {
 }
 
 class ITagSearchResults {
-  matching_tags: Array<ITag>
+  matching_tags: Array<ITag>;
+}
+
+class IAllTagResults {
+  all_tags: Array<ITag>;
 }

@@ -38,7 +38,7 @@ export class SearchQuery {
       search_text: this.searchText,
       start_date: this.startDate,
       end_date: this.endDate,
-      tag_ids: this.tagIds,
+      tags: this.tagIds,
       feature_threshold: this.featureThreshold,
       offset_date: this.offsetDate,
       target_max_results: 50,

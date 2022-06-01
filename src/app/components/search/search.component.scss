@@ -1,0 +1,13 @@
+.search-container {
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+
+}
+
+.search-container mat-form-field {
+  width: calc(100vw - 20px);
+  max-width: calc(100vw - 20px);
+  position: relative;
+  line-clamp: 1;
+}
