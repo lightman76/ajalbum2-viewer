@@ -1,12 +1,12 @@
-import {Component, Input, SimpleChanges} from "@angular/core";
-import {Photo} from "../../helper/photo";
-import {ActivatedRoute, Router} from "@angular/router";
-import {PhotoService} from "../../services/photo.service";
-import {PhotoResultSetService} from "../../services/photo-result-set.service";
-import {faChevronCircleDown, faChevronCircleUp} from "@fortawesome/pro-solid-svg-icons";
-import {BehaviorSubject} from "rxjs";
-import {ITag} from "../../services/helper/i-tag";
-import {TagService} from "../../services/tag.service";
+import {Component, Input, SimpleChanges} from '@angular/core';
+import {Photo} from '../../helper/photo';
+import {ActivatedRoute, Router} from '@angular/router';
+import {PhotoService} from '../../services/photo.service';
+import {PhotoResultSetService} from '../../services/photo-result-set.service';
+import {faChevronCircleDown, faChevronCircleUp} from '@fortawesome/pro-solid-svg-icons';
+import {BehaviorSubject} from 'rxjs';
+import {ITag} from '../../services/helper/i-tag';
+import {TagService} from '../../services/tag.service';
 
 @Component({
   selector: 'individual-photo-info',
@@ -152,9 +152,11 @@ import {TagService} from "../../services/tag.service";
     }
   `],
   host: {
-    "[class.show__nub]": "displayStatus === 'minimized'",
-    "[class.show__single_line]": "displayStatus === 'single-line'",
-    "[class.show__full1]": "displayStatus === 'full1'"
+    '[class.show__nub]': 'displayStatus === \'minimized\'',
+    '[class.show__single_line]': 'displayStatus === \'single-line\'',
+    '[class.show__full1]': 'displayStatus === \'full1\'',
+    '(document:keydown.arrowup)': 'showMore($event)',
+    '(document:keydown.arrowdown)': 'showLess($event)',
   }
 })
 
