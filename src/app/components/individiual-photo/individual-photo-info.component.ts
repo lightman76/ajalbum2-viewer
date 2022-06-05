@@ -155,8 +155,8 @@ import {TagService} from '../../services/tag.service';
     '[class.show__nub]': 'displayStatus === \'minimized\'',
     '[class.show__single_line]': 'displayStatus === \'single-line\'',
     '[class.show__full1]': 'displayStatus === \'full1\'',
-    '(document:keydown.arrowup)': 'showMore($event)',
-    '(document:keydown.arrowdown)': 'showLess($event)',
+    '(document:keydown.arrowup)': 'keyShowMore($event)',
+    '(document:keydown.arrowdown)': 'keyShowLess($event)',
   }
 })
 
@@ -165,6 +165,7 @@ export class IndividualPhotoInfoComponent {
   faChevronCircleDown = faChevronCircleDown;
 
   @Input() photo: Photo;
+  @Input() zoomLevel: number;
   tagSubjs: Array<BehaviorSubject<ITag>>;
 
   displayStatus: string = "single-line";
@@ -194,7 +195,7 @@ export class IndividualPhotoInfoComponent {
   refreshPhotoInfo() {
     let tagsById = this.tagService.getTag$forIds(this.photo.tags);
     let tagArr = [];
-    console.log("Photo: retrieved tag subjects1 as ", tagsById);
+    console.log('Photo: retrieved tag subjects1 as ', tagsById);
     Object.keys(tagsById).forEach((k) => {
       let tag = tagsById[k];
       tagArr.push(tag);
@@ -204,11 +205,23 @@ export class IndividualPhotoInfoComponent {
     //console.log("Photo: retrieved tag subjects as ", this.tagSubjs);
   }
 
+  keyShowMore(evt) {
+    if (this.zoomLevel === 1.0) {
+      this.showMore(evt);
+    }
+  }
+
   showMore(evt) {
     if (this.displayStatus === 'minimized') {
       this.displayStatus = 'single-line';
     } else if (this.displayStatus === 'single-line') {
       this.displayStatus = 'full1';
+    }
+  }
+
+  keyShowLess(evt) {
+    if (this.zoomLevel === 1.0) {
+      this.showLess(evt);
     }
   }
 

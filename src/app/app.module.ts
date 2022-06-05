@@ -21,12 +21,14 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatInputModule} from '@angular/material/input';
 import {MatNativeDateModule} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatSliderModule} from '@angular/material/slider';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {TagComponent} from './components/tag/tag-component';
 import {TagService} from './services/tag.service';
 import {DefaultUserComponent} from './components/default-user/default-user.component';
 import {MatChipsModule} from '@angular/material/chips';
+import {PhotoZoomControl} from './components/individiual-photo/zoom-control.component';
 
 
 @Injectable()
@@ -45,6 +47,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     PhotoThumbComponent,
     IndividualPhotoComponent,
     IndividualPhotoInfoComponent,
+    PhotoZoomControl,
     SearchComponent,
     TagComponent
   ],
@@ -63,6 +66,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     ReactiveFormsModule,
     MatButtonModule,
     MatDatepickerModule,
+    MatSliderModule,
   ],
   providers: [
     ConfigService,

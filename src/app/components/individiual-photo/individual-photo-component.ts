@@ -11,19 +11,21 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '
   template: `
     <div class="individual-photo-container"
     >
-      <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'">
+      <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'" tabindex="0">
         <fa-icon [icon]="faTimes"></fa-icon>
       </div>
-      <div class="zoom-toggle" (click)="zoomToggle($event)" [matTooltip]="'Toggle zoom'">
-        <fa-icon [icon]="faSearchPlus"></fa-icon>
+      <div class="zoom-toggle">
+        <photo-zoom-control [zoomLevel]="zoomLevel" (updatedZoomLevel)="onZoomLevelUpdate($event)"></photo-zoom-control>
       </div>
-      <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)" [matTooltip]="'Previous photo'" [matTooltipPosition]="'right'">
-        <div class="navigation-button-icon">
+      <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)" [matTooltip]="'Previous photo'"
+           [matTooltipPosition]="'right'">
+        <div class="navigation-button-icon" tabindex="0">
           <fa-icon [icon]="faChevronCircleLeft" [size]="'2x'"></fa-icon>
         </div>
       </div>
-      <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)" [matTooltip]="'Next Photo'" [matTooltipPosition]="'left'">
-        <div class="navigation-button-icon">
+      <div class="navigation-button navigation-button-future" (click)="futurePhoto($event)" [matTooltip]="'Next Photo'"
+           [matTooltipPosition]="'left'">
+        <div class="navigation-button-icon" tabindex="0">
           <fa-icon [icon]="faChevronCircleRight" [size]="'2x'"></fa-icon>
         </div>
       </div>
@@ -45,12 +47,17 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '
              [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
-      <individual-photo-info [photo]="photo" *ngIf="photo"></individual-photo-info>
+      <individual-photo-info [photo]="photo" *ngIf="photo" [zoomLevel]="zoomLevel"></individual-photo-info>
     </div>
   `,
   host: {
-    '(document:keydown.arrowleft)': 'pastPhoto($event)',
-    '(document:keydown.arrowright)': 'futurePhoto($event)',
+    '(document:keydown.arrowleft)': 'keyPastPhoto($event)',
+    '(document:keydown.arrowright)': 'keyFuturePhoto($event)',
+    '(document:keydown.escape)': 'handleEscape($event)',
+    '(document:keydown.add)': 'handleZoom($event)',
+    '(document:keydown.shift.=)': 'handleZoom($event)',
+    '(document:keydown.=)': 'handleZoom($event)',
+    '(document:keydown.-)': 'handleUnzoom($event)',
   },
 
   styles: [`
@@ -92,7 +99,7 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '
       position: fixed;
       top: 10px;
       right: 50px;
-      width: 30px;
+      width: 50px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
       border-radius: 15px;
@@ -276,33 +283,55 @@ export class IndividualPhotoComponent {
     let curPhotoId = this.params.photoId;
     let newParams = {...this.queryParams};
     delete newParams['photoId'];
-    this.router.navigate(["../../list"], {relativeTo: this.route, fragment: "photo__" + curPhotoId, queryParams: newParams});
+    this.router.navigate(['../../list'], {relativeTo: this.route, fragment: 'photo__' + curPhotoId, queryParams: newParams});
+  }
+
+  keyFuturePhoto(evt) {
+    if (this.zoomLevel === 1.0) {
+      this.futurePhoto(evt);
+    }
   }
 
   futurePhoto(evt) {
     evt.preventDefault();
     this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
-      console.log("Future photo ", photo);
+      console.log('Future photo ', photo);
       if (photo) {
         this.resetView();
         let newParams = {...this.queryParams};
-        delete newParams["photoId"];
-        this.router.navigate(["../", photo.time_id], {relativeTo: this.route, queryParams: newParams});
+        delete newParams['photoId'];
+        this.router.navigate(['../', photo.time_id], {relativeTo: this.route, queryParams: newParams});
       }
     });
+  }
+
+  keyPastPhoto(evt) {
+    if (this.zoomLevel === 1.0) {
+      this.pastPhoto(evt);
+    }
   }
 
   pastPhoto(evt) {
     evt.preventDefault();
     this.resultSetService.getPastPhotoFromId(this.photoId).then((photo) => {
-      console.log("Past photo ", photo);
+      console.log('Past photo ', photo);
       if (photo) {
         this.resetView();
         let newParams = {...this.queryParams};
-        delete newParams["photoId"];
-        this.router.navigate(["../", photo.time_id], {relativeTo: this.route, queryParams: newParams});
+        delete newParams['photoId'];
+        this.router.navigate(['../', photo.time_id], {relativeTo: this.route, queryParams: newParams});
       }
     });
+  }
+
+  handleEscape(evt) {
+    if (this.zoomLevel === 1.0) {
+      //back to results
+      this.returnToSearch(evt);
+    } else {
+      evt.preventDefault();
+      this.onZoomLevelUpdate(1.0);
+    }
   }
 
   resetView() {
@@ -372,14 +401,40 @@ export class IndividualPhotoComponent {
     }, 1);
   }
 
+  onZoomLevelUpdate(zoomLevel) {
+    let prevZoomLevel = this.zoomLevel;
+    this.zoomLevel = zoomLevel;
 
-  zoomToggle(evt) {
-    evt.preventDefault();
-    if (this.zoomLevel === 1.0) {
-      this.zoomLevel = 2.0;
-    } else {
-      this.zoomLevel = 1.0;
+    let lastWidth = this.imgContainer.nativeElement.scrollWidth;
+    let lastHeight = this.imgContainer.nativeElement.scrollHeight;
+    let scrollLeft = this.imgContainer.nativeElement.scrollLeft;
+    let scrollTop = this.imgContainer.nativeElement.scrollTop;
+    let dims = this.updateZoomDims();
+    let imgWidth = dims[0];
+    let imgHeight = dims[1];
+    let newScrollLeft = 0;
+    let newScrollTop = 0;
+    if (this.zoomLevel !== 1.0) {
+      //Now compensate positioning to zoom in on mouse pointer
+      let evtX = window.innerWidth / 2;
+      let evtY = window.innerHeight / 2;
+      let relPosX = (scrollLeft + evtX) * 1.0 / lastWidth;
+      let relPosY = (scrollTop + evtY) * 1.0 / lastHeight;
+
+      newScrollLeft = Math.round(imgWidth * relPosX) - evtX;
+      newScrollTop = Math.round(imgHeight * relPosY) - evtY;
+
+      console.log('  PinchZoomPosCorrection: prevZoomLevel=' + prevZoomLevel + ' evtCoords=' + evtX + '/' + evtY + '; scrollOffsets=' + scrollLeft + '/' + scrollTop + ' relPos=' + relPosX + '/' + relPosY + ' newScroll=' + newScrollLeft + '/' + newScrollTop);
     }
+    this.imgContainer.nativeElement.scrollLeft = newScrollLeft;
+    this.imgContainer.nativeElement.scrollTop = newScrollTop;
+    setTimeout(() => {
+      //have to do it again after timeout for the initial zoom when scrollbars are added...
+      this.imgContainer.nativeElement.scrollLeft = newScrollLeft;
+      this.imgContainer.nativeElement.scrollTop = newScrollTop;
+    }, 1);
+
+
   }
 
   onSwipe(evt) {
@@ -507,5 +562,30 @@ export class IndividualPhotoComponent {
     if (this.isPinching) {
       this.isPinching = false;
     }
+  }
+
+  handleZoom(evt) {
+    let inc = 0.1;
+    if (this.zoomLevel > 5) {
+      inc = 0.4;
+    }
+    this.onZoomLevelUpdate(this.zoomLevel + inc);
+    evt.preventDefault();
+
+  }
+
+  handleUnzoom(evt) {
+    let inc = 0.1;
+    if (this.zoomLevel > 5) {
+      inc = 0.4;
+    }
+    if (this.zoomLevel > 1) {
+      if (this.zoomLevel - inc < 1) {
+        this.onZoomLevelUpdate(1.0);
+      } else {
+        this.onZoomLevelUpdate(this.zoomLevel - inc);
+      }
+    }
+    evt.preventDefault();
   }
 }
