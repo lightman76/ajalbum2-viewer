@@ -19,6 +19,8 @@ import {SearchComponent} from './components/search/search.component';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatInputModule} from '@angular/material/input';
+import {MatNativeDateModule} from '@angular/material/core';
+import {MatDatepickerModule} from '@angular/material/datepicker';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {TagComponent} from './components/tag/tag-component';
@@ -53,12 +55,14 @@ export class MyHammerConfig extends HammerGestureConfig {
     BrowserAnimationsModule,
     FontAwesomeModule,
     HammerModule,
+    MatNativeDateModule,
     MatAutocompleteModule,
     MatChipsModule,
     MatInputModule,
     MatTooltipModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatDatepickerModule,
   ],
   providers: [
     ConfigService,

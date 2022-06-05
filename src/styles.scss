@@ -20,3 +20,7 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
   overflow: auto;
 }
+
+.mat-autocomplete-panel {
+  max-height: min(450px, 80vh) !important;
+}

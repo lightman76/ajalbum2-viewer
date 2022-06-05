@@ -4,6 +4,7 @@ import {PhotoService} from '../../services/photo.service';
 import {SearchQuery} from '../../services/helper/search-query';
 import {PhotoResultSetService} from '../../services/photo-result-set.service';
 import {PhotosForDay} from '../../helper/photos-for-day';
+import {distinct} from 'rxjs/operators';
 
 @Component({
   selector: 'photo-list',
@@ -60,11 +61,9 @@ export class PhotoListComponent {
     private resultSetService: PhotoResultSetService,
     private elRef: ElementRef,
   ) {
-    console.log("Creating photo list component")
   }
 
   ngOnInit() {
-    console.log("ngOnInit photo list component")
     this.route.fragment.subscribe(fragment => {
       this.fragment = fragment;
       if (this.fragment) {
@@ -83,16 +82,20 @@ export class PhotoListComponent {
       }
     });
     this.route.params.subscribe(params => {
-      console.log("PATH PARAMS: ", params);
+      //console.log("PATH PARAMS: ", params);
       this.userName = params.userName;
     });
-    this.route.queryParams.subscribe(params => {
-      console.log("QUERY PARAMS: ", params);
+    this.route.queryParams.pipe(distinct()).subscribe(params => {
+      //console.log("QUERY PARAMS: ", params);
       this.params = params;
       this.resultSetService.getPhotosByDay$().subscribe((photosByDate) => {
         this.photosByDate = photosByDate;
       });
-      this.currentSearch = new SearchQuery(params);
+      let q = new SearchQuery(params);
+      if (q.equals(this.currentSearch)) {
+        return;
+      }
+      this.currentSearch = q;
       this.currentSearch.userName = this.userName;
       if (this.fragment) {
         const photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
@@ -103,11 +106,15 @@ export class PhotoListComponent {
           this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
         }
       }
+      console.log('  PhotoList: query params updated: ', this.currentSearch);
       this.resultSetService.updateSearch(this.currentSearch);
     });
   }
 
   onSearchUpdated(query) {
+    if (query.equals(this.currentSearch)) {
+      return;
+    }
     console.log('  PhotoList: Search Updated: ', query);
     this.currentSearch = query;
     const queryParams: Params = this.currentSearch.toQueryParamHash();

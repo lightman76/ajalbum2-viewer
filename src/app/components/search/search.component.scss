@@ -2,7 +2,6 @@
   padding-left: 10px;
   padding-right: 10px;
   position: relative;
-
 }
 
 .search-container mat-form-field {
@@ -11,3 +10,18 @@
   position: relative;
   line-clamp: 1;
 }
+
+.search-date-filters {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 90px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #aaa;
+
+  .search-date-filter {
+    flex: 1 1 50%;
+  }
+}
+

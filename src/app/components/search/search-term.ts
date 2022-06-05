@@ -1,4 +1,4 @@
-import {faBook, faCalendar, faMapMarkerAlt, faSearch, faTag, faUser} from '@fortawesome/pro-solid-svg-icons';
+import {faBook, faCalendar, faClock, faMapMarkerAlt, faSearch, faTag, faUser} from '@fortawesome/pro-solid-svg-icons';
 import {IconDefinition} from '@fortawesome/pro-regular-svg-icons';
 
 export class SearchTerm {
@@ -25,6 +25,8 @@ export class SearchTerm {
       return faUser;
     } else if (this.termType === 'event') {
       return faCalendar;
+    } else if (this.termType === 'date') {
+      return faClock;
     }
     return faTag;
   }

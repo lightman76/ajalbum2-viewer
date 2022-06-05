@@ -8,6 +8,7 @@ import {catchError, retry} from 'rxjs/operators';
 @Injectable()
 export class TagService {
   private tagSubjectsById: { [key: string]: BehaviorSubject<ITag> };
+  private allTagsPromise = null;
 
   constructor(private configService: ConfigService,
               private http: HttpClient) {
@@ -42,9 +43,13 @@ export class TagService {
   }
 
   getAllTags(userName: string): Promise<Array<BehaviorSubject<ITag>>> {
-    return new Promise<Array<BehaviorSubject<ITag>>>((resolve, reject) => {
+    if (this.allTagsPromise) {
+      return this.allTagsPromise;
+    }
+    this.allTagsPromise = new Promise<Array<BehaviorSubject<ITag>>>((resolve, reject) => {
       if (!userName) {
         reject('Missing user name');
+        this.allTagsPromise = null;
         return;
       }
       let headers = new HttpHeaders({'Content-Type': 'application/json'});
@@ -64,11 +69,14 @@ export class TagService {
           }
           results.push(t$);
         });
+        this.allTagsPromise = null;
         resolve(results);
       }, (err) => {
         reject(err);
       });
     });
+
+    return this.allTagsPromise;
   }
 
   getTag$forIds(ids: Array<number>) {

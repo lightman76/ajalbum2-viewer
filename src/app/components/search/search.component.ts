@@ -10,6 +10,7 @@ import {map, startWith} from 'rxjs/operators';
 import {ITag} from '../../services/helper/i-tag';
 import {Observable} from 'rxjs';
 import {TagService} from '../../services/tag.service';
+import {AJHelpers} from '../../services/helper/ajhelpers';
 
 @Component({
   selector: 'photo-search',
@@ -45,6 +46,36 @@ import {TagService} from '../../services/tag.service';
             </button>
           </mat-chip-list>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
+            <div class="search-date-filters">
+              <div class="search-date-filter search-date-filter-start">
+                <mat-form-field appearance="fill">
+                  <mat-label>Start Date</mat-label>
+                  <input
+                    matInput
+                    (dateInput)="onStartDateChange($event)"
+                    [value]="startDate"
+                    [matDatepicker]="startPicker">
+                  <mat-hint>MM/DD/YYYY</mat-hint>
+                  <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+
+                  <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div class="search-date-filter search-date-filter-end">
+                <mat-form-field appearance="fill">
+                  <mat-label>End Date</mat-label>
+                  <input
+                    matInput
+                    (dateInput)="onEndDateChange($event)"
+                    [value]="endDate"
+                    [matDatepicker]="endPicker">
+                  <mat-hint>MM/DD/YYYY</mat-hint>
+                  <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                </mat-form-field>
+
+              </div>
+            </div>
             <mat-option *ngFor="let tagSearchTerm of filterTags | async" [value]="tagSearchTerm">
               <fa-icon [icon]="getIconForType(tagSearchTerm)"></fa-icon>&nbsp;
               {{tagSearchTerm.name}}
@@ -62,6 +93,9 @@ export class SearchComponent {
   separatorKeysCodes: number[] = [ENTER, COMMA];
   @Input() searchQuery: SearchQuery = null;
   @Output() searchUpdated: EventEmitter<SearchQuery>;
+
+  startDate: Date | null = null;
+  endDate: Date | null = null;
   searchForm;
   searchTerms: Array<SearchTerm>;
   filteredSearchTerms: Array<SearchTerm>;
@@ -102,8 +136,6 @@ export class SearchComponent {
         console.error('Failure retrieving tags: ', err);
       });
     }
-
-    this.updateSearchTermsFromQuery();
   }
 
   updateSearchTermsFromQuery() {
@@ -123,6 +155,13 @@ export class SearchComponent {
       if (this.searchQuery.searchText) {
         this.searchTerms.push(new SearchTerm(this.idCtr++, this.searchQuery.searchText, 'search'));
       }
+      if (this.searchQuery.startDate) {
+        this.startDate = AJHelpers.parseDashedDate(this.searchQuery.startDate);
+      }
+      if (this.searchQuery.endDate) {
+        this.endDate = AJHelpers.parseDashedDate(this.searchQuery.endDate);
+      }
+      this.refreshDateTerm();
     }
   }
 
@@ -195,6 +234,10 @@ export class SearchComponent {
     const idx = this.searchTerms.findIndex((v) => v.id === term.id);
     if (idx >= 0) {
       this.searchTerms.splice(idx, 1);
+      if (term.termType === 'date') {
+        this.startDate = null;
+        this.endDate = null;
+      }
       this.runSearch(null);
     }
   }
@@ -206,18 +249,28 @@ export class SearchComponent {
       evt.returnValue = false;
     }
     //console.log("Preparing to run search ", this.searchTerms);
-    let textSearch = '';
-    let tagIds = [];
+    let textSearch = null;
+    let tagIds = null;
+    let startDate = null;
+    let endDate = null;
     this.searchTerms.forEach((t) => {
-      if (t.termType === 'search') {
-        textSearch += t.displayName + ' ';
+      if (t.termType === 'search' && t.displayName != '') {
+        textSearch = (textSearch || '') + t.displayName + ' ';
+      } else if (t.termType === 'date') {
+        startDate = this.startDate;
+        endDate = this.endDate;
       } else {
+        if (!tagIds) {
+          tagIds = [];
+        }
         tagIds.push(t.id);
       }
     });
     let newQuery = this.searchQuery.clone();
     newQuery.searchText = textSearch;
     newQuery.tagIds = tagIds;
+    newQuery.startDate = startDate;
+    newQuery.endDate = endDate;
     this.searchUpdated.emit(newQuery);
   }
 
@@ -225,6 +278,80 @@ export class SearchComponent {
     this.searchForm.setValue('');
     this.searchTerms = [];
     this.runSearch(null);
+  }
+
+  clearStartDate(evt) {
+    this.startDate = null;
+    this.refreshDateTerm();
+  }
+
+  clearEndDate(evt) {
+    this.endDate = null;
+    this.refreshDateTerm();
+  }
+
+  onStartDateChange(evt) {
+    if (typeof evt.targetElement.value !== 'string') {
+      this.startDate = evt.targetElement.value;
+      this.refreshDateTerm();
+    } else {
+      try {
+        let d = new Date(evt.targetElement.value);
+        this.startDate = d;
+        this.refreshDateTerm();
+      } catch (e) {
+        console.log('Failed to parse date', e);
+      }
+    }
+  }
+
+  onEndDateChange(evt) {
+    if (typeof evt.targetElement.value !== 'string') {
+      this.endDate = evt.targetElement.value;
+      this.refreshDateTerm();
+    } else {
+      try {
+        let d = new Date(evt.targetElement.value);
+        this.endDate = d;
+        this.refreshDateTerm();
+      } catch (e) {
+        console.log('Failed to parse date', e);
+      }
+    }
+  }
+
+  refreshDateTerm() {
+    const startTerm: Date = this.startDate;
+    const endTerm: Date = this.endDate;
+    let term = this.searchTerms.find((t) => t.termType === 'date');
+    if (term) {
+      if (startTerm === null && endTerm === null) {
+        const idx = this.searchTerms.indexOf(term);
+        this.searchTerms.splice(idx, 1);
+        return;
+      }
+    } else {
+      if (startTerm !== null || endTerm !== null) {
+        term = new SearchTerm(this.idCtr++, '', 'date');
+        this.searchTerms.push(term);
+      }
+    }
+    if (term) {
+      let displayName = null;
+      if (startTerm && !endTerm) {
+        displayName = 'After ' + this.formatDashedDate(startTerm);
+      } else if (!startTerm && endTerm) {
+        displayName = 'Before ' + this.formatDashedDate(endTerm);
+      } else if (startTerm && endTerm) {
+        displayName = 'Between ' + this.formatDashedDate(startTerm) + ' and ' + this.formatDashedDate(endTerm);
+      }
+      term.displayName = displayName;
+    }
+    this.runSearch(null);
+  }
+
+  formatDashedDate(date) {
+    return AJHelpers.formatDashedDate(date);
   }
 
   getIconForType(tag: ITag) {

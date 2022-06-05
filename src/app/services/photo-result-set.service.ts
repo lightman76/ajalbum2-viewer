@@ -1,14 +1,14 @@
-import {PhotoService} from "./photo.service";
-import {PhotosForDay} from "../helper/photos-for-day";
-import {SearchQuery} from "./helper/search-query";
-import {ISearchResultsGroup} from "./helper/i-search-results-group";
-import {Injectable} from "@angular/core";
-import {Photo} from "../helper/photo";
-import {BehaviorSubject, Subscription} from "rxjs";
-import {ISearchDateOutlineResult} from "./helper/i-search-date-outline-result";
-import {RectangleDimensions} from "./helper/rectangle-dimensions";
-import {distinct} from "rxjs/operators";
-import * as _ from "lodash";
+import {PhotoService} from './photo.service';
+import {PhotosForDay} from '../helper/photos-for-day';
+import {SearchQuery} from './helper/search-query';
+import {ISearchResultsGroup} from './helper/i-search-results-group';
+import {Injectable} from '@angular/core';
+import {Photo} from '../helper/photo';
+import {BehaviorSubject, Subscription} from 'rxjs';
+import {ISearchDateOutlineResult} from './helper/i-search-date-outline-result';
+import {RectangleDimensions} from './helper/rectangle-dimensions';
+import {distinct} from 'rxjs/operators';
+import * as _ from 'lodash';
 
 @Injectable()
 export class PhotoResultSetService {
@@ -66,7 +66,7 @@ export class PhotoResultSetService {
   updateSearch(inSearch: SearchQuery) {
     //console.info("PhotoResultSet: Updating current query: ",inSearch, this.search, " Are same? "+(this.search && this.search.equals(inSearch)))
     if (this.search && this.search.equals(inSearch)) return;
-    //console.info("  PhotoResultSet: It's a new query - actually run: ",inSearch)
+    console.info('  PhotoResultSet: It\'s a new query - actually run: ', inSearch, this.search);
     this.searchSpecificSubscriptions.forEach((sub) => {
       try {
         sub.unsubscribe();
@@ -76,6 +76,7 @@ export class PhotoResultSetService {
     this.searchSpecificSubscriptions = [];
     this.photosByDayList = [];
     this.photosByDayHash = {};
+    this.photosByDay$.next(this.photosByDayList);
     //TODO: probably need to push out on the subjects...
     this.search = inSearch.clone();
     this.initialLoadUpToDate = this.search.offsetDate;
