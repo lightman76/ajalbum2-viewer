@@ -5,8 +5,8 @@
 }
 
 .search-container mat-form-field {
-  width: calc(100vw - 20px);
-  max-width: calc(100vw - 20px);
+  width: calc(100% - 20px);
+  max-width: calc(100% - 20px);
   position: relative;
   line-clamp: 1;
 }

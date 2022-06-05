@@ -10,7 +10,13 @@ import {distinct} from 'rxjs/operators';
   selector: 'photo-list',
   template: `
     <div class="control-bar">
-      <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
+      <div class="control-bar-search">
+        <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
+      </div>
+      <div class="control-bar-login">
+        <login-indicator></login-indicator>
+      </div>
+
     </div>
     <div class="results" (scroll)="handleScroll($event)">
       <photos-for-day [pfd]="pfd" [focusPhotoId]="focusPhotoId" *ngFor="let pfd of photosByDate"
@@ -31,7 +37,17 @@ import {distinct} from 'rxjs/operators';
 
     .control-bar {
       height: 65px;
-      width: 100vw;
+      display: flex;
+    }
+
+    .control-bar-search {
+      height: 65px;
+      flex: 1 1 calc(100vw - 50px);
+    }
+
+    .control-bar-login {
+      height: 65px;
+      flex: 0 0 50px;
     }
 
     .results {

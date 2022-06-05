@@ -29,6 +29,8 @@ import {TagService} from './services/tag.service';
 import {DefaultUserComponent} from './components/default-user/default-user.component';
 import {MatChipsModule} from '@angular/material/chips';
 import {PhotoZoomControl} from './components/individiual-photo/zoom-control.component';
+import {LoginIndicatorComponent} from './components/login-indicator/login-indicator.component';
+import {UserService} from './services/user.service';
 
 
 @Injectable()
@@ -42,11 +44,12 @@ export class MyHammerConfig extends HammerGestureConfig {
   declarations: [
     AppComponent,
     DefaultUserComponent,
+    IndividualPhotoComponent,
+    IndividualPhotoInfoComponent,
+    LoginIndicatorComponent,
     PhotoListComponent,
     PhotosForDayComponent,
     PhotoThumbComponent,
-    IndividualPhotoComponent,
-    IndividualPhotoInfoComponent,
     PhotoZoomControl,
     SearchComponent,
     TagComponent
@@ -73,6 +76,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     PhotoService,
     PhotoResultSetService,
     TagService,
+    UserService,
     {
       provide: HAMMER_GESTURE_CONFIG,
       useClass: MyHammerConfig
