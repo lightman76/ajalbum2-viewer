@@ -2,6 +2,8 @@ import {Component} from '@angular/core';
 import {faUser} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
+import {LoginDialogComponent} from '../login-dialog/login-dialog-component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'login-indicator',
@@ -35,7 +37,8 @@ export class LoginIndicatorComponent {
   faUser = faUser;
   currentUser: UserInfo = null;
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService,
+              private dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -46,7 +49,21 @@ export class LoginIndicatorComponent {
 
   toggleLogin(evt) {
     evt.preventDefault();
-    //NOT IMPLEMENTED
+    if (this.currentUser) {
+      //LOG OUT
+      this.userService.logoutUser();
+    } else {
+      //NOT LOGGED IN
+      const dialogRef = this.dialog.open(LoginDialogComponent, {
+        width: '250px',
+        data: {},
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        console.log('The dialog was closed');
+        this.currentUser = result ? result.userInfo : null;
+      });
+    }
   }
 
 

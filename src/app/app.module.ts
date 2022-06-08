@@ -24,6 +24,8 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatSliderModule} from '@angular/material/slider';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatDialogModule} from '@angular/material/dialog';
 import {TagComponent} from './components/tag/tag-component';
 import {TagService} from './services/tag.service';
 import {DefaultUserComponent} from './components/default-user/default-user.component';
@@ -31,6 +33,7 @@ import {MatChipsModule} from '@angular/material/chips';
 import {PhotoZoomControl} from './components/individiual-photo/zoom-control.component';
 import {LoginIndicatorComponent} from './components/login-indicator/login-indicator.component';
 import {UserService} from './services/user.service';
+import {LoginDialogComponent} from './components/login-dialog/login-dialog-component';
 
 
 @Injectable()
@@ -46,13 +49,14 @@ export class MyHammerConfig extends HammerGestureConfig {
     DefaultUserComponent,
     IndividualPhotoComponent,
     IndividualPhotoInfoComponent,
+    LoginDialogComponent,
     LoginIndicatorComponent,
     PhotoListComponent,
     PhotosForDayComponent,
     PhotoThumbComponent,
     PhotoZoomControl,
     SearchComponent,
-    TagComponent
+    TagComponent,
   ],
   imports: [
     BrowserModule,
@@ -68,6 +72,8 @@ export class MyHammerConfig extends HammerGestureConfig {
     MatTooltipModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatDialogModule,
+    MatSnackBarModule,
     MatDatepickerModule,
     MatSliderModule,
   ],

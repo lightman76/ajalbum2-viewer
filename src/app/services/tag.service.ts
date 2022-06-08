@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, throwError} from 'rxjs';
+import {BehaviorSubject} from 'rxjs';
 import {ITag} from './helper/i-tag';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {ConfigService} from './config.service';
 import {catchError, retry} from 'rxjs/operators';
+import {AJHelpers} from './helper/ajhelpers';
 
 @Injectable()
 export class TagService {
@@ -17,10 +18,10 @@ export class TagService {
 
   searchTags(tagSearch: ITagSearch) {
     return new Promise<Array<BehaviorSubject<ITag>>>((resolve, reject) => {
-      let headers = new HttpHeaders({"Content-Type": "application/json"});
-      let req = this.http.post<ITagSearchResults>(this.configService.getApiRoot() + "/tag",
+      let headers = new HttpHeaders({'Content-Type': 'application/json'});
+      let req = this.http.post<ITagSearchResults>(this.configService.getApiRoot() + '/tag',
         JSON.stringify(tagSearch),
-        {headers: headers}).pipe(retry(3), catchError(this.errorHandler));
+        {headers: headers}).pipe(retry(3), catchError(AJHelpers.errorHandler));
       req.subscribe((data) => {
         let results = [];
         data.matching_tags.forEach((tag) => {
@@ -54,7 +55,7 @@ export class TagService {
       }
       let headers = new HttpHeaders({'Content-Type': 'application/json'});
       let req = this.http.get<IAllTagResults>(this.configService.getApiRoot() + '/' + encodeURIComponent(userName) + '/tags',
-        {headers: headers}).pipe(retry(3), catchError(this.errorHandler));
+        {headers: headers}).pipe(retry(3), catchError(AJHelpers.errorHandler));
       req.subscribe((data) => {
         let results = [];
         data.all_tags.forEach((tag) => {
@@ -105,10 +106,10 @@ export class TagService {
   }
 
   private retrieveTagsForIds(tagIds) {
-    let headers = new HttpHeaders({"Content-Type": "application/json"});
-    let req = this.http.post<ITagResults>(this.configService.getApiRoot() + "/tag/ids",
+    let headers = new HttpHeaders({'Content-Type': 'application/json'});
+    let req = this.http.post<ITagResults>(this.configService.getApiRoot() + '/tag/ids',
       JSON.stringify(tagIds),
-      {headers: headers}).pipe(retry(3), catchError(this.errorHandler));
+      {headers: headers}).pipe(retry(3), catchError(AJHelpers.errorHandler));
     req.subscribe((data) => {
       Object.keys(data.tags).forEach((idStr) => {
         let id = parseInt(idStr);
@@ -119,23 +120,6 @@ export class TagService {
       });
     });
   }
-
-  private errorHandler(error: HttpErrorResponse) {
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      console.error('An error occurred:', error.error.message);
-    } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong.
-      console.error(
-        `Backend returned code ${error.status}, ` +
-        `body was: ${error.error}`);
-    }
-    // Return an observable with a user-facing error message.
-    return throwError(
-      'Something bad happened; please try again later.');
-  }
-
 }
 
 export class ITagSearch {
