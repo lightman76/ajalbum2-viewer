@@ -9,6 +9,7 @@ import {ISearchDateOutlineResult} from './helper/i-search-date-outline-result';
 import {RectangleDimensions} from './helper/rectangle-dimensions';
 import {distinct} from 'rxjs/operators';
 import * as _ from 'lodash';
+import {SelectionService} from './selection.service';
 
 @Injectable()
 export class PhotoResultSetService {
@@ -30,6 +31,7 @@ export class PhotoResultSetService {
 
   constructor(
     private photoService: PhotoService,
+    private selectionService: SelectionService,
   ) {
     this.photosByDayList = [];
     this.photosByDayHash = {};
@@ -77,6 +79,7 @@ export class PhotoResultSetService {
     this.photosByDayList = [];
     this.photosByDayHash = {};
     this.photosByDay$.next(this.photosByDayList);
+    this.selectionService.clearSelections();
     //TODO: probably need to push out on the subjects...
     this.search = inSearch.clone();
     this.initialLoadUpToDate = this.search.offsetDate;

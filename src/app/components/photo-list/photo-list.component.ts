@@ -14,6 +14,7 @@ import {distinct} from 'rxjs/operators';
         <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
       </div>
       <div class="control-bar-login">
+        <photo-selection-toggle></photo-selection-toggle>
         <login-indicator></login-indicator>
       </div>
 
@@ -42,12 +43,12 @@ import {distinct} from 'rxjs/operators';
 
     .control-bar-search {
       height: 65px;
-      flex: 1 1 calc(100vw - 50px);
+      flex: 1 1 calc(100vw - 100px);
     }
 
     .control-bar-login {
-      height: 65px;
-      flex: 0 0 50px;
+      height: 100px;
+      flex: 0 0 100px;
     }
 
     .results {

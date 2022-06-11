@@ -26,6 +26,7 @@ import {MatDialog} from '@angular/material/dialog';
       height: 50px;
       padding: 20px 10px 10px 10px;
       color: #888;
+      display: inline-block;
     }
 
     .login-indicator.loggedIn {

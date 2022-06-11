@@ -34,6 +34,8 @@ import {PhotoZoomControl} from './components/individiual-photo/zoom-control.comp
 import {LoginIndicatorComponent} from './components/login-indicator/login-indicator.component';
 import {UserService} from './services/user.service';
 import {LoginDialogComponent} from './components/login-dialog/login-dialog-component';
+import {SelectionService} from './services/selection.service';
+import {PhotoSelectionToggle} from './components/photo-selection-toggle/photo-selection-toggle';
 
 
 @Injectable()
@@ -53,6 +55,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     LoginIndicatorComponent,
     PhotoListComponent,
     PhotosForDayComponent,
+    PhotoSelectionToggle,
     PhotoThumbComponent,
     PhotoZoomControl,
     SearchComponent,
@@ -81,6 +84,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     ConfigService,
     PhotoService,
     PhotoResultSetService,
+    SelectionService,
     TagService,
     UserService,
     {
