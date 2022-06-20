@@ -92,8 +92,8 @@ export class PhotoThumbComponent {
 
   ngOnInit() {
     this.selectionService.getSelectedPhotosById$().subscribe((selectedPhotos) => {
-      if (selectedPhotos && this.photo && this.photo.id) {
-        this.isSelected = selectedPhotos[this.photo.id] || false;
+      if (selectedPhotos && this.photo && this.photo.time_id) {
+        this.isSelected = selectedPhotos[this.photo.time_id] || false;
       }
     });
   }
@@ -102,7 +102,7 @@ export class PhotoThumbComponent {
     if (this.selectionService.getSelectionEnabled$().getValue()) {
       //selection is enabled - click is to toggle select photo
       let photosById = {...this.selectionService.getSelectedPhotosById$().getValue()};
-      photosById[this.photo.id] = !this.isSelected;
+      photosById[this.photo.time_id] = !this.isSelected;
       this.selectionService.getSelectedPhotosById$().next(photosById);
     } else {
       //selection is NOT enabled - click is to view photo

@@ -55,7 +55,7 @@ export class UserService {
   private updateLocalStorage(username, userInfo) {
     if (userInfo) {
       localStorage.setItem('username', username);
-      localStorage.setItem('loginAuthToken', userInfo);
+      localStorage.setItem('loginAuthToken', userInfo.authenticationToken);
     } else {
       localStorage.removeItem('username');
       localStorage.removeItem('loginAuthToken');

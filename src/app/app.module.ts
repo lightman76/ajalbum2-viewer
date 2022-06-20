@@ -36,6 +36,8 @@ import {UserService} from './services/user.service';
 import {LoginDialogComponent} from './components/login-dialog/login-dialog-component';
 import {SelectionService} from './services/selection.service';
 import {PhotoSelectionToggle} from './components/photo-selection-toggle/photo-selection-toggle';
+import {EditPhotoButtonComponent} from './components/edit-photo-button/edit-photo-button.component';
+import {BulkPhotoEditDialogComponent} from './components/bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 
 
 @Injectable()
@@ -48,7 +50,9 @@ export class MyHammerConfig extends HammerGestureConfig {
 @NgModule({
   declarations: [
     AppComponent,
+    BulkPhotoEditDialogComponent,
     DefaultUserComponent,
+    EditPhotoButtonComponent,
     IndividualPhotoComponent,
     IndividualPhotoInfoComponent,
     LoginDialogComponent,

@@ -14,7 +14,7 @@ import {MatDialog} from '@angular/material/dialog';
       <fa-icon
         (click)="toggleLogin($event)"
         [matTooltip]="currentUser ? ('Log out of '+currentUser.userName) : 'Log in'"
-        [matTooltipPosition]="'left'"
+        [matTooltipPosition]="'below'"
         [icon]="faUser"
         [size]="'2x'"></fa-icon>
     </div>

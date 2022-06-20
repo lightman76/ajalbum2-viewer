@@ -65,10 +65,12 @@ export class PhotoResultSetService {
   }
 
   //when search updated, clear prior results
-  updateSearch(inSearch: SearchQuery) {
+  updateSearch(inSearch: SearchQuery, forcedRefresh: boolean = false) {
     //console.info("PhotoResultSet: Updating current query: ",inSearch, this.search, " Are same? "+(this.search && this.search.equals(inSearch)))
-    if (this.search && this.search.equals(inSearch)) return;
-    console.info('  PhotoResultSet: It\'s a new query - actually run: ', inSearch, this.search);
+    if (!forcedRefresh && this.search && this.search.equals(inSearch)) {
+      return;
+    }
+    console.info('  PhotoResultSet: It\'s a new query/forced refresh - actually run: ', forcedRefresh, inSearch, this.search);
     this.searchSpecificSubscriptions.forEach((sub) => {
       try {
         sub.unsubscribe();

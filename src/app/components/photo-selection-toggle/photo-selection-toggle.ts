@@ -14,7 +14,7 @@ import {SelectionService} from '../../services/selection.service';
       <fa-icon
         (click)="toggleSelection($event)"
         [matTooltip]="toggleState ? 'Photo selection enabled' : 'Photo selection disabled'"
-        [matTooltipPosition]="'left'"
+        [matTooltipPosition]="'below'"
         [icon]="toggleState ? faToggleOn : faToggleOff"
         [size]="'2x'"></fa-icon>
     </div>

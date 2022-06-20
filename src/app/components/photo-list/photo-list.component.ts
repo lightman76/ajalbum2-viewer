@@ -14,6 +14,11 @@ import {distinct} from 'rxjs/operators';
         <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
       </div>
       <div class="control-bar-login">
+        <edit-photo-button
+          [usageContext]="'multi'"
+          [viewingUser]="currentSearch.userName"
+          (photosUpdated)="onPhotosEdited($event)"
+        ></edit-photo-button>
         <photo-selection-toggle></photo-selection-toggle>
         <login-indicator></login-indicator>
       </div>
@@ -43,12 +48,12 @@ import {distinct} from 'rxjs/operators';
 
     .control-bar-search {
       height: 65px;
-      flex: 1 1 calc(100vw - 100px);
+      flex: 1 1 100%;
     }
 
     .control-bar-login {
       height: 100px;
-      flex: 0 0 100px;
+      flex: 1 0 auto;
     }
 
     .results {
@@ -128,18 +133,18 @@ export class PhotoListComponent {
     });
   }
 
-  onSearchUpdated(query) {
-    if (query.equals(this.currentSearch)) {
+  onSearchUpdated(query, forcedRefresh: boolean = false) {
+    if (!forcedRefresh && query.equals(this.currentSearch)) {
       return;
     }
-    console.log('  PhotoList: Search Updated: ', query);
+    console.log('  PhotoList: Search Updated: forcedRefresh=' + forcedRefresh, query);
     this.currentSearch = query;
     const queryParams: Params = this.currentSearch.toQueryParamHash();
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: queryParams, //note, can use queryParamsHandling: "merge" to merge with existing rather than replace
     });
-    this.resultSetService.updateSearch(query);
+    this.resultSetService.updateSearch(query, forcedRefresh);
     if (this.focusPhotoId === null) {
       //Need to scroll results back to top
       try {
@@ -147,6 +152,12 @@ export class PhotoListComponent {
       } catch (e) {
       }
     }
+  }
+
+  onPhotosEdited(editedIds) {
+    console.log('onPhotosEdited got ', editedIds);
+    this.focusPhotoId = editedIds ? editedIds[0] : null;
+    this.onSearchUpdated(this.currentSearch, true);
   }
 
   handleScroll(evt) {
