@@ -10,7 +10,9 @@ import {faSearchPlus, faTimes} from '@fortawesome/pro-solid-svg-icons';
       <span class="magnification-display">{{zoomLevel|number:"1.0-2"}}x</span>
     </div>
     <div class="zoom-toggle-dropdown" *ngIf="showingZoomControls">
-      <mat-slider min="1" max="20" step="0.05" vertical [value]="zoomLevel" (change)="onZoomSliderChange($event)"
+      <mat-slider min="1" max="20" step="0.05" vertical
+                  [value]="zoomLevel"
+                  (change)="onZoomSliderChange($event)"
                   (input)="onZoomSliderChange($event)"></mat-slider>
       <div class="magnification-reset" (click)="resetZoomLevel($event)" tabindex="0">
         Reset

@@ -31,6 +31,21 @@ import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
             formControlName="description"
             matInput></textarea>
         </mat-form-field>
+        <div class="photo-priority">
+          <label id="photo-priority" class="photo-priority-label">Priority</label>
+        </div>
+        <mat-slider
+          class="example-margin"
+          [max]="10"
+          [min]="0"
+          [step]="1"
+          [thumbLabel]="'How important is the photo: 10=must see; 1=default; 0=hide from normal view'"
+          [tickInterval]="'auto'"
+          [value]="priority"
+          (change)="onPriorityChange($event)"
+          (input)="onPriorityChange($event)"
+          aria-labelledby="photo-priority">
+        </mat-slider>
         <div class="tag-edit-area">
           <div class="tag-edit-area__title">Tags:</div>
           <div class="tag-list tag-list-added-all">
