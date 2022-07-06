@@ -92,14 +92,14 @@ export class PhotoResultSetService {
     return this.photosByDay$;
   }
 
-  getPhotoForId(userName:string, photoTimeIdNum: number): Promise<Photo> {
+  async getPhotoForId(userName: string, photoTimeIdNum: number): Promise<Photo> {
     let photoTimeId = new Date(photoTimeIdNum);
-    console.log("getPhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId+" for user "+userName);
+    console.log('getPhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId + ' for user ' + userName);
     return new Promise<Photo>((resolve, reject) => {
 
       let day = PhotosForDay.dateToDayStr(photoTimeId);
       let pfd = this.photosByDayHash[day];
-      console.log("  getPhotoForId: pfd loaded=" + (pfd && pfd.photoResultsLoaded))
+      console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
       if (pfd && pfd.photoResultsLoaded) {
         resolve(pfd.getPhotoForTimeId(photoTimeIdNum));
       } else {

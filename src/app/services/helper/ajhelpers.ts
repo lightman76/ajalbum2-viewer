@@ -1,5 +1,7 @@
 import {HttpErrorResponse} from '@angular/common/http';
 import {throwError} from 'rxjs';
+import {ITag} from './i-tag';
+import {faBook, faCalendar, faMapMarkerAlt, faTag, faUser} from '@fortawesome/pro-solid-svg-icons';
 
 export class AJHelpers {
   static formatDashedDate(date) {
@@ -40,6 +42,21 @@ export class AJHelpers {
     // Return an observable with a user-facing error message.
     return throwError(
       'Something bad happened; please try again later.');
+  }
+
+  static getIconForType(tag: ITag) {
+    if (tag.tag_type === 'tag') {
+      return faTag;
+    } else if (tag.tag_type === 'location') {
+      return faMapMarkerAlt;
+    } else if (tag.tag_type === 'album') {
+      return faBook;
+    } else if (tag.tag_type === 'people') {
+      return faUser;
+    } else if (tag.tag_type === 'event') {
+      return faCalendar;
+    }
+    return faTag;
   }
 
 

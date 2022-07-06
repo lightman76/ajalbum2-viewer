@@ -1,7 +1,7 @@
 import {Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {FormBuilder, FormControl} from '@angular/forms';
-import {faBook, faCalendar, faMapMarkerAlt, faSearch, faTag, faTimes, faUser} from '@fortawesome/pro-solid-svg-icons';
+import {faSearch, faTimes} from '@fortawesome/pro-solid-svg-icons';
 import {SearchQuery} from '../../services/helper/search-query';
 import {SearchTerm} from './search-term';
 import {MatChipInputEvent} from '@angular/material/chips';
@@ -355,18 +355,7 @@ export class SearchComponent {
   }
 
   getIconForType(tag: ITag) {
-    if (tag.tag_type === 'tag') {
-      return faTag;
-    } else if (tag.tag_type === 'location') {
-      return faMapMarkerAlt;
-    } else if (tag.tag_type === 'album') {
-      return faBook;
-    } else if (tag.tag_type === 'people') {
-      return faUser;
-    } else if (tag.tag_type === 'event') {
-      return faCalendar;
-    }
-    return faTag;
+    return AJHelpers.getIconForType(tag);
   }
 
   private _filter(value: string | ITag): ITag[] {
