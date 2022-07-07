@@ -102,7 +102,11 @@ export class PhotoThumbComponent {
     if (this.selectionService.getSelectionEnabled$().getValue()) {
       //selection is enabled - click is to toggle select photo
       let photosById = {...this.selectionService.getSelectedPhotosById$().getValue()};
-      photosById[this.photo.time_id] = !this.isSelected;
+      if (this.isSelected) {
+        delete photosById[this.photo.time_id];
+      } else {
+        photosById[this.photo.time_id] = true;
+      }
       this.selectionService.getSelectedPhotosById$().next(photosById);
     } else {
       //selection is NOT enabled - click is to view photo

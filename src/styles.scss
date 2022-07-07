@@ -24,3 +24,14 @@ body {
 .mat-autocomplete-panel {
   max-height: min(450px, 80vh) !important;
 }
+
+bulk-photo-edit-dialog {
+  mat-form-field, mat-slider {
+    width: 100%;
+  }
+}
+
+.mat-form-field-infix {
+  width: 100% !important;
+}
+
