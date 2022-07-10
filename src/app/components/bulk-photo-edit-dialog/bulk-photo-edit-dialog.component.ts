@@ -2,7 +2,7 @@ import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Photo} from '../../helper/photo';
 import {ITag} from '../../services/helper/i-tag';
 import {PhotoService, PhotoUpdateFields} from '../../services/photo.service';
@@ -17,6 +17,7 @@ import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {map, startWith} from 'rxjs/operators';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {MatChipInputEvent} from '@angular/material/chips';
+import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.component';
 
 @Component({
   selector: 'bulk-photo-edit-dialog',
@@ -177,10 +178,6 @@ export class BulkPhotoEditDialogComponent {
 
   form: FormGroup;
 
-  titleForm: FormControl;
-  descriptionForm: FormControl;
-  priorityForm: FormControl;
-
   photos: Array<Photo>;
   addTags: Array<BulkTagDetail>;
   removeTags: Array<BulkTagDetail>;
@@ -216,6 +213,7 @@ export class BulkPhotoEditDialogComponent {
               private photoResultSetService: PhotoResultSetService,
               private matSnackBar: MatSnackBar,
               private tagService: TagService,
+              private dialog: MatDialog,
               private fb: FormBuilder,) {
     this.photos = [];
     this.addTags = [];
@@ -364,10 +362,28 @@ export class BulkPhotoEditDialogComponent {
   }
 
   confirmAddTag(evt: MatChipInputEvent) {
+    let tagName = evt.value;
     this.searchTagInput.nativeElement.value = '';
     this.searchTags.setValue('');
     //TODO:
-    alert('TODO: Create dialog for new tag ' + evt.value);
+
+    const dialogRef = this.dialog.open(CreateTagDialogComponent, {
+      width: '350px',
+      data: {
+        forUserName: this.forUserName,
+        currentUser: this.currentUser,
+        name: tagName
+      },
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Create tag dialog was closed', result);
+      if (result && result.disposition === 'created') {
+        //Ok - add the new tag to the list
+        let tag$ = result.tag$;
+        this.addTags.push(new BulkTagDetail(tag$, false, false));
+      }
+    });
+
   }
 
   onSubmit(evt) {

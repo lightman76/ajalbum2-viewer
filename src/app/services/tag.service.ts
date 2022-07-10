@@ -105,11 +105,42 @@ export class TagService {
     return ret;
   }
 
+  async createTag(userName, authorization, tagType, name, description, shortcutUrl, optionsHash) {
+    return new Promise<BehaviorSubject<ITag>>((resolve, reject) => {
+      let headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + encodeURIComponent(authorization)
+      });
+      let req = this.http.post<ICreateTagResult>(this.configService.getApiUserRoot(userName) + '/tag',
+        JSON.stringify({
+          tag_type: tagType,
+          name: name,
+          description: description,
+          shortcut_url: shortcutUrl,
+          location_latitude: optionsHash.location_latitude,
+          location_longitude: optionsHash.location_longitude,
+          event_date: optionsHash.event_date,
+        }),
+        {headers: headers}).pipe(retry(1), catchError(AJHelpers.errorHandler));
+      req.subscribe((data) => {
+        let tag = data.tag;
+        let id = tag.id;
+        let t$ = this.tagSubjectsById[id];
+        if (!t$) {
+          t$ = this.tagSubjectsById[id] = new BehaviorSubject<ITag>(tag);
+        } else {
+          t$.next(tag);
+        }
+        resolve(t$);
+      }, reject);
+    });
+  }
+
   private retrieveTagsForIds(tagIds) {
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     let req = this.http.post<ITagResults>(this.configService.getApiRoot() + '/tag/ids',
       JSON.stringify(tagIds),
-      {headers: headers}).pipe(retry(3), catchError(AJHelpers.errorHandler));
+      {headers: headers}).pipe(retry(1), catchError(AJHelpers.errorHandler));
     req.subscribe((data) => {
       Object.keys(data.tags).forEach((idStr) => {
         let id = parseInt(idStr);
@@ -127,7 +158,11 @@ export class ITagSearch {
 }
 
 class ITagResults {
-  tags: { [key: string]: ITag }
+  tags: { [key: string]: ITag };
+}
+
+class ICreateTagResult {
+  tag: ITag;
 }
 
 class ITagSearchResults {

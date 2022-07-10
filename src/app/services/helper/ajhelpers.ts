@@ -45,15 +45,22 @@ export class AJHelpers {
   }
 
   static getIconForType(tag: ITag) {
-    if (tag.tag_type === 'tag') {
+    if (!tag) {
+      return null;
+    }
+    return this.getIconForTagType(tag.tag_type);
+  }
+
+  static getIconForTagType(tagType: string) {
+    if (tagType === 'tag') {
       return faTag;
-    } else if (tag.tag_type === 'location') {
+    } else if (tagType === 'location') {
       return faMapMarkerAlt;
-    } else if (tag.tag_type === 'album') {
+    } else if (tagType === 'album') {
       return faBook;
-    } else if (tag.tag_type === 'people') {
+    } else if (tagType === 'people') {
       return faUser;
-    } else if (tag.tag_type === 'event') {
+    } else if (tagType === 'event') {
       return faCalendar;
     }
     return faTag;

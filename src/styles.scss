@@ -31,6 +31,12 @@ bulk-photo-edit-dialog {
   }
 }
 
+create-tag-dialog {
+  mat-form-field, mat-radio-group, mat-radio-button {
+    width: 100%;
+  }
+}
+
 .mat-form-field-infix {
   width: 100% !important;
 }

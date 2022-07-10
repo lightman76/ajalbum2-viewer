@@ -24,6 +24,7 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatSliderModule} from '@angular/material/slider';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
+import {MatRadioModule} from '@angular/material/radio';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatDialogModule} from '@angular/material/dialog';
 import {TagComponent} from './components/tag/tag-component';
@@ -38,6 +39,7 @@ import {SelectionService} from './services/selection.service';
 import {PhotoSelectionToggle} from './components/photo-selection-toggle/photo-selection-toggle';
 import {EditPhotoButtonComponent} from './components/edit-photo-button/edit-photo-button.component';
 import {BulkPhotoEditDialogComponent} from './components/bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
+import {CreateTagDialogComponent} from './components/create-tag-dialog/create-tag-dialog.component';
 
 
 @Injectable()
@@ -51,6 +53,7 @@ export class MyHammerConfig extends HammerGestureConfig {
   declarations: [
     AppComponent,
     BulkPhotoEditDialogComponent,
+    CreateTagDialogComponent,
     DefaultUserComponent,
     EditPhotoButtonComponent,
     IndividualPhotoComponent,
@@ -80,6 +83,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
+    MatRadioModule,
     MatSnackBarModule,
     MatDatepickerModule,
     MatSliderModule,
