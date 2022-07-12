@@ -63,6 +63,12 @@ import {MatRadioChange} from '@angular/material/radio';
             <fa-icon [icon]="getIconForTagType('people')"></fa-icon>
             Person
           </mat-radio-button>
+          <mat-radio-button
+            [checked]="tagType === 'species'"
+            [value]="'species'">
+            <fa-icon [icon]="getIconForTagType('species')"></fa-icon>
+            Species
+          </mat-radio-button>
 
 
         </mat-radio-group>

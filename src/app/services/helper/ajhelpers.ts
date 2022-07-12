@@ -1,7 +1,7 @@
 import {HttpErrorResponse} from '@angular/common/http';
 import {throwError} from 'rxjs';
 import {ITag} from './i-tag';
-import {faBook, faCalendar, faMapMarkerAlt, faTag, faUser} from '@fortawesome/pro-solid-svg-icons';
+import {faBook, faCalendar, faDove, faMapMarkerAlt, faTag, faUser} from '@fortawesome/pro-solid-svg-icons';
 
 export class AJHelpers {
   static formatDashedDate(date) {
@@ -62,6 +62,8 @@ export class AJHelpers {
       return faUser;
     } else if (tagType === 'event') {
       return faCalendar;
+    } else if (tagType === 'species') {
+      return faDove;
     }
     return faTag;
   }
