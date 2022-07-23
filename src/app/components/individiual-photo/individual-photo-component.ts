@@ -516,9 +516,9 @@ export class IndividualPhotoComponent {
   onSwipe(evt) {
     if (this.zoomLevel === 1.0 && Math.abs(evt.deltaX) > 40) {
       if (evt.deltaX > 0) {
-        this.futurePhoto(evt);
-      } else {
         this.pastPhoto(evt);
+      } else {
+        this.futurePhoto(evt);
       }
     }
   }
