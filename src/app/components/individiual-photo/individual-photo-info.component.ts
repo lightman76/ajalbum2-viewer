@@ -1,4 +1,4 @@
-import {Component, Input, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {Photo} from '../../helper/photo';
 import {ActivatedRoute, Router} from '@angular/router';
 import {PhotoService} from '../../services/photo.service';
@@ -160,7 +160,7 @@ import {TagService} from '../../services/tag.service';
   }
 })
 
-export class IndividualPhotoInfoComponent {
+export class IndividualPhotoInfoComponent implements OnChanges {
   faChevronCircleUp = faChevronCircleUp;
   faChevronCircleDown = faChevronCircleDown;
 
@@ -168,7 +168,7 @@ export class IndividualPhotoInfoComponent {
   @Input() zoomLevel: number;
   tagSubjs: Array<BehaviorSubject<ITag>>;
 
-  displayStatus: string = "single-line";
+  displayStatus: string = 'single-line';
 
   constructor(
     private route: ActivatedRoute,
@@ -187,6 +187,7 @@ export class IndividualPhotoInfoComponent {
     if(changes && changes['photo']) {
       let change = changes['photo'];
       if(change.currentValue != null) {
+        console.log('photoInfo: Got photo change');
         this.refreshPhotoInfo();
       }
     }

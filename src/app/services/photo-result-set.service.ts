@@ -65,7 +65,7 @@ export class PhotoResultSetService {
   }
 
   //when search updated, clear prior results
-  updateSearch(inSearch: SearchQuery, forcedRefresh: boolean = false) {
+  async updateSearch(inSearch: SearchQuery, forcedRefresh: boolean = false) {
     //console.info("PhotoResultSet: Updating current query: ",inSearch, this.search, " Are same? "+(this.search && this.search.equals(inSearch)))
     if (!forcedRefresh && this.search && this.search.equals(inSearch)) {
       return;
@@ -85,7 +85,7 @@ export class PhotoResultSetService {
     //TODO: probably need to push out on the subjects...
     this.search = inSearch.clone();
     this.initialLoadUpToDate = this.search.offsetDate;
-    this.initiateSearch();
+    await this.initiateSearch();
   }
 
   getPhotosByDay$() {
@@ -303,31 +303,37 @@ export class PhotoResultSetService {
     return this.scrollOffset$;
   }
 
-  private initiateSearch() {
-    this.fetchResultsOutline(null);
+  private async initiateSearch() {
+    await this.fetchResultsOutline(null);
 
   }
 
   private fetchStartingAtDay(offsetDate: Date) {
-    console.log("  FETCH at date=" + offsetDate);
+    console.log('  FETCH at date=' + offsetDate);
     this.photoService.getSearchResults(this.search, offsetDate).subscribe((results) => {
       this.parseResults(results);
     });
   }
 
-  private fetchResultsOutline(offsetDate: Date) {
-    console.log("  FETCH OUTLINE at date=" + offsetDate);
-    this.photoService.getSearchDateOutline(this.search, offsetDate).subscribe((results) => {
-      this.parseOutlineResults(results);
-      this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
-      if (this.initialLoadUpToDate) {
-        let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
-        let loadToDate = new Date(this.initialLoadUpToDate);
-        console.log("   ## Looking for initial load date of " + loadToDate + ".  Currently at " + earliestDate + ".  Next offset date=" + this.outlineNextOffsetDate);
-        if (earliestDate > loadToDate) {
-          this.fetchResultsOutline(this.outlineNextOffsetDate);
+  private async fetchResultsOutline(offsetDate: Date) {
+    console.log('  FETCH OUTLINE at date=' + offsetDate);
+    return new Promise<boolean>((resolve, reject) => {
+      this.photoService.getSearchDateOutline(this.search, offsetDate).subscribe(async (results) => {
+        this.parseOutlineResults(results);
+        this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
+        if (this.initialLoadUpToDate) {
+          let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
+          let loadToDate = new Date(this.initialLoadUpToDate);
+          console.log('   ## Looking for initial load date of ' + loadToDate + '.  Currently at ' + earliestDate + '.  Next offset date=' + this.outlineNextOffsetDate);
+          if (earliestDate > loadToDate) {
+            await this.fetchResultsOutline(this.outlineNextOffsetDate);
+          } else {
+            resolve(true);
+          }
+        } else {
+          resolve(true);
         }
-      }
+      });
     });
   }
 

@@ -1,23 +1,24 @@
-import {IImageVersion} from "../services/helper/i-image-version";
-import {IPhoto} from "../services/helper/i-photo";
-import {JsonUtils} from "./json-utils";
+import {IImageVersion} from '../services/helper/i-image-version';
+import {IPhoto} from '../services/helper/i-photo';
+import {JsonUtils} from './json-utils';
 
 export class Photo {
   id: number;
-  title:string;
-  description:string;
-  time_id:number;
-  time:Date;
-  taken_in_tz:number;
-  location_latitude:number;
-  location_longitude:number;
+  title: string;
+  description: string;
+  time_id: number;
+  time: Date;
+  taken_in_tz: number;
+  location_latitude: number;
+  location_longitude: number;
   location_name:string;
   source_id:number;
   source_name:string;
   metadata:any;
   tags:Array<number>;
   feature_threshold:number;
-  image_versions:{[key:string]:IImageVersion}
+  image_versions: { [key: string]: IImageVersion };
+  lastRefreshed: Date;
 
   constructor() {}
 
@@ -38,6 +39,7 @@ export class Photo {
     photo.tags = i.tags || [];
     photo.feature_threshold = i.feature_threshold;
     photo.image_versions = i.image_versions;
+    photo.lastRefreshed = new Date();
     return photo;
   }
 }

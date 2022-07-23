@@ -4,7 +4,10 @@ import {PhotoService} from '../../services/photo.service';
 import {SearchQuery} from '../../services/helper/search-query';
 import {PhotoResultSetService} from '../../services/photo-result-set.service';
 import {Photo} from '../../helper/photo';
-import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '@fortawesome/pro-solid-svg-icons';
+import {faChevronCircleLeft, faChevronCircleRight, faEdit, faTimes} from '@fortawesome/pro-solid-svg-icons';
+import {UserService} from '../../services/user.service';
+import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'individual-photo',
@@ -16,6 +19,9 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '
       </div>
       <div class="zoom-toggle">
         <photo-zoom-control [zoomLevel]="zoomLevel" (updatedZoomLevel)="onZoomLevelUpdate($event)"></photo-zoom-control>
+      </div>
+      <div class="edit-details" (click)="openEdit($event)" [matTooltip]="'Edit details'" tabindex="0" *ngIf="canEdit">
+        <fa-icon [icon]="faEdit"></fa-icon>
       </div>
       <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)" [matTooltip]="'Previous photo'"
            [matTooltipPosition]="'right'">
@@ -121,6 +127,32 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '
       background-color: rgba(150, 150, 150, 1.0);
     }
 
+    .edit-details {
+      position: fixed;
+      top: 10px;
+      right: 100px;
+      width: 30px;
+      height: 30px;
+      color: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      padding-top: 5px;
+      text-align: center;
+      font-weight: bold;
+      font-family: "Arial", sans-serif;
+      font-size: 18px;
+      background-color: rgba(150, 150, 150, 0.2);
+      transition-property: background-color, color;
+      transition-duration: 250ms;
+      cursor: pointer;
+      z-index: 20;
+      user-select: none;
+    }
+
+    .edit-details:hover {
+      color: rgba(0, 0, 0, 1);
+      background-color: rgba(150, 150, 150, 1.0);
+    }
+
     .navigation-button {
       position: fixed;
       top: 60px;
@@ -213,16 +245,17 @@ import {faChevronCircleLeft, faChevronCircleRight, faSearchPlus, faTimes} from '
   `],
 })
 export class IndividualPhotoComponent {
+  faTimes = faTimes;
+  faChevronCircleLeft = faChevronCircleLeft;
+  faChevronCircleRight = faChevronCircleRight;
+  faEdit = faEdit;
+
   params: any;
   queryParams: any;
   photoId: number;
   photo: Photo;
   zoomLevel = 1.0;
   aspectRatio = 1.0;
-  faSearchPlus = faSearchPlus;
-  faTimes = faTimes;
-  faChevronCircleLeft = faChevronCircleLeft;
-  faChevronCircleRight = faChevronCircleRight;
   isPanning = false;
   isPinching = false;
   panningOffsetX = 0;
@@ -236,6 +269,8 @@ export class IndividualPhotoComponent {
   lastPinchEvent = null;
 
   userName = null;
+  canEdit = false;
+  editOpen = false;
 
   @ViewChild('imgContainer') imgContainer: ElementRef<HTMLDivElement>;
   @ViewChild('imgHost') imgHost: ElementRef<HTMLImageElement>;
@@ -245,7 +280,9 @@ export class IndividualPhotoComponent {
     private router: Router,
     private photoService: PhotoService,
     private resultSetService: PhotoResultSetService,
+    private userService: UserService,
     private elRef: ElementRef,
+    private dialog: MatDialog,
   ) {
   }
 
@@ -262,19 +299,16 @@ export class IndividualPhotoComponent {
       this.params = params;
       if (params.photoId) {
         this.userName = params['userName'];
-        console.log("  IndividualPhoto: Got PhotoID as " + params["photoId"]);
-        this.photoId = parseInt(params["photoId"]);
-        this.resultSetService.getPhotoForId(this.userName, this.photoId).then((photo) => {
-          this.photo = photo;
-          if (photo) {
-            this.aspectRatio = photo.image_versions['screenHd']['height'] ? photo.image_versions['screenHd']['width'] * 1.0 / photo.image_versions['screenHd']['height'] : 1.0;
-          } else {
-            console.error("  IndividualPhoto: Photo not found for ID!", this.photoId);
-          }
-        });
+        console.log('  IndividualPhoto: Got PhotoID as ' + params['photoId']);
+        this.photoId = parseInt(params['photoId']);
+        this.reloadPhotoDetails();
       } else {
-        console.error("  IndividualPhoto: No photoId found!", params)
+        console.error('  IndividualPhoto: No photoId found!', params);
       }
+    });
+
+    this.userService.getCurrentUser$().subscribe((currentUser) => {
+      this.canEdit = this.userService.hasAccessToUser(currentUser, this.userName);
     });
   }
 
@@ -287,7 +321,7 @@ export class IndividualPhotoComponent {
   }
 
   keyFuturePhoto(evt) {
-    if (this.zoomLevel === 1.0) {
+    if (this.zoomLevel === 1.0 && !this.editOpen) {
       this.futurePhoto(evt);
     }
   }
@@ -306,7 +340,7 @@ export class IndividualPhotoComponent {
   }
 
   keyPastPhoto(evt) {
-    if (this.zoomLevel === 1.0) {
+    if (this.zoomLevel === 1.0 && !this.editOpen) {
       this.pastPhoto(evt);
     }
   }
@@ -325,6 +359,9 @@ export class IndividualPhotoComponent {
   }
 
   handleEscape(evt) {
+    if (this.editOpen) {
+      return;
+    }
     if (this.zoomLevel === 1.0) {
       //back to results
       this.returnToSearch(evt);
@@ -343,6 +380,45 @@ export class IndividualPhotoComponent {
       this.panningEl.scrollLeft = 0;
       this.panningEl = null;
     }
+  }
+
+  openEdit(evt) {
+    evt.preventDefault();
+    if (this.canEdit) {
+      console.log('Got edit photo click - opening dialog');
+      this.editOpen = true;
+      const dialogRef = this.dialog.open(BulkPhotoEditDialogComponent, {
+        width: '450px',
+        data: {
+          forUserName: this.userName,
+          photoIds: [this.photo.time_id]
+        },
+      });
+      dialogRef.afterClosed().subscribe(async result => {
+        this.editOpen = false;
+        console.log('IndividualPhoto: Edit Photo dialog was closed', result);
+        if (result && result.disposition === 'updated') {
+          let query = new SearchQuery(this.queryParams);
+          await this.resultSetService.updateSearch(query, true);
+          setTimeout(() => this.reloadPhotoDetails(), 10);
+          console.log('IndividualPhoto:   Emitting update for ' + this.photo.time_id);
+        }
+      });
+
+    }
+  }
+
+  async reloadPhotoDetails() {
+    return this.resultSetService.getPhotoForId(this.userName, this.photoId).then((photo) => {
+      this.photo = photo;
+      console.log('IndvPhoto: reloaded photo details', this.photo);
+      if (photo) {
+        this.aspectRatio = photo.image_versions['screenHd']['height'] ? photo.image_versions['screenHd']['width'] * 1.0 / photo.image_versions['screenHd']['height'] : 1.0;
+      } else {
+        console.error('  IndividualPhoto: Photo not found for ID!', this.photoId);
+      }
+    });
+
   }
 
   @HostListener('wheel', ['$event']) onMouseWheel(event: WheelEvent) {
@@ -565,6 +641,9 @@ export class IndividualPhotoComponent {
   }
 
   handleZoom(evt) {
+    if (this.editOpen) {
+      return;
+    }
     let inc = 0.1;
     if (this.zoomLevel > 5) {
       inc = 0.4;
@@ -575,6 +654,9 @@ export class IndividualPhotoComponent {
   }
 
   handleUnzoom(evt) {
+    if (this.editOpen) {
+      return;
+    }
     let inc = 0.1;
     if (this.zoomLevel > 5) {
       inc = 0.4;
