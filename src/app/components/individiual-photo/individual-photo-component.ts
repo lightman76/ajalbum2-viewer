@@ -287,11 +287,22 @@ export class IndividualPhotoComponent {
   }
 
   ngOnInit() {
+    let query = null;
+
+    //have to wait for query params AND photo id
+    let fetchResultsWhenReady = async () => {
+      console.log('Checking fetchResultsWhenReady', this.photoId, query);
+      if (this.photoId && query) {
+        await this.resultSetService.updateSearch(query);
+        await this.reloadPhotoDetails();
+      }
+    };
+
     this.route.queryParams.subscribe(queryParams => {
       //TODO: get linked search params from here
       this.queryParams = queryParams;
-      let query = new SearchQuery(queryParams);
-      this.resultSetService.updateSearch(query);
+      query = new SearchQuery(queryParams);
+      fetchResultsWhenReady();
     });
 
     this.route.params.subscribe(params => {
@@ -301,7 +312,7 @@ export class IndividualPhotoComponent {
         this.userName = params['userName'];
         console.log('  IndividualPhoto: Got PhotoID as ' + params['photoId']);
         this.photoId = parseInt(params['photoId']);
-        this.reloadPhotoDetails();
+        fetchResultsWhenReady();
       } else {
         console.error('  IndividualPhoto: No photoId found!', params);
       }

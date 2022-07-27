@@ -116,10 +116,10 @@ export class PhotoResultSetService {
                 if (photo) {
                   resolve(photo);
                 } else {
-                  reject("Photo not found");
+                  reject('Photo not found');
                 }
               }
-            }, 100);
+            }, 300);
           }
         });
         return null;
@@ -309,7 +309,7 @@ export class PhotoResultSetService {
   }
 
   private fetchStartingAtDay(offsetDate: Date) {
-    console.log('  FETCH at date=' + offsetDate);
+    console.log('  FETCH at date=' + offsetDate, this.search);
     this.photoService.getSearchResults(this.search, offsetDate).subscribe((results) => {
       this.parseResults(results);
     });
