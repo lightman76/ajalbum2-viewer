@@ -40,6 +40,7 @@ import {PhotoSelectionToggle} from './components/photo-selection-toggle/photo-se
 import {EditPhotoButtonComponent} from './components/edit-photo-button/edit-photo-button.component';
 import {BulkPhotoEditDialogComponent} from './components/bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {CreateTagDialogComponent} from './components/create-tag-dialog/create-tag-dialog.component';
+import {APP_BASE_HREF} from '@angular/common';
 
 
 @Injectable()
@@ -98,6 +99,10 @@ export class MyHammerConfig extends HammerGestureConfig {
     {
       provide: HAMMER_GESTURE_CONFIG,
       useClass: MyHammerConfig
+    },
+    {
+      provide: APP_BASE_HREF,
+      useValue: '/'
     }
   ],
   bootstrap: [AppComponent]

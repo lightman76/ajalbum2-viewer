@@ -1,0 +1,21 @@
+# Dockerfile.nginx
+
+FROM nginx:latest AS ajalbum-nginx-server
+COPY nginx-reverse-proxy.conf /etc/nginx/conf.d/reverse-proxy.conf
+
+ENV INSTALL_PATH /opt/static-app
+ENV VIEWER_INSTALL_PATH /opt/static-app/ajalbum-viewer
+ENV PHOTO_STORAGE_PATH /opt/photo-storage
+RUN mkdir -p $VIEWER_INSTALL_PATH
+#RUN mkdir -p $PHOTO_STORAGE_PATH
+
+WORKDIR $VIEWER_INSTALL_PATH
+COPY dist/ajalbum2-viewer .
+
+EXPOSE 8020
+STOPSIGNAL SIGTERM
+CMD ["echo","#### PATH CHECK ######"]
+CMD ["/bin/ls","/opt/photo-storage"]
+
+CMD ["nginx", "-g", "daemon off;"]
+
