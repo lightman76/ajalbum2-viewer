@@ -1,14 +1,15 @@
-import {PhotoService} from "./photo.service";
-import {PhotosForDay} from "../helper/photos-for-day";
-import {SearchQuery} from "./helper/search-query";
-import {ISearchResultsGroup} from "./helper/i-search-results-group";
-import {Injectable} from "@angular/core";
-import {Photo} from "../helper/photo";
-import {BehaviorSubject, Subscription} from "rxjs";
-import {ISearchDateOutlineResult} from "./helper/i-search-date-outline-result";
-import {RectangleDimensions} from "./helper/rectangle-dimensions";
-import {distinct} from "rxjs/operators";
-import * as _ from "lodash";
+import {PhotoService} from './photo.service';
+import {PhotosForDay} from '../helper/photos-for-day';
+import {SearchQuery} from './helper/search-query';
+import {ISearchResultsGroup} from './helper/i-search-results-group';
+import {Injectable} from '@angular/core';
+import {Photo} from '../helper/photo';
+import {BehaviorSubject, Subscription} from 'rxjs';
+import {ISearchDateOutlineResult} from './helper/i-search-date-outline-result';
+import {RectangleDimensions} from './helper/rectangle-dimensions';
+import {distinct} from 'rxjs/operators';
+import * as _ from 'lodash';
+import {SelectionService} from './selection.service';
 
 @Injectable()
 export class PhotoResultSetService {
@@ -30,11 +31,12 @@ export class PhotoResultSetService {
 
   constructor(
     private photoService: PhotoService,
+    private selectionService: SelectionService,
   ) {
     this.photosByDayList = [];
     this.photosByDayHash = {};
     this.photosByDay$ = new BehaviorSubject<Array<PhotosForDay>>(this.photosByDayList);
-    this.viewerWidth$ = new BehaviorSubject<number>(window.innerWidth - 20);
+    this.viewerWidth$ = new BehaviorSubject<number>(window.innerWidth);
     this.viewerHeight$ = new BehaviorSubject<number>(window.innerHeight);
     this.thumbnailDims$ = new BehaviorSubject<RectangleDimensions>(new RectangleDimensions(270, 270));
     this.scrollOffset$ = new BehaviorSubject<number>(0);
@@ -48,25 +50,27 @@ export class PhotoResultSetService {
     });
     window.addEventListener("resize", () => {
       this.recomputeThumbSize();
-      this.viewerWidth$.next(window.innerWidth - 20);
+      this.viewerWidth$.next(window.innerWidth);
     });
     this.recomputeThumbSize();
   }
 
   recomputeThumbSize() {
     if (window.innerWidth < 810) {
-      let size = (window.innerWidth - 20) / 3
+      const size = Math.floor((window.innerWidth) / 3.0);
       this.thumbnailDims$.next(new RectangleDimensions(size, size));
     } else {
-      this.thumbnailDims$.next(new RectangleDimensions(270, 270));
+      this.thumbnailDims$.next(new RectangleDimensions(260, 260));
     }
   }
 
   //when search updated, clear prior results
-  updateSearch(inSearch: SearchQuery) {
+  async updateSearch(inSearch: SearchQuery, forcedRefresh: boolean = false) {
     //console.info("PhotoResultSet: Updating current query: ",inSearch, this.search, " Are same? "+(this.search && this.search.equals(inSearch)))
-    if (this.search && this.search.equals(inSearch)) return;
-    //console.info("  PhotoResultSet: It's a new query - actually run: ",inSearch)
+    if (!forcedRefresh && this.search && this.search.equals(inSearch)) {
+      return;
+    }
+    console.info('  PhotoResultSet: It\'s a new query/forced refresh - actually run: ', forcedRefresh, inSearch, this.search);
     this.searchSpecificSubscriptions.forEach((sub) => {
       try {
         sub.unsubscribe();
@@ -76,24 +80,26 @@ export class PhotoResultSetService {
     this.searchSpecificSubscriptions = [];
     this.photosByDayList = [];
     this.photosByDayHash = {};
+    this.photosByDay$.next(this.photosByDayList);
+    this.selectionService.clearSelections();
     //TODO: probably need to push out on the subjects...
     this.search = inSearch.clone();
     this.initialLoadUpToDate = this.search.offsetDate;
-    this.initiateSearch();
+    await this.initiateSearch();
   }
 
   getPhotosByDay$() {
     return this.photosByDay$;
   }
 
-  getPhotoForId(photoTimeIdNum: number): Promise<Photo> {
+  async getPhotoForId(userName: string, photoTimeIdNum: number): Promise<Photo> {
     let photoTimeId = new Date(photoTimeIdNum);
-    console.log("getPhotoForId: Preparing to getphoto " + photoTimeIdNum + " date=" + photoTimeId);
+    console.log('getPhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId + ' for user ' + userName);
     return new Promise<Photo>((resolve, reject) => {
 
       let day = PhotosForDay.dateToDayStr(photoTimeId);
       let pfd = this.photosByDayHash[day];
-      console.log("  getPhotoForId: pfd loaded=" + (pfd && pfd.photoResultsLoaded))
+      console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
       if (pfd && pfd.photoResultsLoaded) {
         resolve(pfd.getPhotoForTimeId(photoTimeIdNum));
       } else {
@@ -110,10 +116,10 @@ export class PhotoResultSetService {
                 if (photo) {
                   resolve(photo);
                 } else {
-                  reject("Photo not found");
+                  reject('Photo not found');
                 }
               }
-            }, 100);
+            }, 300);
           }
         });
         return null;
@@ -247,11 +253,11 @@ export class PhotoResultSetService {
 
   recomputeDateHeightOffsets() {
     let bottomOfLast = 0;
-    console.log("  Recompute height offsets");
+    //console.log("  Recompute height offsets");
     this.photosByDayList.forEach((pfd, idx) => {
       pfd.offsetFromTop = bottomOfLast;
       bottomOfLast = pfd.offsetFromTop + pfd.getDisplayHeight$().getValue();
-      console.log("    " + pfd.forDate.getFullYear() + (pfd.forDate.getMonth() + 1) + pfd.forDate.getDate() + " " + pfd.offsetFromTop + " height=" + pfd.getDisplayHeight$().getValue() + " bottomOfLast=" + bottomOfLast)
+      //console.log("    " + pfd.forDate.getFullYear() + (pfd.forDate.getMonth() + 1) + pfd.forDate.getDate() + " " + pfd.offsetFromTop + " height=" + pfd.getDisplayHeight$().getValue() + " bottomOfLast=" + bottomOfLast)
     });
   }
 
@@ -297,31 +303,37 @@ export class PhotoResultSetService {
     return this.scrollOffset$;
   }
 
-  private initiateSearch() {
-    this.fetchResultsOutline(null);
+  private async initiateSearch() {
+    await this.fetchResultsOutline(null);
 
   }
 
   private fetchStartingAtDay(offsetDate: Date) {
-    console.log("  FETCH at date=" + offsetDate);
+    console.log('  FETCH at date=' + offsetDate, this.search);
     this.photoService.getSearchResults(this.search, offsetDate).subscribe((results) => {
       this.parseResults(results);
     });
   }
 
-  private fetchResultsOutline(offsetDate: Date) {
-    console.log("  FETCH OUTLINE at date=" + offsetDate);
-    this.photoService.getSearchDateOutline(this.search, offsetDate).subscribe((results) => {
-      this.parseOutlineResults(results);
-      this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
-      if (this.initialLoadUpToDate) {
-        let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
-        let loadToDate = new Date(this.initialLoadUpToDate)
-        console.log("   ## Looking for initial load date of " + loadToDate + ".  Currently at " + earliestDate + ".  Next offset date=" + this.outlineNextOffsetDate);
-        if (earliestDate > loadToDate) {
-          this.fetchResultsOutline(this.outlineNextOffsetDate);
+  private async fetchResultsOutline(offsetDate: Date) {
+    console.log('  FETCH OUTLINE at date=' + offsetDate);
+    return new Promise<boolean>((resolve, reject) => {
+      this.photoService.getSearchDateOutline(this.search, offsetDate).subscribe(async (results) => {
+        this.parseOutlineResults(results);
+        this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
+        if (this.initialLoadUpToDate) {
+          let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
+          let loadToDate = new Date(this.initialLoadUpToDate);
+          console.log('   ## Looking for initial load date of ' + loadToDate + '.  Currently at ' + earliestDate + '.  Next offset date=' + this.outlineNextOffsetDate);
+          if (earliestDate > loadToDate) {
+            await this.fetchResultsOutline(this.outlineNextOffsetDate);
+          } else {
+            resolve(true);
+          }
+        } else {
+          resolve(true);
         }
-      }
+      });
     });
   }
 
@@ -350,7 +362,7 @@ export class PhotoResultSetService {
   private getPhotosForDay(date: Date, processedDates: any): PhotosForDay {
     let day = PhotosForDay.dateToDayStr(date);
     let pfd = this.photosByDayHash[day];
-    console.log("    Looking up Photos For Day " + day + ".  Found existing? " + (pfd != null));
+    //console.log("    Looking up Photos For Day " + day + ".  Found existing? " + (pfd != null));
     if (pfd == null) {
       pfd = new PhotosForDay(date, this);
       let oldList = this.photosByDayList;

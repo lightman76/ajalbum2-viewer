@@ -20,3 +20,24 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
   overflow: auto;
 }
+
+.mat-autocomplete-panel {
+  max-height: min(450px, 80vh) !important;
+}
+
+bulk-photo-edit-dialog {
+  mat-form-field, mat-slider {
+    width: 100%;
+  }
+}
+
+create-tag-dialog {
+  mat-form-field, mat-radio-group, mat-radio-button {
+    width: 100%;
+  }
+}
+
+.mat-form-field-infix {
+  width: 100% !important;
+}
+

@@ -1,0 +1,6 @@
+.git
+.dockerignore
+.env
+tmp/
+node_modules
+.angular

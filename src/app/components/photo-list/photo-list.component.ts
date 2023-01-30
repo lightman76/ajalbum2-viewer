@@ -1,15 +1,28 @@
-import {Component, ElementRef} from "@angular/core";
+import {Component, ElementRef} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {PhotoService} from "../../services/photo.service";
-import {SearchQuery} from "../../services/helper/search-query";
-import {PhotoResultSetService} from "../../services/photo-result-set.service";
-import {PhotosForDay} from "../../helper/photos-for-day";
+import {PhotoService} from '../../services/photo.service';
+import {SearchQuery} from '../../services/helper/search-query';
+import {PhotoResultSetService} from '../../services/photo-result-set.service';
+import {PhotosForDay} from '../../helper/photos-for-day';
+import {distinct} from 'rxjs/operators';
 
 @Component({
   selector: 'photo-list',
   template: `
     <div class="control-bar">
-      <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
+      <div class="control-bar-search">
+        <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
+      </div>
+      <div class="control-bar-login">
+        <edit-photo-button
+          [usageContext]="'multi'"
+          [viewingUser]="currentSearch.userName"
+          (photosUpdated)="onPhotosEdited($event)"
+        ></edit-photo-button>
+        <photo-selection-toggle></photo-selection-toggle>
+        <login-indicator></login-indicator>
+      </div>
+
     </div>
     <div class="results" (scroll)="handleScroll($event)">
       <photos-for-day [pfd]="pfd" [focusPhotoId]="focusPhotoId" *ngFor="let pfd of photosByDate"
@@ -29,13 +42,23 @@ import {PhotosForDay} from "../../helper/photos-for-day";
     }
 
     .control-bar {
-      height: 45px;
-      width: 100vw;
+      height: 65px;
+      display: flex;
+    }
+
+    .control-bar-search {
+      height: 65px;
+      flex: 1 1 100%;
+    }
+
+    .control-bar-login {
+      height: 100px;
+      flex: 1 0 auto;
     }
 
     .results {
       width: 100%;
-      height: calc(100% - 45px);
+      height: calc(100% - 65px);
       overflow: auto;
     }
   `],
@@ -51,6 +74,7 @@ export class PhotoListComponent {
   focusPhotoId = null;
   currentSearch: SearchQuery;
   private fragment;
+  private userName;
 
   constructor(
     private route: ActivatedRoute,
@@ -66,11 +90,11 @@ export class PhotoListComponent {
       this.fragment = fragment;
       if (this.fragment) {
         if (this.currentSearch) {
-          let photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
+          const photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
           if (photoIdRegEx) {
-            let photoId = photoIdRegEx[1];
+            const photoId = photoIdRegEx[1];
             this.focusPhotoId = parseInt(photoId);
-            let date = new Date(parseInt(photoId));
+            const date = new Date(parseInt(photoId));
             this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
             this.resultSetService.updateSearch(this.currentSearch);
           }
@@ -79,34 +103,48 @@ export class PhotoListComponent {
         this.focusPhotoId = null;
       }
     });
-    this.route.queryParams.subscribe(params => {
-      //TODO: get linked search params from here
+    this.route.params.subscribe(params => {
+      //console.log("PATH PARAMS: ", params);
+      this.userName = params.userName;
+    });
+    this.route.queryParams.pipe(distinct()).subscribe(params => {
+      //console.log("QUERY PARAMS: ", params);
       this.params = params;
       this.resultSetService.getPhotosByDay$().subscribe((photosByDate) => {
         this.photosByDate = photosByDate;
       });
-      this.currentSearch = new SearchQuery(params);
+      let q = new SearchQuery(params);
+      if (q.equals(this.currentSearch)) {
+        return;
+      }
+      this.currentSearch = q;
+      this.currentSearch.userName = this.userName;
       if (this.fragment) {
-        let photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
+        const photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
         if (photoIdRegEx) {
-          let photoId = photoIdRegEx[1];
+          const photoId = photoIdRegEx[1];
           this.focusPhotoId = parseInt(photoId);
-          let date = new Date(parseInt(photoId));
+          const date = new Date(parseInt(photoId));
           this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
         }
       }
+      console.log('  PhotoList: query params updated: ', this.currentSearch);
       this.resultSetService.updateSearch(this.currentSearch);
     });
   }
 
-  onSearchUpdated(query) {
+  onSearchUpdated(query, forcedRefresh: boolean = false) {
+    if (!forcedRefresh && query.equals(this.currentSearch)) {
+      return;
+    }
+    console.log('  PhotoList: Search Updated: forcedRefresh=' + forcedRefresh, query);
     this.currentSearch = query;
     const queryParams: Params = this.currentSearch.toQueryParamHash();
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: queryParams, //note, can use queryParamsHandling: "merge" to merge with existing rather than replace
     });
-    this.resultSetService.updateSearch(query);
+    this.resultSetService.updateSearch(query, forcedRefresh);
     if (this.focusPhotoId === null) {
       //Need to scroll results back to top
       try {
@@ -114,6 +152,12 @@ export class PhotoListComponent {
       } catch (e) {
       }
     }
+  }
+
+  onPhotosEdited(editedIds) {
+    console.log('onPhotosEdited got ', editedIds);
+    this.focusPhotoId = editedIds ? editedIds[0] : null;
+    this.onSearchUpdated(this.currentSearch, true);
   }
 
   handleScroll(evt) {

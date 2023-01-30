@@ -9,6 +9,10 @@
     },
     "array-type": false,
     "arrow-return-shorthand": true,
+    "comment-format": [
+      false,
+      "check-space"
+    ],
     "curly": true,
     "deprecation": {
       "severity": "warning"
@@ -65,7 +69,7 @@
     ],
     "no-empty": false,
     "no-inferrable-types": [
-      true,
+      false,
       "ignore-params"
     ],
     "no-non-null-assertion": true,
@@ -75,10 +79,6 @@
     "object-literal-key-quotes": [
       true,
       "as-needed"
-    ],
-    "quotemark": [
-      true,
-      "single"
     ],
     "semicolon": {
       "options": [
