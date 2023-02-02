@@ -102,7 +102,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     },
     {
       provide: APP_BASE_HREF,
-      useValue: '/'
+      useValue: '/photos/'
     }
   ],
   bootstrap: [AppComponent]

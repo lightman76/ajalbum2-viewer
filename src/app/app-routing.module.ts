@@ -8,6 +8,7 @@ const routes: Routes = [
   {path: "", component: DefaultUserComponent, pathMatch: "full"},
   {path: ":userName/photo/:photoId", component: IndividualPhotoComponent},
   {path: ":userName/list", component: PhotoListComponent},
+
   //{path: "**", component: DefaultUserComponent},
 ];
 
