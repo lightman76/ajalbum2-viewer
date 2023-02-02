@@ -1,2 +1,2 @@
 #!/bin/bash
-ng serve --disable-host-check --no-live-reload
+ng serve --disable-host-check --no-live-reload 
