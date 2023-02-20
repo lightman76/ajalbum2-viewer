@@ -1,12 +1,12 @@
 import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {UntypedFormBuilder, UntypedFormGroup} from '@angular/forms';
 import {TagService} from '../../services/tag.service';
 import {AJHelpers} from '../../services/helper/ajhelpers';
-import {MatRadioChange} from '@angular/material/radio';
+import {MatLegacyRadioChange as MatRadioChange} from '@angular/material/legacy-radio';
 
 @Component({
   selector: 'create-tag-dialog',

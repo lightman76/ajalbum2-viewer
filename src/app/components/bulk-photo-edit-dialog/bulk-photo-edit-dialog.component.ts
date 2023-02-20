@@ -1,8 +1,12 @@
 import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import {
+  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialog as MatDialog,
+  MatLegacyDialogRef as MatDialogRef
+} from '@angular/material/legacy-dialog';
 import {Photo} from '../../helper/photo';
 import {ITag} from '../../services/helper/i-tag';
 import {PhotoService, PhotoUpdateFields} from '../../services/photo.service';
@@ -15,8 +19,8 @@ import {faCheckSquare, faMinusSquare, faTimesSquare} from '@fortawesome/pro-regu
 import {AJHelpers} from '../../services/helper/ajhelpers';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {map, startWith} from 'rxjs/operators';
-import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {MatChipInputEvent} from '@angular/material/chips';
+import {MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent} from '@angular/material/legacy-autocomplete';
+import {MatLegacyChipInputEvent as MatChipInputEvent} from '@angular/material/legacy-chips';
 import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.component';
 
 @Component({

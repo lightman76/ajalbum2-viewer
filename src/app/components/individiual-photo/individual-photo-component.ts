@@ -7,7 +7,7 @@ import {Photo} from '../../helper/photo';
 import {faChevronCircleLeft, faChevronCircleRight, faEdit, faTimes} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 
 @Component({
   selector: 'individual-photo',
