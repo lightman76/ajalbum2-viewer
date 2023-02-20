@@ -28,13 +28,37 @@
               "src/assets"
             ],
             "styles": [
-              "src/imports.scss",
               "src/styles.scss"
             ],
+            "optimization": {
+              "scripts": false,
+              "styles": {
+                "minify": false,
+                "inlineCritical": false
+              }
+            },
             "baseHref": "/photos/",
             "scripts": []
           },
           "configurations": {
+            "development": {
+              "optimization": {
+                "scripts": false,
+                "styles": {
+                  "minify": false,
+                  "inlineCritical": false
+                }
+              }
+            },
+            "dev": {
+              "optimization": {
+                "scripts": false,
+                "styles": {
+                  "minify": false,
+                  "inlineCritical": false
+                }
+              }
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -42,7 +66,13 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
@@ -93,7 +123,6 @@
               "src/assets"
             ],
             "styles": [
-              "src/imports.scss",
               "src/styles.scss"
             ],
             "scripts": []

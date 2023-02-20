@@ -2,9 +2,9 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {faEdit} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {SelectionService} from '../../services/selection.service';
 import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'edit-photo-button',

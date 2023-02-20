@@ -1,12 +1,6 @@
 import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
-import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
-import {
-  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-  MatLegacyDialog as MatDialog,
-  MatLegacyDialogRef as MatDialogRef
-} from '@angular/material/legacy-dialog';
 import {Photo} from '../../helper/photo';
 import {ITag} from '../../services/helper/i-tag';
 import {PhotoService, PhotoUpdateFields} from '../../services/photo.service';
@@ -20,8 +14,10 @@ import {AJHelpers} from '../../services/helper/ajhelpers';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {map, startWith} from 'rxjs/operators';
 import {MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent} from '@angular/material/legacy-autocomplete';
-import {MatLegacyChipInputEvent as MatChipInputEvent} from '@angular/material/legacy-chips';
 import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.component';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatChipInputEvent} from '@angular/material/chips';
 
 @Component({
   selector: 'bulk-photo-edit-dialog',
@@ -50,31 +46,27 @@ import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.c
         <div class="photo-priority">
           <label id="photo-priority" class="photo-priority-label">Priority</label>
         </div>
-        <mat-slider
-          class="example-margin"
-          [max]="10"
-          [min]="0"
-          [step]="1"
-          [thumbLabel]="true"
-          [tickInterval]="'auto'"
-          [value]="priority"
-          (change)="onPriorityChange($event)"
-          (input)="onPriorityChange($event)"
-          aria-labelledby="photo-priority">
+        <mat-slider step="1" max="10" min="0" discrete showTickMarks>
+          <input
+            matSliderThumb
+            class="example-margin"
+            [value]="priority"
+            (valueChange)="onPriorityChange($event)"
+            aria-labelledby="photo-priority">
         </mat-slider>
 
 
         <div class="tag-edit-area" *ngIf="singlePhotoEdit">
           <mat-form-field>
             <mat-label>Tags:</mat-label>
-            <mat-chip-list #tagChipList aria-label="Search tags">
-              <mat-chip *ngFor="let tagDetail of addTags"
-                        (removed)="removeTag($event, tagDetail)">
+            <mat-chip-listbox #tagChipList aria-label="Search tags">
+              <mat-chip-option *ngFor="let tagDetail of addTags"
+                               (removed)="removeTag($event, tagDetail)">
                 <tag [tagSubject]="tagDetail.tag$"
                      [tagActions]="[tagActionRemoveFromAll]"
                      (tagActionHandler)="onTagAction($event, addTags, tagDetail)"
                 ></tag>
-              </mat-chip>
+              </mat-chip-option>
               <input
                 placeholder="Search tags"
                 #searchTagInput
@@ -83,7 +75,7 @@ import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.c
                 [matChipInputFor]="tagChipList"
                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                 (matChipInputTokenEnd)="confirmAddTag($event)">
-            </mat-chip-list>
+            </mat-chip-listbox>
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
               <mat-option *ngFor="let tagSearchTerm of filterTags | async" [value]="tagSearchTerm">
                 <fa-icon [icon]="getIconForType(tagSearchTerm)"></fa-icon>&nbsp;
@@ -98,14 +90,14 @@ import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.c
           <div class="tag-edit-area__title">Tags:</div>
           <mat-form-field>
             <mat-label>Add to all:</mat-label>
-            <mat-chip-list #tagChipList aria-label="Search tags">
-              <mat-chip *ngFor="let tagDetail of addTags"
-                        (removed)="removeTag($event, tagDetail)">
+            <mat-chip-listbox #tagChipList aria-label="Search tags">
+              <mat-chip-option *ngFor="let tagDetail of addTags"
+                               (removed)="removeTag($event, tagDetail)">
                 <tag [tagSubject]="tagDetail.tag$"
                      [tagActions]="tagDetail.originallyOnSome ? [tagActionLeaveUnchanged,tagActionRemoveFromAll] : [tagActionRemoveFromAll]"
                      (tagActionHandler)="onTagAction($event, addTags, tagDetail)"
                 ></tag>
-              </mat-chip>
+              </mat-chip-option>
               <input
                 placeholder="Search tags"
                 #searchTagInput
@@ -114,7 +106,7 @@ import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.c
                 [matChipInputFor]="tagChipList"
                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                 (matChipInputTokenEnd)="confirmAddTag($event)">
-            </mat-chip-list>
+            </mat-chip-listbox>
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
               <mat-option *ngFor="let tagSearchTerm of filterTags | async" [value]="tagSearchTerm">
                 <fa-icon [icon]="getIconForType(tagSearchTerm)"></fa-icon>&nbsp;

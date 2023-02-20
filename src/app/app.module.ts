@@ -16,21 +16,12 @@ import {IndividualPhotoComponent} from './components/individiual-photo/individua
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import {IndividualPhotoInfoComponent} from './components/individiual-photo/individual-photo-info.component';
 import {SearchComponent} from './components/search/search.component';
-import {MatLegacyAutocompleteModule as MatAutocompleteModule} from '@angular/material/legacy-autocomplete';
-import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
-import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {MatNativeDateModule} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatLegacySliderModule as MatSliderModule} from '@angular/material/legacy-slider';
 import {ReactiveFormsModule} from '@angular/forms';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
-import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
-import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {TagComponent} from './components/tag/tag-component';
 import {TagService} from './services/tag.service';
 import {DefaultUserComponent} from './components/default-user/default-user.component';
-import {MatLegacyChipsModule as MatChipsModule} from '@angular/material/legacy-chips';
 import {PhotoZoomControl} from './components/individiual-photo/zoom-control.component';
 import {LoginIndicatorComponent} from './components/login-indicator/login-indicator.component';
 import {UserService} from './services/user.service';
@@ -41,6 +32,15 @@ import {EditPhotoButtonComponent} from './components/edit-photo-button/edit-phot
 import {BulkPhotoEditDialogComponent} from './components/bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {CreateTagDialogComponent} from './components/create-tag-dialog/create-tag-dialog.component';
 import {APP_BASE_HREF} from '@angular/common';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatInputModule} from '@angular/material/input';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatButtonModule} from '@angular/material/button';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSliderModule} from '@angular/material/slider';
 
 
 @Injectable()

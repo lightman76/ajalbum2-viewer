@@ -19,15 +19,15 @@ import {AJHelpers} from '../../services/helper/ajhelpers';
       <form [formGroup]="searchForm" (ngSubmit)="runSearch($event)">
         <mat-form-field>
           <mat-label>Search</mat-label>
-          <mat-chip-list #tagChipList aria-label="Search tags">
-            <mat-chip *ngFor="let term of searchTerms"
-                      (removed)="removeSearchTerm(term)">
+          <mat-chip-listbox #tagChipList aria-label="Search tags">
+            <mat-chip-option *ngFor="let term of searchTerms"
+                             (removed)="removeSearchTerm(term)">
               <fa-icon [icon]="term.getIconForType()"></fa-icon>&nbsp;
               {{term.displayName}}
               <button matChipRemove>
                 <fa-icon [icon]="faTimes"></fa-icon>
               </button>
-            </mat-chip>
+            </mat-chip-option>
             <input
               placeholder="Search"
               #searchInput
@@ -44,7 +44,7 @@ import {AJHelpers} from '../../services/helper/ajhelpers';
                     *ngIf="searchTerms.length !== 0 || searchInput.value.length !== 0" (click)="clearForm($event)">
               <fa-icon [icon]="faTimes"></fa-icon>
             </button>
-          </mat-chip-list>
+          </mat-chip-listbox>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
             <div class="search-date-filters">
               <div class="search-date-filter search-date-filter-start">

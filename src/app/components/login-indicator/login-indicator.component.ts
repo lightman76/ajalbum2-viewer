@@ -3,7 +3,7 @@ import {faUser} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
 import {LoginDialogComponent} from '../login-dialog/login-dialog-component';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'login-indicator',
