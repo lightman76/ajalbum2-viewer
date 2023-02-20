@@ -3,7 +3,7 @@ import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup} from '@angular/forms';
 import {TagService} from '../../services/tag.service';
 import {AJHelpers} from '../../services/helper/ajhelpers';
 import {MatRadioChange} from '@angular/material/radio';
@@ -131,7 +131,7 @@ export class CreateTagDialogComponent {
   shortcutUrl: string = null;
   description: string = null;
 
-  form: FormGroup;
+  form: UntypedFormGroup;
   currentUser: UserInfo = null;
 
   @ViewChild('nameInput') nameInput: ElementRef<HTMLInputElement>;
@@ -149,7 +149,7 @@ export class CreateTagDialogComponent {
               private userService: UserService,
               private matSnackBar: MatSnackBar,
               private tagService: TagService,
-              private fb: FormBuilder,) {
+              private fb: UntypedFormBuilder,) {
   }
 
   ngOnInit() {

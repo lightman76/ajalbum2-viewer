@@ -1,6 +1,6 @@
 import {Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {FormBuilder, FormControl} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormControl} from '@angular/forms';
 import {faSearch, faTimes} from '@fortawesome/pro-solid-svg-icons';
 import {SearchQuery} from '../../services/helper/search-query';
 import {SearchTerm} from './search-term';
@@ -110,9 +110,9 @@ export class SearchComponent {
   @ViewChild('searchInput') searchInput: ElementRef<HTMLInputElement>;
 
 
-  constructor(private formBuilder: FormBuilder,
+  constructor(private formBuilder: UntypedFormBuilder,
               private tagService: TagService) {
-    this.searchForm = new FormControl();
+    this.searchForm = new UntypedFormControl();
     /*
         this.searchForm = this.formBuilder.group({
           searchTerms: [this.searchQuery ? this.searchQuery.searchText : ''],

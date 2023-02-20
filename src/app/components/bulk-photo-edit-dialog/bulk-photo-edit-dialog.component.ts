@@ -6,7 +6,7 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {Photo} from '../../helper/photo';
 import {ITag} from '../../services/helper/i-tag';
 import {PhotoService, PhotoUpdateFields} from '../../services/photo.service';
-import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {PhotoResultSetService} from '../../services/photo-result-set.service';
 import {TagService} from '../../services/tag.service';
 import {BehaviorSubject, Observable} from 'rxjs';
@@ -176,7 +176,7 @@ export class BulkPhotoEditDialogComponent {
   currentUser: UserInfo = null;
   forUserName: string = null;
 
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   photos: Array<Photo>;
   addTags: Array<BulkTagDetail>;
@@ -214,12 +214,12 @@ export class BulkPhotoEditDialogComponent {
               private matSnackBar: MatSnackBar,
               private tagService: TagService,
               private dialog: MatDialog,
-              private fb: FormBuilder,) {
+              private fb: UntypedFormBuilder,) {
     this.photos = [];
     this.addTags = [];
     this.someTags = [];
     this.removeTags = [];
-    this.searchTags = new FormControl();
+    this.searchTags = new UntypedFormControl();
     this.allTags = [];
     this.filterTags = this.searchTags.valueChanges.pipe(
       startWith(null),
