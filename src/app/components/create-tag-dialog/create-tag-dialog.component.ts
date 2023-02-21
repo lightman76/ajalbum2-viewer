@@ -4,9 +4,9 @@ import {UserInfo} from '../../services/helper/user-info';
 import {UntypedFormBuilder, UntypedFormGroup} from '@angular/forms';
 import {TagService} from '../../services/tag.service';
 import {AJHelpers} from '../../services/helper/ajhelpers';
-import {MatLegacyRadioChange as MatRadioChange} from '@angular/material/legacy-radio';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatRadioChange} from '@angular/material/radio';
 
 @Component({
   selector: 'create-tag-dialog',

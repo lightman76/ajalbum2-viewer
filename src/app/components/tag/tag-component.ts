@@ -1,8 +1,9 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ITag} from '../../services/helper/i-tag';
-import {faBook, faEnvelope, faLocation, faTag, faUser} from '@fortawesome/pro-solid-svg-icons';
+import {faTag} from '@fortawesome/pro-solid-svg-icons';
 import {IconDefinition} from '@fortawesome/pro-regular-svg-icons';
+import {AJHelpers} from '../../services/helper/ajhelpers';
 
 @Component({
   selector: 'tag',
@@ -70,17 +71,7 @@ export class TagComponent {
   processTagInfo() {
     let tag = this.tagSubject.getValue();
     if (tag && tag.tag_type) {
-      if (tag.tag_type === 'tag') {
-        this.tagIcon = faTag;
-      } else if (tag.tag_type === 'people') {
-        this.tagIcon = faUser;
-      } else if (tag.tag_type === 'location') {
-        this.tagIcon = faLocation;
-      } else if (tag.tag_type === 'event') {
-        this.tagIcon = faEnvelope;
-      } else if (tag.tag_type === 'album') {
-        this.tagIcon = faBook;
-      }
+      this.tagIcon = AJHelpers.getIconForTagType(tag.tag_type);
     }
   }
 

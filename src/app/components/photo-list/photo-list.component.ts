@@ -42,12 +42,12 @@ import {distinct} from 'rxjs/operators';
     }
 
     .control-bar {
-      height: 65px;
+      height: 79px;
       display: flex;
     }
 
     .control-bar-search {
-      height: 65px;
+      height: 79px;
       flex: 1 1 100%;
     }
 
@@ -58,7 +58,7 @@ import {distinct} from 'rxjs/operators';
 
     .results {
       width: 100%;
-      height: calc(100% - 65px);
+      height: calc(100% - 79px);
       overflow: auto;
     }
   `],

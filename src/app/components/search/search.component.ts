@@ -4,36 +4,37 @@ import {UntypedFormBuilder, UntypedFormControl} from '@angular/forms';
 import {faSearch, faTimes} from '@fortawesome/pro-solid-svg-icons';
 import {SearchQuery} from '../../services/helper/search-query';
 import {SearchTerm} from './search-term';
-import {MatLegacyChipInputEvent as MatChipInputEvent} from '@angular/material/legacy-chips';
-import {MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent} from '@angular/material/legacy-autocomplete';
 import {map, startWith} from 'rxjs/operators';
 import {ITag} from '../../services/helper/i-tag';
 import {Observable} from 'rxjs';
 import {TagService} from '../../services/tag.service';
 import {AJHelpers} from '../../services/helper/ajhelpers';
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatChipInputEvent} from '@angular/material/chips';
 
 @Component({
   selector: 'photo-search',
   template: `
     <div class="search-container">
       <form [formGroup]="searchForm" (ngSubmit)="runSearch($event)">
-        <mat-form-field>
+        <mat-form-field appearance="fill">
           <mat-label>Search</mat-label>
-          <mat-chip-listbox #tagChipList aria-label="Search tags">
-            <mat-chip-option *ngFor="let term of searchTerms"
-                             (removed)="removeSearchTerm(term)">
+          <mat-chip-grid #tagChipGrid aria-label="Search tags">
+            <mat-chip-row *ngFor="let term of searchTerms"
+                          [editable]="false"
+                          (removed)="removeSearchTerm(term)">
               <fa-icon [icon]="term.getIconForType()"></fa-icon>&nbsp;
               {{term.displayName}}
-              <button matChipRemove>
+              <button matChipRemove [attr.aria-label]="'remove search term '+term.displayName">
                 <fa-icon [icon]="faTimes"></fa-icon>
               </button>
-            </mat-chip-option>
+            </mat-chip-row>
             <input
               placeholder="Search"
               #searchInput
               [formControl]="searchForm"
               [matAutocomplete]="auto"
-              [matChipInputFor]="tagChipList"
+              [matChipInputFor]="tagChipGrid"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
               (matChipInputTokenEnd)="addSearchTerm($event)">
             <button mat-icon-button color="primary" matSuffix aria-label="Search" type="button"
@@ -44,7 +45,7 @@ import {AJHelpers} from '../../services/helper/ajhelpers';
                     *ngIf="searchTerms.length !== 0 || searchInput.value.length !== 0" (click)="clearForm($event)">
               <fa-icon [icon]="faTimes"></fa-icon>
             </button>
-          </mat-chip-listbox>
+          </mat-chip-grid>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
             <div class="search-date-filters">
               <div class="search-date-filter search-date-filter-start">

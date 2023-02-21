@@ -13,11 +13,11 @@ import {faCheckSquare, faMinusSquare, faTimesSquare} from '@fortawesome/pro-regu
 import {AJHelpers} from '../../services/helper/ajhelpers';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {map, startWith} from 'rxjs/operators';
-import {MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent} from '@angular/material/legacy-autocomplete';
 import {CreateTagDialogComponent} from '../create-tag-dialog/create-tag-dialog.component';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatChipInputEvent} from '@angular/material/chips';
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
 @Component({
   selector: 'bulk-photo-edit-dialog',
@@ -57,25 +57,26 @@ import {MatChipInputEvent} from '@angular/material/chips';
 
 
         <div class="tag-edit-area" *ngIf="singlePhotoEdit">
-          <mat-form-field>
+          <mat-form-field appearance="fill">
             <mat-label>Tags:</mat-label>
-            <mat-chip-listbox #tagChipList aria-label="Search tags">
-              <mat-chip-option *ngFor="let tagDetail of addTags"
-                               (removed)="removeTag($event, tagDetail)">
+            <mat-chip-grid #tagChipGrid aria-label="Search tags">
+              <mat-chip-row *ngFor="let tagDetail of addTags"
+                            [editable]="false"
+                            (removed)="removeTag($event, tagDetail)">
                 <tag [tagSubject]="tagDetail.tag$"
                      [tagActions]="[tagActionRemoveFromAll]"
                      (tagActionHandler)="onTagAction($event, addTags, tagDetail)"
                 ></tag>
-              </mat-chip-option>
+              </mat-chip-row>
               <input
                 placeholder="Search tags"
                 #searchTagInput
                 [formControl]="searchTags"
                 [matAutocomplete]="auto"
-                [matChipInputFor]="tagChipList"
+                [matChipInputFor]="tagChipGrid"
                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                 (matChipInputTokenEnd)="confirmAddTag($event)">
-            </mat-chip-listbox>
+            </mat-chip-grid>
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
               <mat-option *ngFor="let tagSearchTerm of filterTags | async" [value]="tagSearchTerm">
                 <fa-icon [icon]="getIconForType(tagSearchTerm)"></fa-icon>&nbsp;
