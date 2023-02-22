@@ -2,8 +2,8 @@ import {Component} from '@angular/core';
 import {faUser} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialogRef} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'login-dialog',

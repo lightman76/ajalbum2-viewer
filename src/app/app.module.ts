@@ -16,21 +16,12 @@ import {IndividualPhotoComponent} from './components/individiual-photo/individua
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import {IndividualPhotoInfoComponent} from './components/individiual-photo/individual-photo-info.component';
 import {SearchComponent} from './components/search/search.component';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatInputModule} from '@angular/material/input';
 import {MatNativeDateModule} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatSliderModule} from '@angular/material/slider';
 import {ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatRadioModule} from '@angular/material/radio';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {MatDialogModule} from '@angular/material/dialog';
 import {TagComponent} from './components/tag/tag-component';
 import {TagService} from './services/tag.service';
 import {DefaultUserComponent} from './components/default-user/default-user.component';
-import {MatChipsModule} from '@angular/material/chips';
 import {PhotoZoomControl} from './components/individiual-photo/zoom-control.component';
 import {LoginIndicatorComponent} from './components/login-indicator/login-indicator.component';
 import {UserService} from './services/user.service';
@@ -41,6 +32,15 @@ import {EditPhotoButtonComponent} from './components/edit-photo-button/edit-phot
 import {BulkPhotoEditDialogComponent} from './components/bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {CreateTagDialogComponent} from './components/create-tag-dialog/create-tag-dialog.component';
 import {APP_BASE_HREF} from '@angular/common';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatInputModule} from '@angular/material/input';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatButtonModule} from '@angular/material/button';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatSliderModule} from '@angular/material/slider';
 
 
 @Injectable()
@@ -107,4 +107,30 @@ export class MyHammerConfig extends HammerGestureConfig {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor() {
+    this.hackLoadStylesheet();
+  }
+
+  async hackLoadStylesheet() {
+    let links = document.getElementsByTagName('link');
+    let stylesheetUrl = null;
+    for (let i = 0; i < links.length; i++) {
+      let l = links[i];
+      if (/styles\./.exec(l.href)) {
+        stylesheetUrl = l.href;
+        break;
+      }
+    }
+    if (stylesheetUrl) {
+      let resp = await fetch(stylesheetUrl);
+      if (resp.status == 200) {
+        let stylesheetContent = await resp.text();
+        let styleEl = document.createElement('style');
+        styleEl.innerText = stylesheetContent;
+        document.body.appendChild(styleEl);
+      }
+    }
+
+  }
+}

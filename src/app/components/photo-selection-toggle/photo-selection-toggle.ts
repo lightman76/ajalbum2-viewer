@@ -2,8 +2,8 @@ import {Component} from '@angular/core';
 import {faToggleOff, faToggleOn} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
-import {MatDialog} from '@angular/material/dialog';
 import {SelectionService} from '../../services/selection.service';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'photo-selection-toggle',

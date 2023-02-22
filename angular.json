@@ -28,13 +28,38 @@
               "src/assets"
             ],
             "styles": [
-              "src/imports.scss",
-              "src/styles.scss"
+              "@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/styles.css"
             ],
+            "optimization": {
+              "scripts": false,
+              "styles": {
+                "minify": false,
+                "inlineCritical": false
+              }
+            },
             "baseHref": "/photos/",
             "scripts": []
           },
           "configurations": {
+            "development": {
+              "optimization": {
+                "scripts": false,
+                "styles": {
+                  "minify": false,
+                  "inlineCritical": false
+                }
+              }
+            },
+            "dev": {
+              "optimization": {
+                "scripts": false,
+                "styles": {
+                  "minify": false,
+                  "inlineCritical": false
+                }
+              }
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -42,7 +67,13 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
@@ -93,8 +124,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/imports.scss",
-              "src/styles.scss"
+              "@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/styles.css"
             ],
             "scripts": []
           }
@@ -127,7 +158,6 @@
       }
     }
   },
-  "defaultProject": "ajalbum2-viewer",
   "cli": {
     "analytics": "6af18286-e5ab-4fa6-915e-26b3f1272a59"
   }
