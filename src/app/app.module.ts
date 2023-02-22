@@ -107,4 +107,30 @@ export class MyHammerConfig extends HammerGestureConfig {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor() {
+    this.hackLoadStylesheet();
+  }
+
+  async hackLoadStylesheet() {
+    let links = document.getElementsByTagName('link');
+    let stylesheetUrl = null;
+    for (let i = 0; i < links.length; i++) {
+      let l = links[i];
+      if (/styles\./.exec(l.href)) {
+        stylesheetUrl = l.href;
+        break;
+      }
+    }
+    if (stylesheetUrl) {
+      let resp = await fetch(stylesheetUrl);
+      if (resp.status == 200) {
+        let stylesheetContent = await resp.text();
+        let styleEl = document.createElement('style');
+        styleEl.innerText = stylesheetContent;
+        document.body.appendChild(styleEl);
+      }
+    }
+
+  }
+}

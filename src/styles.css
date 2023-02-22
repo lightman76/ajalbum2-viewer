@@ -1,11 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import '~@angular/material/prebuilt-themes/indigo-pink.css';
-
-//Import the bootstrap functions, variables, and mixins need by the other files
-@import "variables";
-@import "reset";
-
 html, body {
   height: 100vh;
   width: 100vw;
@@ -21,16 +15,12 @@ body {
   max-height: min(450px, 80vh) !important;
 }
 
-bulk-photo-edit-dialog {
-  mat-form-field, mat-slider {
-    width: 100%;
-  }
+bulk-photo-edit-dialog mat-form-field, bulk-photo-edit-dialog mat-slider {
+  width: 100%;
 }
 
-create-tag-dialog {
-  mat-form-field, mat-radio-group, mat-radio-button {
-    width: 100%;
-  }
+create-tag-dialog mat-form-field, create-tag-dialog mat-radio-group, create-tag-dialog mat-radio-button {
+  width: 100%;
 }
 
 .mat-form-field-infix {
