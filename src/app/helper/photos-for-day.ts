@@ -1,6 +1,6 @@
-import {Photo} from "./photo";
-import {BehaviorSubject} from "rxjs";
-import {PhotoResultSetService} from "../services/photo-result-set.service";
+import {Photo} from './photo';
+import {BehaviorSubject} from 'rxjs';
+import {PhotoResultSetService} from '../services/photo-result-set.service';
 
 export class PhotosForDay {
   private photos: Array<Photo>;
@@ -13,8 +13,8 @@ export class PhotosForDay {
   dateInViewRange: boolean = false;
   private photoCount$: BehaviorSubject<number>;
 
-  constructor(forDate: Date, private photoResultSetService: PhotoResultSetService) {
-    this.forDate = new Date(forDate.getFullYear(), forDate.getMonth(), forDate.getDate(), 0, 0, 0, 0);
+  constructor(forDay: string, private photoResultSetService: PhotoResultSetService) {
+    this.forDate = new Date(parseInt(forDay.substring(0, 4)), parseInt(forDay.substring(4, 6)), parseInt(forDay.substring(6, 8)), 0, 0, 0, 0);
     this.photos = [];
     this.photosByPhotoTimeId = {};
     this.photoList$ = new BehaviorSubject<Array<Photo>>(this.photos);

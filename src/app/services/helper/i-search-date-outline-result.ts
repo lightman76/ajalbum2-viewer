@@ -5,6 +5,6 @@ export interface ISearchDateOutlineResult {
 }
 
 export interface ISearchDateOutline {
-  date: Date,
+  date: string,
   num_items: number;
 }

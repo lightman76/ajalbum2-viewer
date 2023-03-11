@@ -8,6 +8,7 @@ export class Photo {
   description: string;
   time_id: number;
   time: Date;
+  date_bucket: number;
   taken_in_tz: number;
   location_latitude: number;
   location_longitude: number;
@@ -29,6 +30,7 @@ export class Photo {
     photo.description = i.description;
     photo.time_id = i.time_id;
     photo.time = JsonUtils.parseJsonDate(i.time);
+    photo.date_bucket = i.date_bucket;
     photo.taken_in_tz = i.taken_in_tz;
     photo.location_latitude = i.location_latitude;
     photo.location_longitude = i.location_longitude;

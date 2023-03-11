@@ -341,9 +341,10 @@ export class PhotoResultSetService {
     let processedDates = {};
     this.outlineNextOffsetDate = new Date(results.next_offset_date);
     results.result_count_by_date.forEach((dayOutline) => {
-      let parsedDate = new Date(dayOutline.date + "T00:00:00");
+      //let parsedDate = new Date(dayOutline.date + "T00:00:00");
+      let parsedDayBucket = dayOutline.date.replace(/-/g, '');
       //let parsedDate = new Date(parsedDateW.getTime())
-      let photosByDay = this.getPhotosForDay(parsedDate, processedDates);
+      let photosByDay = this.getPhotosForDay(parsedDayBucket, processedDates);
       photosByDay.getPhotoCount$().next(dayOutline.num_items);
     });
   }
@@ -352,19 +353,19 @@ export class PhotoResultSetService {
     let processedDates = {};
     results.photos.forEach((ip) => {
       let photo = Photo.fromIPhoto(ip);
-      let localTime = new Date(photo.time.getTime())
-      let photosByDay = this.getPhotosForDay(localTime, processedDates);
+      let localTime = new Date(photo.time.getTime());
+      let bucketTime = photo.date_bucket;
+      let photosByDay = this.getPhotosForDay(bucketTime, processedDates);
       photosByDay.addPhoto(photo);
     });
     this.resultsAreLoading = false;
   }
 
-  private getPhotosForDay(date: Date, processedDates: any): PhotosForDay {
-    let day = PhotosForDay.dateToDayStr(date);
+  private getPhotosForDay(day, processedDates: any): PhotosForDay {
     let pfd = this.photosByDayHash[day];
     //console.log("    Looking up Photos For Day " + day + ".  Found existing? " + (pfd != null));
     if (pfd == null) {
-      pfd = new PhotosForDay(date, this);
+      pfd = new PhotosForDay(day, this);
       let oldList = this.photosByDayList;
       this.photosByDayList = oldList.slice();
       this.photosByDayList.push(pfd);
