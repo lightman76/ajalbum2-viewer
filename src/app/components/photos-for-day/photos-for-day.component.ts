@@ -10,7 +10,6 @@ import {SearchQuery} from '../../services/helper/search-query';
          [attr.id]="'day-list__'+pfd.forDate.getFullYear()+'-'+(pfd.forDate.getMonth() + 1)+'-'+pfd.forDate.getDate()">{{pfd.forDate.getFullYear()}}
       /{{pfd.forDate.getMonth() + 1}}
       /{{pfd.forDate.getDate()}}
-      <small>loaded={{pfd.photoResultsLoaded}}</small>
     </div>
     <div class="photo-list" *ngIf="pfd.dateInViewRange || pfd.photoResultsLoaded">
       <div class="photo-item" *ngFor="let photo of photoList">
