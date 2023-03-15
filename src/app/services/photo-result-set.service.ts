@@ -355,6 +355,7 @@ export class PhotoResultSetService {
       let photo = Photo.fromIPhoto(ip);
       let localTime = new Date(photo.time.getTime());
       let bucketTime = photo.date_bucket;
+      console.log('processing date bucket ' + bucketTime, ip);
       let photosByDay = this.getPhotosForDay(bucketTime, processedDates);
       photosByDay.addPhoto(photo);
     });
@@ -363,7 +364,7 @@ export class PhotoResultSetService {
 
   private getPhotosForDay(day, processedDates: any): PhotosForDay {
     let pfd = this.photosByDayHash[day];
-    //console.log("    Looking up Photos For Day " + day + ".  Found existing? " + (pfd != null));
+    console.log('    Looking up Photos For Day ' + day + '.  Found existing? ' + (pfd != null));
     if (pfd == null) {
       pfd = new PhotosForDay(day, this);
       let oldList = this.photosByDayList;
@@ -385,6 +386,7 @@ export class PhotoResultSetService {
         //existing results are old, wipe it out before returning
         processedDates[day] = true;
         pfd.clearList();
+        pfd.photoResultsLoaded = false;
       }
     }
     return pfd;

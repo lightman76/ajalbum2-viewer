@@ -1,7 +1,7 @@
-import {Component, ElementRef, Input, SimpleChanges} from "@angular/core";
-import {PhotosForDay} from "../../helper/photos-for-day";
-import {Photo} from "../../helper/photo";
-import {SearchQuery} from "../../services/helper/search-query";
+import {Component, ElementRef, Input, SimpleChanges} from '@angular/core';
+import {PhotosForDay} from '../../helper/photos-for-day';
+import {Photo} from '../../helper/photo';
+import {SearchQuery} from '../../services/helper/search-query';
 
 @Component({
   selector: 'photos-for-day',
@@ -9,7 +9,9 @@ import {SearchQuery} from "../../services/helper/search-query";
     <div class="date-header"
          [attr.id]="'day-list__'+pfd.forDate.getFullYear()+'-'+(pfd.forDate.getMonth() + 1)+'-'+pfd.forDate.getDate()">{{pfd.forDate.getFullYear()}}
       /{{pfd.forDate.getMonth() + 1}}
-      /{{pfd.forDate.getDate()}}</div>
+      /{{pfd.forDate.getDate()}}
+      <small>loaded={{pfd.photoResultsLoaded}}</small>
+    </div>
     <div class="photo-list" *ngIf="pfd.dateInViewRange || pfd.photoResultsLoaded">
       <div class="photo-item" *ngFor="let photo of photoList">
         <photo-thumb [photo]="photo" [currentQuery]="currentQuery"></photo-thumb>

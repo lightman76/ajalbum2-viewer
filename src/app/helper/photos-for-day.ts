@@ -14,7 +14,8 @@ export class PhotosForDay {
   private photoCount$: BehaviorSubject<number>;
 
   constructor(forDay: string, private photoResultSetService: PhotoResultSetService) {
-    this.forDate = new Date(parseInt(forDay.substring(0, 4)), parseInt(forDay.substring(4, 6)), parseInt(forDay.substring(6, 8)), 0, 0, 0, 0);
+    this.forDate = new Date(parseInt(forDay.substring(0, 4)), parseInt(forDay.substring(4, 6)) - 1, parseInt(forDay.substring(6, 8)), 0, 0, 0, 0);
+    this.forDate = new Date(this.forDate.getTime() + (new Date().getTimezoneOffset() * 1000));
     this.photos = [];
     this.photosByPhotoTimeId = {};
     this.photoList$ = new BehaviorSubject<Array<Photo>>(this.photos);
