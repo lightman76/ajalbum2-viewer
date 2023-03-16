@@ -141,23 +141,23 @@ export class PhotoResultSetService {
         if (photo) {
           resolve(photo);
         } else {
-          //TODO - find future day and return last photo
+          //TODO - find future day and return first photo
           //reject("Photo not found");
           var idx = this.photosByDayList.indexOf(pfd);
           if (idx > 0) {
             var nextDayPfd = this.photosByDayList[idx - 1];
-            resolve(nextDayPfd.getLastPhoto());
+            resolve(nextDayPfd.getFirstPhoto());
 
             if (nextDayPfd && !nextDayPfd.photoResultsLoaded) {
               this.fetchStartingAtDay(nextDayPfd.forDate);
               var sub = this.photosByDay$.subscribe((pfds) => {
                 let nextDayPfd = this.photosByDayList[idx - 1];
-                resolve(nextDayPfd.getLastPhoto());
+                resolve(nextDayPfd.getFirstPhoto());
                 sub.unsubscribe();
               });
             } else {
               if (nextDayPfd) {
-                resolve(nextDayPfd.getLastPhoto());
+                resolve(nextDayPfd.getFirstPhoto());
               } else {
                 reject("Beginning of results")
               }
@@ -179,7 +179,7 @@ export class PhotoResultSetService {
                 if (photo) {
                   resolve(photo);
                 } else {
-                  //TODO - find future day and return last photo
+                  //TODO - find future day and return first photo
                   //reject("Photo not found");
                 }
               }
@@ -204,7 +204,7 @@ export class PhotoResultSetService {
         if (photo) {
           resolve(photo);
         } else {
-          //TODO - find past day and return first photo
+          //TODO - find past day and return last photo
           //reject("Photo not found");
           var idx = this.photosByDayList.indexOf(pfd);
           if (idx >= 0 && idx < this.photosByDayList.length) {
@@ -213,12 +213,12 @@ export class PhotoResultSetService {
               this.fetchStartingAtDay(prevDayPfd.forDate);
               let sub = this.photosByDay$.subscribe((pfds) => {
                 var prevDayPfd = this.photosByDayList[idx + 1];
-                resolve(prevDayPfd.getFirstPhoto());
+                resolve(prevDayPfd.getLastPhoto());
                 sub.unsubscribe();
               });
             } else {
               if (prevDayPfd) {
-                resolve(prevDayPfd.getFirstPhoto());
+                resolve(prevDayPfd.getLastPhoto());
               } else {
                 reject("End of results")
               }
@@ -239,7 +239,7 @@ export class PhotoResultSetService {
                 if (photo) {
                   resolve(photo);
                 } else {
-                  //TODO - find past day and return first photo
+                  //TODO - find past day and return last photo
                   //reject("Photo not found");
                 }
               }
