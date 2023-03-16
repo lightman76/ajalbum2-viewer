@@ -38,7 +38,7 @@ export class PhotosForDay {
   public static dateToDayStr(d: Date) {
     if (d == null) return null;
     //TODO: do I need to check the tz and convert to local TZ if not already?
-    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    return d.toISOString().slice(0, 10).replace(/-/g, '');
   }
 
   public static dateToUtcDayStr(d: Date) {

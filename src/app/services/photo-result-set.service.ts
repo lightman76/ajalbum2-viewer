@@ -98,8 +98,9 @@ export class PhotoResultSetService {
     return new Promise<Photo>((resolve, reject) => {
 
       let day = PhotosForDay.dateToDayStr(photoTimeId);
+      console.info('getPhotoForId: Looking up day=' + day + ' in hash', this.photosByDayHash);
       let pfd = this.photosByDayHash[day];
-      console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
+      //console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
       if (pfd && pfd.photoResultsLoaded) {
         resolve(pfd.getPhotoForTimeId(photoTimeIdNum));
       } else {
