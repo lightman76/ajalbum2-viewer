@@ -102,29 +102,46 @@ export class PhotoResultSetService {
       let pfd = this.photosByDayHash[day];
       //console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
       if (pfd && pfd.photoResultsLoaded) {
-        resolve(pfd.getPhotoForTimeId(photoTimeIdNum));
-      } else {
-        this.fetchStartingAtDay(photoTimeId);
-        let sub = this.photosByDay$.subscribe((pfds) => {
-          let day = PhotosForDay.dateToDayStr(photoTimeId);
+        let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
+        if (photo) {
+          resolve(photo);
+          return;
+        } else {
+          //didn't find the photo in that date.  It's possible the date bucket was classified to the prior day so try that
+          let day = PhotosForDay.dateToDayStr(new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000));
+          console.info('getPhotoForId: RETRY: Looking up day=' + day + ' in hash', this.photosByDayHash);
           let pfd = this.photosByDayHash[day];
-          if (pfd) {
-            console.log("  getPhotoForId: retrying: pfd loaded=" + (pfd && pfd.photoResultsLoaded) + " for day " + day)
-            setTimeout(() => {
-              if (pfd && pfd.photoResultsLoaded) {
-                sub.unsubscribe();
-                let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
-                if (photo) {
-                  resolve(photo);
-                } else {
-                  reject('Photo not found');
-                }
-              }
-            }, 300);
+          //console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
+          if (pfd && pfd.photoResultsLoaded) {
+            let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
+            if (photo) {
+              resolve(photo);
+              return;
+            }
           }
-        });
-        return null;
+        }
       }
+      this.fetchStartingAtDay(photoTimeId);
+      let sub = this.photosByDay$.subscribe((pfds) => {
+        //Always fetch an extra 12 hours before to account for time zone differences between date bucket and UTC...
+        let day = PhotosForDay.dateToDayStr(new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000));
+        let pfd = this.photosByDayHash[day];
+        if (pfd) {
+          console.log('  getPhotoForId: retrying: pfd loaded=' + (pfd && pfd.photoResultsLoaded) + ' for day ' + day);
+          setTimeout(() => {
+            if (pfd && pfd.photoResultsLoaded) {
+              sub.unsubscribe();
+              let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
+              if (photo) {
+                resolve(photo);
+              } else {
+                reject('Photo not found');
+              }
+            }
+          }, 300);
+        }
+      });
+      return null;
     });
   }
 
