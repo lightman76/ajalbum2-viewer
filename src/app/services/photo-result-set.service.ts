@@ -229,10 +229,16 @@ export class PhotoResultSetService {
             if (prevDayPfd && !prevDayPfd.photoResultsLoaded) {
               let sub = this.photosByDay$.subscribe((pfds) => {
                 var prevDayPfd = this.photosByDayList[idx + 1];
-                if (prevDayPfd && prevDayPfd.photoResultsLoaded) {
-                  resolve(prevDayPfd.getFirstPhoto());
-                  sub.unsubscribe();
-                }
+                sub.unsubscribe();
+                console.log('  ##### getPastPhotoFromId: load for prevDayPfd got subscription update for: ' + prevDayPfd.forDate + '  photoResultsLoaded=' + prevDayPfd.photoResultsLoaded, prevDayPfd);
+                //TODO: now subscribe and wait on photoList$ and keep checking the results loaded
+                let sub2 = prevDayPfd.getPhotoList$().subscribe((photos) => {
+                  if (prevDayPfd && prevDayPfd.photoResultsLoaded) {
+                    console.log('  ##### getPastPhotoFromId: load for nextDayPfd  RESOLVING: ' + prevDayPfd.forDate);
+                    resolve(prevDayPfd.getFirstPhoto());
+                    sub2.unsubscribe();
+                  }
+                });
               });
               this.fetchStartingAtDay(prevDayPfd.forDate);
             } else {
