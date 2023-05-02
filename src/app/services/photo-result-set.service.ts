@@ -28,6 +28,7 @@ export class PhotoResultSetService {
   private resultsAreLoading: boolean = false;
   private initialLoadUpToDate: string = null;
   private outlineNextOffsetDate = null;
+  private outlineCurrentLoadingToDate = null;
 
   constructor(
     private photoService: PhotoService,
@@ -102,7 +103,6 @@ export class PhotoResultSetService {
       let pfd = this.photosByDayHash[day];
       if (pfd) {
         if (this.photosByDayList.indexOf(pfd) === this.photosByDayList.length - 1 && this.outlineNextOffsetDate) {
-          this.outlineNextOffsetDate = null; //wipe this out so we don't renter this until the next page is ready
           //We've loaded the last day, from the current outline results - load the next outline page
           this.fetchResultsOutline(this.outlineNextOffsetDate); //we'll just ignore the promise  and let this happen in the background
         }
@@ -290,7 +290,6 @@ export class PhotoResultSetService {
         //It's in the view area
         pfd.dateInViewRange = true;
         if (this.photosByDayList.length === idx + 1 && this.outlineNextOffsetDate) {
-          this.outlineNextOffsetDate = null; //wipe this out so we don't renter this until the next page is ready
           //We've loaded the last day, from the current outline results - load the next outline page
           this.fetchResultsOutline(this.outlineNextOffsetDate); //we'll just ignore the promise  and let this happen in the background
         }
@@ -334,6 +333,10 @@ export class PhotoResultSetService {
   }
 
   private async fetchResultsOutline(offsetDate: Date) {
+    if (this.outlineCurrentLoadingToDate != null && this.outlineCurrentLoadingToDate === offsetDate) {
+      return;
+    } //Already in the process of loading
+    this.outlineCurrentLoadingToDate = offsetDate;
     console.log('  FETCH OUTLINE at date=' + offsetDate);
     return new Promise<boolean>((resolve, reject) => {
       this.photoService.getSearchDateOutline(this.search, offsetDate).subscribe(async (results) => {
