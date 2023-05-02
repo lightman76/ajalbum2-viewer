@@ -102,6 +102,7 @@ export class PhotoResultSetService {
       let pfd = this.photosByDayHash[day];
       if (pfd) {
         if (this.photosByDayList.indexOf(pfd) === this.photosByDayList.length - 1 && this.outlineNextOffsetDate) {
+          this.outlineNextOffsetDate = null; //wipe this out so we don't renter this until the next page is ready
           //We've loaded the last day, from the current outline results - load the next outline page
           this.fetchResultsOutline(this.outlineNextOffsetDate); //we'll just ignore the promise  and let this happen in the background
         }
@@ -289,6 +290,7 @@ export class PhotoResultSetService {
         //It's in the view area
         pfd.dateInViewRange = true;
         if (this.photosByDayList.length === idx + 1 && this.outlineNextOffsetDate) {
+          this.outlineNextOffsetDate = null; //wipe this out so we don't renter this until the next page is ready
           //We've loaded the last day, from the current outline results - load the next outline page
           this.fetchResultsOutline(this.outlineNextOffsetDate); //we'll just ignore the promise  and let this happen in the background
         }
