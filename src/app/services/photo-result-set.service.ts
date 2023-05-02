@@ -100,6 +100,12 @@ export class PhotoResultSetService {
       let day = PhotosForDay.dateToDayStr(photoTimeId);
       console.info('getPhotoForId: Looking up day=' + day + ' in hash', this.photosByDayHash);
       let pfd = this.photosByDayHash[day];
+      if (pfd) {
+        if (this.photosByDayList.indexOf(pfd) === this.photosByDayList.length - 1 && this.outlineNextOffsetDate) {
+          //We've loaded the last day, from the current outline results - load the next outline page
+          this.fetchResultsOutline(this.outlineNextOffsetDate); //we'll just ignore the promise  and let this happen in the background
+        }
+      }
       //console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
       if (pfd && pfd.photoResultsLoaded) {
         let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
@@ -275,16 +281,20 @@ export class PhotoResultSetService {
     //console.log("    Reprocessing range=" + rangeTop + "/" + rangeBottom);
 
 
-    this.photosByDayList.forEach((pfd) => {
+    this.photosByDayList.forEach((pfd, idx) => {
       if (!(
         pfd.offsetFromTop + pfd.getDisplayHeight$().getValue() < rangeTop ||
         pfd.offsetFromTop > rangeBottom
       )) {
         //It's in the view area
         pfd.dateInViewRange = true;
+        if (this.photosByDayList.length === idx + 1 && this.outlineNextOffsetDate) {
+          //We've loaded the last day, from the current outline results - load the next outline page
+          this.fetchResultsOutline(this.outlineNextOffsetDate); //we'll just ignore the promise  and let this happen in the background
+        }
         //console.log("      Checking " + pfd.forDate + " results loaded=" + pfd.photoResultsLoaded + " resultsLoading=" + this.resultsAreLoading + " offsetFromTop=" + pfd.offsetFromTop + " height=" + pfd.getDisplayHeight$().getValue())
         if (!pfd.photoResultsLoaded && !this.resultsAreLoading) {
-          console.log("      Preparing to load for " + pfd.forDate + " results loaded=" + pfd.photoResultsLoaded + " resultsLoading=" + this.resultsAreLoading)
+          console.log('      Preparing to load for ' + pfd.forDate + ' results loaded=' + pfd.photoResultsLoaded + ' resultsLoading=' + this.resultsAreLoading);
           this.fetchStartingAtDay(pfd.forDate);
           this.resultsAreLoading = true;
           //since this can return multiple days, we'll stop here
