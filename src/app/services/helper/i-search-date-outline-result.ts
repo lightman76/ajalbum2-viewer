@@ -1,6 +1,6 @@
 export interface ISearchDateOutlineResult {
-  offset_date: Date,
-  next_offset_date: Date,
+  offset_date: number,
+  next_offset_date: number,
   result_count_by_date: Array<ISearchDateOutline>
 }
 

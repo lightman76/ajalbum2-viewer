@@ -7,7 +7,7 @@ export class SearchQuery {
   endDate: Date = null;
   tagIds: Array<number> = null;
   featureThreshold: number = null;
-  offsetDate: string = null;
+  offsetDate: number = null;
   timezoneOffsetMin: number = null;
 
   constructor(params: any) {

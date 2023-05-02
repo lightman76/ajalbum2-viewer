@@ -95,7 +95,7 @@ export class PhotoListComponent {
             const photoId = photoIdRegEx[1];
             this.focusPhotoId = parseInt(photoId);
             const date = new Date(parseInt(photoId));
-            this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
+            this.currentSearch.offsetDate = parseInt(PhotosForDay.dateToDayStr(date));
             this.resultSetService.updateSearch(this.currentSearch);
             let wl = window.location;
             //window.location.replace(wl.protocol+wl.hostname+wl.pathname+wl.search)
@@ -127,7 +127,7 @@ export class PhotoListComponent {
           const photoId = photoIdRegEx[1];
           this.focusPhotoId = parseInt(photoId);
           const date = new Date(parseInt(photoId));
-          this.currentSearch.offsetDate = PhotosForDay.dateToDayStr(date);
+          this.currentSearch.offsetDate = parseInt(PhotosForDay.dateToDayStr(date));
           let wl = window.location;
           setTimeout(() => {
             window.history.replaceState(null, null, wl.protocol + '//' + wl.hostname + wl.pathname + wl.search);

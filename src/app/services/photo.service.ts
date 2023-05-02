@@ -18,20 +18,28 @@ export class PhotoService {
   ) {
   }
 
-  getSearchResults(searchQuery: SearchQuery, dateOffset: Date = new Date()) {
-    let headers = new HttpHeaders({"Content-Type": "application/json"});
+  getSearchResults(searchQuery: SearchQuery, dateOffset: number) {
+    let headers = new HttpHeaders({'Content-Type': 'application/json'});
     let query = searchQuery.clone();
-    query.offsetDate = PhotosForDay.dateToDayStr(dateOffset);
+    if (!dateOffset) {
+      let d = new Date();
+      dateOffset = parseInt(PhotosForDay.dateToDayStr(d));
+    }
+    query.offsetDate = dateOffset; //PhotosForDay.dateToDayStr(dateOffset);
     return this.http.post<ISearchResultsGroup>(this.configService.getApiRoot() + '/photo/search', JSON.stringify(query.toJsonHash()), {
       headers: headers,
       responseType: 'json'
     }).pipe(retry(1), catchError(this.errorHandler));
   }
 
-  getSearchDateOutline(searchQuery: SearchQuery, dateOffset: Date = new Date()) {
+  getSearchDateOutline(searchQuery: SearchQuery, dateOffset: number) {
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     let query = searchQuery.clone();
-    query.offsetDate = PhotosForDay.dateToDayStr(dateOffset);
+    if (!dateOffset) {
+      let d = new Date();
+      dateOffset = parseInt(PhotosForDay.dateToDayStr(d));
+    }
+    query.offsetDate = dateOffset;//PhotosForDay.dateToDayStr(dateOffset);
     return this.http.post<ISearchDateOutlineResult>(this.configService.getApiRoot() + '/photo/date_outline_search', JSON.stringify(query.toJsonHash()), {
       headers: headers,
       responseType: 'json'

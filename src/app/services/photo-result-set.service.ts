@@ -26,9 +26,9 @@ export class PhotoResultSetService {
   private scrollOffset$: BehaviorSubject<number>;
   private debouncedRecomputeDateHeightOffsets: any;
   private resultsAreLoading: boolean = false;
-  private initialLoadUpToDate: string = null;
-  private outlineNextOffsetDate = null;
-  private outlineCurrentLoadingToDate = null;
+  private initialLoadUpToDate: number = null;
+  private outlineNextOffsetDate: number = null;
+  private outlineCurrentLoadingToDate: number = null;
 
   constructor(
     private photoService: PhotoService,
@@ -85,6 +85,8 @@ export class PhotoResultSetService {
     this.selectionService.clearSelections();
     //TODO: probably need to push out on the subjects...
     this.search = inSearch.clone();
+    this.outlineNextOffsetDate = null;
+    this.outlineCurrentLoadingToDate = null;
     this.initialLoadUpToDate = this.search.offsetDate;
     await this.initiateSearch();
   }
@@ -327,12 +329,12 @@ export class PhotoResultSetService {
 
   private fetchStartingAtDay(offsetDate: Date) {
     console.log('  FETCH at date=' + offsetDate, this.search);
-    this.photoService.getSearchResults(this.search, offsetDate).subscribe((results) => {
+    this.photoService.getSearchResults(this.search, parseInt(PhotosForDay.dateToDayStr(offsetDate))).subscribe((results) => {
       this.parseResults(results);
     });
   }
 
-  private async fetchResultsOutline(offsetDate: Date) {
+  private async fetchResultsOutline(offsetDate: number) {
     if (this.outlineCurrentLoadingToDate != null && this.outlineCurrentLoadingToDate === offsetDate) {
       return;
     } //Already in the process of loading
@@ -360,7 +362,7 @@ export class PhotoResultSetService {
 
   private parseOutlineResults(results: ISearchDateOutlineResult) {
     let processedDates = {};
-    this.outlineNextOffsetDate = new Date(results.next_offset_date);
+    this.outlineNextOffsetDate = results.next_offset_date;
     results.result_count_by_date.forEach((dayOutline) => {
       //let parsedDate = new Date(dayOutline.date + "T00:00:00");
       let parsedDayBucket = dayOutline.date.replace(/-/g, '');
