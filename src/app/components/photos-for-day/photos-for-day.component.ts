@@ -7,9 +7,9 @@ import {SearchQuery} from '../../services/helper/search-query';
   selector: 'photos-for-day',
   template: `
     <div class="date-header"
-         [attr.id]="'day-list__'+pfd.forDate.getFullYear()+'-'+(pfd.forDate.getMonth() + 1)+'-'+pfd.forDate.getDate()">{{pfd.forDate.getFullYear()}}
-      /{{pfd.forDate.getMonth() + 1}}
-      /{{pfd.forDate.getDate()}}
+         [attr.id]="'day-list__'+pfd.forDateParts[0]+'-'+(pfd.forDateParts[1])+'-'+pfd.forDateParts[2]">{{pfd.forDateParts[0]}}
+      /{{pfd.forDateParts[1]}}
+      /{{pfd.forDateParts[2]}}
     </div>
     <div class="photo-list" *ngIf="pfd.dateInViewRange || pfd.photoResultsLoaded">
       <div class="photo-item" *ngFor="let photo of photoList">
@@ -99,12 +99,12 @@ export class PhotosForDayComponent {
   checkForFocusPhoto() {
     if (this.focusPhotoId) {
       let d = new Date(this.focusPhotoId);
-      if (PhotosForDay.dateToDayStr(d) === PhotosForDay.dateToDayStr(this.pfd.forDate)) {
+      if (PhotosForDay.dateToDayStr(d) === this.pfd.forDate.toString()) {
         //Scroll this into view
         try {
           this.elRef.nativeElement.scrollIntoView({block: 'start'});
         } catch (e) {
-          console.error("failed to scroll day into view", e);
+          console.error('failed to scroll day into view', e);
         }
       }
     }

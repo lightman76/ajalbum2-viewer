@@ -97,10 +97,11 @@ export class PhotoResultSetService {
 
   async getPfdForPhotoId(userName: string, photoTimeIdNum: number): Promise<PhotosForDay> {
     let photoTimeId = new Date(photoTimeIdNum);
-    console.log('getPhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId + ' for user ' + userName);
+    console.log('getPfdForPhotoId: Preparing to get pfd for photoid ' + photoTimeIdNum + ' date=' + photoTimeId + ' for user ' + userName);
     return new Promise<PhotosForDay>((resolve, reject) => {
 
       let day = PhotosForDay.dateToDayStr(photoTimeId);
+      let dayBucket = parseInt(day);
       console.info('getPhotoForId: Looking up day=' + day + ' in hash', this.photosByDayHash);
       let pfd = this.photosByDayHash[day];
       if (pfd) {
@@ -109,7 +110,7 @@ export class PhotoResultSetService {
           this.fetchResultsOutline(this.outlineNextOffsetDate); //we'll just ignore the promise  and let this happen in the background
         }
       }
-      //console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
+      console.log('  getPfdForPhotoId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
       if (pfd && pfd.photoResultsLoaded) {
         let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
         if (photo) {
@@ -118,7 +119,7 @@ export class PhotoResultSetService {
         } else {
           //didn't find the photo in that date.  It's possible the date bucket was classified to the prior day so try that
           let day = PhotosForDay.dateToDayStr(new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000));
-          console.info('getPhotoForId: RETRY: Looking up day=' + day + ' in hash', this.photosByDayHash);
+          console.info('getPfdForPhotoId: RETRY: Looking up day=' + day + ' in hash', this.photosByDayHash);
           let pfd = this.photosByDayHash[day];
           //console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
           if (pfd && pfd.photoResultsLoaded) {
@@ -130,30 +131,77 @@ export class PhotoResultSetService {
           }
         }
       }
-      let earlyPhotoTimeId = new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000);
+      let dayTmp = PhotosForDay.dateToDayStr(new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000));
+      let earlyPhotoTimeId = parseInt(dayTmp);
+      console.log('  getPfdForPhotoId: Preparing to fetch starting at ' + earlyPhotoTimeId);
       let sub = this.photosByDay$.subscribe((pfds) => {
-        //Always fetch an extra 12 hours before to account for time zone differences between date bucket and UTC...
-        let day = PhotosForDay.dateToDayStr(new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000));
-        let pfd = this.photosByDayHash[day];
-        if (pfd) {
-          console.log('  getPhotoForId: retrying: pfd loaded=' + (pfd && pfd.photoResultsLoaded) + ' for day ' + day);
-          setTimeout(() => {
-            if (pfd && pfd.photoResultsLoaded) {
-              sub.unsubscribe();
-              let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
-              if (photo) {
-                resolve(pfd);
-              } else {
-                console.log('getPfdForPhotoId: didn\'t find photo id', photoTimeId, earlyPhotoTimeId);
-                reject('Photo not found');
+        setTimeout(() => {
+          console.log('    getPfdForPhotoId: Got photosByDay$ update: ', pfds);
+          let pfd = pfds.find((tmp) => {
+            return tmp.forDate === dayBucket;
+          });
+          if (pfd) {
+            console.log('  getPfdForPhotoId: retrying: pfd loaded=' + (pfd && pfd.photoResultsLoaded) + ' for day ' + dayTmp);
+            if (pfd) {
+              try {
+                sub.unsubscribe();
+              } catch (e) {
               }
+              let sub2 = pfd.getPhotoList$().subscribe((photos) => {
+                setTimeout(() => {
+                  if (pfd && pfd.photoResultsLoaded) {
+                    console.log('  ##### getPfdForPhotoId: load for getPfdForPhotoId  RESOLVING: ' + pfd.forDate);
+                    let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
+                    if (photo) {
+                      resolve(pfd);
+                    } else {
+                      console.log('getPfdForPhotoId: didn\'t find photo id', photoTimeId, earlyPhotoTimeId);
+                      reject('Photo not found');
+                    }
+                    try {
+                      sub2.unsubscribe();
+                    } catch (e) {
+                    }
+                    return;
+                  }
+                });
+              });
+              return;
             }
-          }, 300);
-        }
+          }
+          console.log('    getPfdForPhotoId: Updated photosForDay list doesn\'t contain target date ' + dayTmp, pfds);
+          pfd = pfds.find((tmp) => {
+            return tmp.forDate === earlyPhotoTimeId;
+          });
+          if (pfd) {
+            console.log('  getPfdForPhotoId: retrying2: pfd loaded=' + (pfd && pfd.photoResultsLoaded) + ' for day ' + earlyPhotoTimeId);
+            try {
+              sub.unsubscribe();
+            } catch (e) {
+            }
+            let sub2 = pfd.getPhotoList$().subscribe((photos) => {
+              setTimeout(() => {
+                if (pfd && pfd.photoResultsLoaded) {
+                  console.log('  ##### getPfdForPhotoId: load for getPfdForPhotoId  RESOLVING: ' + pfd.forDate);
+                  let photo = pfd.getPhotoForTimeId(photoTimeIdNum);
+                  if (photo) {
+                    resolve(pfd);
+                  } else {
+                    console.log('getPfdForPhotoId: didn\'t find photo id2', photoTimeId, earlyPhotoTimeId);
+                    reject('Photo not found');
+                  }
+                  try {
+                    sub2.unsubscribe();
+                  } catch (e) {
+                  }
+                  return;
+                }
+              });
+            });
+          }
+        });
       });
       this.fetchStartingAtDay(earlyPhotoTimeId);
-
-      return null;
     });
 
   }
@@ -169,7 +217,7 @@ export class PhotoResultSetService {
         return photo;
       }
     }
-    console.log('getPhotoForId: didn\'t find photo id');
+    console.error('getPhotoForId: didn\'t find photo id: ' + photoTimeIdNum);
     throw new Error('Photo not found');
   }
 
@@ -190,16 +238,21 @@ export class PhotoResultSetService {
             if (nextDayPfd && !nextDayPfd.photoResultsLoaded) {
               console.log('  ##### getFuturePhotoFromId: Awaiting load for nextDayPfd: ' + nextDayPfd.forDate);
               let sub = this.photosByDay$.subscribe((pfds) => {
-                sub.unsubscribe();
-                var nextDayPfd = this.photosByDayList[idx - 1];
-                console.log('  ##### getFuturePhotoFromId: load for nextDayPfd got subscription update for: ' + nextDayPfd.forDate + '  photoResultsLoaded=' + nextDayPfd.photoResultsLoaded, nextDayPfd);
-                //TODO: now subscribe and wait on photoList$ and keep checking the results loaded
-                let sub2 = nextDayPfd.getPhotoList$().subscribe((photos) => {
-                  if (nextDayPfd && nextDayPfd.photoResultsLoaded) {
-                    console.log('  ##### getFuturePhotoFromId: load for nextDayPfd  RESOLVING: ' + nextDayPfd.forDate);
-                    resolve(nextDayPfd.getLastPhoto());
-                    sub2.unsubscribe();
+                setTimeout(() => {
+                  try {
+                    sub.unsubscribe();
+                  } catch (e) {
                   }
+                  var nextDayPfd = this.photosByDayList[idx - 1];
+                  console.log('  ##### getFuturePhotoFromId: load for nextDayPfd got subscription update for: ' + nextDayPfd.forDate + '  photoResultsLoaded=' + nextDayPfd.photoResultsLoaded, nextDayPfd);
+                  //TODO: now subscribe and wait on photoList$ and keep checking the results loaded
+                  let sub2 = nextDayPfd.getPhotoList$().subscribe((photos) => {
+                    if (nextDayPfd && nextDayPfd.photoResultsLoaded) {
+                      console.log('  ##### getFuturePhotoFromId: load for nextDayPfd  RESOLVING: ' + nextDayPfd.forDate);
+                      resolve(nextDayPfd.getLastPhoto());
+                      sub2.unsubscribe();
+                    }
+                  });
                 });
               });
               this.fetchStartingAtDay(nextDayPfd.forDate);
@@ -237,16 +290,21 @@ export class PhotoResultSetService {
             var prevDayPfd = this.photosByDayList[idx + 1];
             if (prevDayPfd && !prevDayPfd.photoResultsLoaded) {
               let sub = this.photosByDay$.subscribe((pfds) => {
-                var prevDayPfd = this.photosByDayList[idx + 1];
-                sub.unsubscribe();
-                console.log('  ##### getPastPhotoFromId: load for prevDayPfd got subscription update for: ' + prevDayPfd.forDate + '  photoResultsLoaded=' + prevDayPfd.photoResultsLoaded, prevDayPfd);
-                //TODO: now subscribe and wait on photoList$ and keep checking the results loaded
-                let sub2 = prevDayPfd.getPhotoList$().subscribe((photos) => {
-                  if (prevDayPfd && prevDayPfd.photoResultsLoaded) {
-                    console.log('  ##### getPastPhotoFromId: load for nextDayPfd  RESOLVING: ' + prevDayPfd.forDate);
-                    resolve(prevDayPfd.getFirstPhoto());
-                    sub2.unsubscribe();
+                setTimeout(() => {
+                  var prevDayPfd = this.photosByDayList[idx + 1];
+                  try {
+                    sub.unsubscribe();
+                  } catch (e) {
                   }
+                  console.log('  ##### getPastPhotoFromId: load for prevDayPfd got subscription update for: ' + prevDayPfd.forDate + '  photoResultsLoaded=' + prevDayPfd.photoResultsLoaded, prevDayPfd);
+                  //TODO: now subscribe and wait on photoList$ and keep checking the results loaded
+                  let sub2 = prevDayPfd.getPhotoList$().subscribe((photos) => {
+                    if (prevDayPfd && prevDayPfd.photoResultsLoaded) {
+                      console.log('  ##### getPastPhotoFromId: load for nextDayPfd  RESOLVING: ' + prevDayPfd.forDate);
+                      resolve(prevDayPfd.getFirstPhoto());
+                      sub2.unsubscribe();
+                    }
+                  });
                 });
               });
               this.fetchStartingAtDay(prevDayPfd.forDate);
@@ -327,9 +385,9 @@ export class PhotoResultSetService {
 
   }
 
-  private fetchStartingAtDay(offsetDate: Date) {
+  private fetchStartingAtDay(offsetDate: number) {
     console.log('  FETCH at date=' + offsetDate, this.search);
-    this.photoService.getSearchResults(this.search, parseInt(PhotosForDay.dateToDayStr(offsetDate))).subscribe((results) => {
+    this.photoService.getSearchResults(this.search, offsetDate).subscribe((results) => {
       this.parseResults(results);
     });
   }
@@ -346,7 +404,7 @@ export class PhotoResultSetService {
         this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
         if (this.initialLoadUpToDate) {
           let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
-          let loadToDate = new Date(this.initialLoadUpToDate);
+          let loadToDate = this.initialLoadUpToDate;
           console.log('   ## Looking for initial load date of ' + loadToDate + '.  Currently at ' + earliestDate + '.  Next offset date=' + this.outlineNextOffsetDate);
           if (earliestDate > loadToDate) {
             await this.fetchResultsOutline(this.outlineNextOffsetDate);
@@ -378,7 +436,7 @@ export class PhotoResultSetService {
       let photo = Photo.fromIPhoto(ip);
       let localTime = new Date(photo.time.getTime());
       let bucketTime = photo.date_bucket;
-      console.log('processing date bucket ' + bucketTime, ip);
+      //console.log('processing date bucket ' + bucketTime, ip);
       let photosByDay = this.getPhotosForDay(bucketTime, processedDates);
       photosByDay.addPhoto(photo);
     });
@@ -387,7 +445,7 @@ export class PhotoResultSetService {
 
   private getPhotosForDay(day, processedDates: any): PhotosForDay {
     let pfd = this.photosByDayHash[day];
-    console.log('    Looking up Photos For Day ' + day + '.  Found existing? ' + (pfd != null));
+    //console.log('    Looking up Photos For Day ' + day + '.  Found existing? ' + (pfd != null));
     if (pfd == null) {
       pfd = new PhotosForDay(day, this);
       let oldList = this.photosByDayList;
@@ -395,7 +453,7 @@ export class PhotoResultSetService {
       this.photosByDayList.push(pfd);
       this.photosByDayHash[day] = pfd;
       this.photosByDayList.sort((a, b) => {
-        return b.forDate.getTime() - a.forDate.getTime();
+        return b.forDate - a.forDate;
       });
       this.photosByDay$.next(this.photosByDayList);
       this.searchSpecificSubscriptions.push(pfd.getDisplayHeight$().pipe(distinct()).subscribe((newHeight) => {
@@ -404,7 +462,7 @@ export class PhotoResultSetService {
 
     } else {
       if (processedDates[day] == null) {
-        console.log("    Found day already existing.  Refreshing results for " + day);
+        //console.log("    Found day already existing.  Refreshing results for " + day);
         //We haven't processed this date yet in this results batch, so
         //existing results are old, wipe it out before returning
         processedDates[day] = true;

@@ -420,14 +420,17 @@ export class IndividualPhotoComponent {
   }
 
   async reloadPhotoDetails() {
+    console.log('IndividualPhoto: reloadPhotoDetails: Initialized for ' + this.photoId);
     return this.resultSetService.getPhotoForId(this.userName, this.photoId).then((photo) => {
       this.photo = photo;
-      console.log('IndvPhoto: reloaded photo details', this.photo);
+      console.log('IndividualPhoto: reloaded photo details', this.photo);
       if (photo) {
         this.aspectRatio = photo.image_versions['screenHd']['height'] ? photo.image_versions['screenHd']['width'] * 1.0 / photo.image_versions['screenHd']['height'] : 1.0;
       } else {
         console.error('  IndividualPhoto: Photo not found for ID!', this.photoId);
       }
+    }, (err) => {
+      console.error('  IndividualPhoto: Error looking up photo for id!', this.photoId);
     });
 
   }

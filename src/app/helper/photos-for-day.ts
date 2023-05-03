@@ -5,7 +5,8 @@ import {PhotoResultSetService} from '../services/photo-result-set.service';
 export class PhotosForDay {
   private photos: Array<Photo>;
   private photosByPhotoTimeId: { [key: string]: Photo };
-  forDate: Date;
+  forDate: number;
+  forDateParts: Array<number>;
   photoResultsLoaded: boolean = false;
   private photoList$: BehaviorSubject<Array<Photo>>;
   displayHeight$: BehaviorSubject<number>;
@@ -14,8 +15,9 @@ export class PhotosForDay {
   private photoCount$: BehaviorSubject<number>;
 
   constructor(forDay: string, private photoResultSetService: PhotoResultSetService) {
-    this.forDate = new Date(parseInt(forDay.substring(0, 4)), parseInt(forDay.substring(4, 6)) - 1, parseInt(forDay.substring(6, 8)), 0, 0, 0, 0);
-    this.forDate = new Date(this.forDate.getTime() + (new Date().getTimezoneOffset() * 1000));
+    this.forDate = parseInt(forDay); //new Date(parseInt(forDay.substring(0, 4)), parseInt(forDay.substring(4, 6)) - 1, parseInt(forDay.substring(6, 8)), 0, 0, 0, 0);
+    this.forDateParts = [parseInt(forDay.substring(0, 4)), parseInt(forDay.substring(4, 6)), parseInt(forDay.substring(6, 8))];
+    //this.forDate = new Date(this.forDate.getTime() + (new Date().getTimezoneOffset() * 1000));
     this.photos = [];
     this.photosByPhotoTimeId = {};
     this.photoList$ = new BehaviorSubject<Array<Photo>>(this.photos);
