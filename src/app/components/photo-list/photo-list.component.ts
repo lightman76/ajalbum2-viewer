@@ -131,7 +131,7 @@ export class PhotoListComponent {
           let wl = window.location;
           setTimeout(() => {
             window.history.replaceState(null, null, wl.protocol + '//' + wl.hostname + wl.pathname + wl.search);
-          }, 500);
+          }, 1500);
         }
       }
       console.log('  PhotoList: query params updated: ', this.currentSearch);
