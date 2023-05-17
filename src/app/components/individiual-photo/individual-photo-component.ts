@@ -232,14 +232,14 @@ import {MatDialog} from '@angular/material/dialog';
       overflow: auto;
       user-select: none;
       position: relative;
+      min-height: 100vh;
+      min-width: 100vw;
     }
 
     .photo-zoomed img {
       object-fit: contain;
       height: 100%;
       width: 100%;
-      min-height: 100vh;
-      min-width: 100vw;
       user-select: none;
     }
   `],
@@ -451,12 +451,14 @@ export class IndividualPhotoComponent {
 
   handleMouseWheelZoom() {
     var event = this.lastZoomEvent;
-    if (event === null) return;
+    if (event === null) {
+      return;
+    }
     this.lastZoomEvent = null;
     let prevZoomLevel = this.zoomLevel;
     this.zoomLevel += (-1 * event.deltaY) * 0.05;
-    if (this.zoomLevel < 1.0) {
-      this.zoomLevel = 1.0;
+    if (this.zoomLevel < 0.05) {
+      this.zoomLevel = 0.05;
     } else if (this.zoomLevel > 100) {
       this.zoomLevel = 100;
     }
@@ -606,12 +608,14 @@ export class IndividualPhotoComponent {
 
   handlePinchMove() {
     var event = this.lastPinchEvent;
-    if (event === null) return;
+    if (event === null) {
+      return;
+    }
     this.lastPinchEvent = null;
     let prevZoomLevel = this.zoomLevel;
     this.zoomLevel = event.scale * this.pinchInitialZoom;
-    if (this.zoomLevel < 1.0) {
-      this.zoomLevel = 1.0;
+    if (this.zoomLevel < 0.05) {
+      this.zoomLevel = 0.05;
     } else if (this.zoomLevel > 100) {
       this.zoomLevel = 100;
     }

@@ -10,9 +10,9 @@ import {faSearchPlus, faTimes} from '@fortawesome/pro-solid-svg-icons';
       <span class="magnification-display">{{zoomLevel|number:"1.0-2"}}x</span>
     </div>
     <div class="zoom-toggle-dropdown" *ngIf="showingZoomControls">
-      <mat-slider step="0.05" showTickMarks>
+      <mat-slider step="0.05" showTickMarks min="-5" max="5">
         <input matSliderThumb
-               [value]="zoomLevel"
+               [value]="calculatedZoomLevel"
                (valueChange)="onZoomSliderChange($event)"
         >
       </mat-slider>
@@ -22,11 +22,25 @@ import {faSearchPlus, faTimes} from '@fortawesome/pro-solid-svg-icons';
     </div>
   `,
   styles: [`
+    :host {
+      position: relative;
+    }
+
     .zoom-toggle-dropdown {
+      position: absolute;
+      right: 0;
+      z-index: 20;
+      top: 20px;
       box-sizing: border-box;
-      width: 55px;
+      height: 55px;
+      width: 400px;
       padding: 5px 5px 15px 5px;
       background-color: #aaaaaa88;
+
+    }
+
+    .zoom-toggle-dropdown mat-slider {
+      width: 300px;
     }
 
     .magnification-display {
@@ -53,17 +67,45 @@ export class PhotoZoomControl {
 
   @Input() zoomLevel: number;
   @Output() updatedZoomLevel: EventEmitter<number>;
+  calculatedZoomLevel: number;
 
   constructor() {
     this.updatedZoomLevel = new EventEmitter<number>();
+  }
+
+  ngOnChanges(changes) {
+    if (changes && changes['zoomLevel']) {
+      this.calculatedZoomLevel = this.calculatedZoomFromUiZoom(this.zoomLevel);
+    }
+  }
+
+  calculatedZoomFromUiZoom(z) {
+    let calcZoom = z - 1.0;
+
+    if (z < 1.0) {
+      calcZoom = -1.0 / (z) + 1.0;
+    }
+    console.log('  >>> Incoming zoom change in val=' + z + ' -->outval=' + calcZoom);
+    return calcZoom;
   }
 
   zoomControlToggle(evt) {
     this.showingZoomControls = !this.showingZoomControls;
   }
 
-  onZoomSliderChange(zoomLevel) {
-    this.updatedZoomLevel.emit(zoomLevel.value);
+  onZoomSliderChange(calcZoomLevel) {
+    if (calcZoomLevel < 0) {
+      this.calculatedZoomLevel = calcZoomLevel;
+      this.zoomLevel = 1.0 / (Math.abs(calcZoomLevel) + 1);
+      console.log('Updated zoom level1 ' + this.zoomLevel + '/' + this.calculatedZoomLevel);
+      this.updatedZoomLevel.emit(this.zoomLevel);
+    } else {
+      this.calculatedZoomLevel = calcZoomLevel;
+      this.zoomLevel = calcZoomLevel + 1;
+      console.log('Updated zoom level2 ' + this.zoomLevel + '/' + this.calculatedZoomLevel);
+      this.updatedZoomLevel.emit(this.zoomLevel);
+    }
+
   }
 
   resetZoomLevel(evt) {
