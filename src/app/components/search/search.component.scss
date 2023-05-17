@@ -14,6 +14,7 @@
 .search-date-filters {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   width: 100%;
   height: 90px;
   padding-top: 10px;
@@ -22,6 +23,16 @@
 
   .search-date-filter {
     flex: 1 1 50%;
+  }
+}
+
+@media(max-width: 700px) {
+  .search-date-filters {
+    height: 180px;
+
+    .search-date-filter {
+      flex: 0 0 100%;
+    }
   }
 }
 

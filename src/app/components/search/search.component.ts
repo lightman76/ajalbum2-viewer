@@ -48,6 +48,19 @@ import {MatChipInputEvent} from '@angular/material/chips';
           </mat-chip-grid>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
             <div class="search-date-filters">
+              <div class="search-date-filter search-date-filter-end">
+                <mat-form-field appearance="fill">
+                  <mat-label>End Date</mat-label>
+                  <input
+                    matInput
+                    (dateInput)="onEndDateChange($event)"
+                    [value]="endDate"
+                    [matDatepicker]="endPicker">
+                  <mat-hint>MM/DD/YYYY</mat-hint>
+                  <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
               <div class="search-date-filter search-date-filter-start">
                 <mat-form-field appearance="fill">
                   <mat-label>Start Date</mat-label>
@@ -61,20 +74,6 @@ import {MatChipInputEvent} from '@angular/material/chips';
 
                   <mat-datepicker #startPicker></mat-datepicker>
                 </mat-form-field>
-              </div>
-              <div class="search-date-filter search-date-filter-end">
-                <mat-form-field appearance="fill">
-                  <mat-label>End Date</mat-label>
-                  <input
-                    matInput
-                    (dateInput)="onEndDateChange($event)"
-                    [value]="endDate"
-                    [matDatepicker]="endPicker">
-                  <mat-hint>MM/DD/YYYY</mat-hint>
-                  <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                  <mat-datepicker #endPicker></mat-datepicker>
-                </mat-form-field>
-
               </div>
             </div>
             <mat-option *ngFor="let tagSearchTerm of filterTags | async" [value]="tagSearchTerm">
@@ -133,6 +132,7 @@ export class SearchComponent {
       this.tagService.getAllTags(this.searchQuery.userName).then((tags) => {
         this.allTags = tags.map((t) => t.getValue());
         this.updateSearchTermsFromQuery();
+        this.searchForm.valueChanges.next('');
       }, (err) => {
         console.error('Failure retrieving tags: ', err);
       });
