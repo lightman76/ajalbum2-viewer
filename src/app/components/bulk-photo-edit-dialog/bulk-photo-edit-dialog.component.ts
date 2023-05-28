@@ -54,6 +54,20 @@ import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
             (valueChange)="onPriorityChange($event)"
             aria-labelledby="photo-priority">
         </mat-slider>
+        <div class="photo-orientation">
+          <label id="photo-photo-orientation" class="photo-orientation-label">Orientation (relative to original)</label>
+        </div>
+
+        <mat-radio-group name="rotation-change"
+                         #rotationInput
+                         formControlName="rotation"
+        >
+          <mat-radio-button [value]="null">No change</mat-radio-button>
+          <mat-radio-button value="0">Original</mat-radio-button>
+          <mat-radio-button value="90">90 Clockwise</mat-radio-button>
+          <mat-radio-button value="180">180</mat-radio-button>
+          <mat-radio-button value="270">90 Counter-clockwise</mat-radio-button>
+        </mat-radio-group>
 
 
         <div class="tag-edit-area" *ngIf="singlePhotoEdit">
@@ -169,6 +183,7 @@ export class BulkPhotoEditDialogComponent {
   title: string = null;
   description: string = null;
   priority: number = null;
+  rotation: number = null;
 
   currentUser: UserInfo = null;
   forUserName: string = null;
@@ -195,6 +210,7 @@ export class BulkPhotoEditDialogComponent {
 
   @ViewChild('titleInput') titleInput: ElementRef<HTMLInputElement>;
   @ViewChild('descriptionInput') descriptionInput: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('rotationInput') rotationInput: ElementRef<HTMLInputElement>;
   @ViewChild('searchTagInput') searchTagInput: ElementRef<HTMLInputElement>;
 
   /** data parameter
@@ -229,6 +245,7 @@ export class BulkPhotoEditDialogComponent {
     this.form = this.fb.group({
       title: [this.title, []],
       description: [this.description, []],
+      rotation: [this.rotation, []],
     });
     this.forUserName = this.data.forUserName;
     this.photoIds = this.data.photoIds;
@@ -251,6 +268,9 @@ export class BulkPhotoEditDialogComponent {
     });
     this.form.get('description').valueChanges.subscribe((val) => {
       this.description = val;
+    });
+    this.form.get('rotation').valueChanges.subscribe((val) => {
+      this.rotation = val;
     });
 
     this.refreshPhotoTags();
@@ -398,6 +418,9 @@ export class BulkPhotoEditDialogComponent {
     }
     if (this.priority !== null) {
       updatedParams.updated_feature_threshold = this.priority;
+    }
+    if (this.rotation !== null) {
+      updatedParams.forced_rotation = this.rotation;
     }
     if (this.addTags.length > 0) {
       updatedParams.add_tags = this.addTags.map((btd) => btd.tag$.getValue().id);

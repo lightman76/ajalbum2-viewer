@@ -95,6 +95,7 @@ export class PhotoUpdateFields {
   updated_title: string;
   updated_description: string;
   updated_feature_threshold: number;
+  forced_rotation: number;
   add_tags: Array<number>;
   remove_tags: Array<number>;
 }
