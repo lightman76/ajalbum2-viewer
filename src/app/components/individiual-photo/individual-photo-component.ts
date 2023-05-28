@@ -4,10 +4,11 @@ import {PhotoService} from '../../services/photo.service';
 import {SearchQuery} from '../../services/helper/search-query';
 import {PhotoResultSetService} from '../../services/photo-result-set.service';
 import {Photo} from '../../helper/photo';
-import {faChevronCircleLeft, faChevronCircleRight, faEdit, faTimes} from '@fortawesome/pro-solid-svg-icons';
+import {faChevronCircleLeft, faChevronCircleRight, faEdit, faTimes, faTrash} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import {UserInfo} from '../../services/helper/user-info';
 
 @Component({
   selector: 'individual-photo',
@@ -22,6 +23,9 @@ import {MatDialog} from '@angular/material/dialog';
       </div>
       <div class="edit-details" (click)="openEdit($event)" [matTooltip]="'Edit details'" tabindex="0" *ngIf="canEdit">
         <fa-icon [icon]="faEdit"></fa-icon>
+      </div>
+      <div class="delete-photo" (click)="confirmDelete($event)" [matTooltip]="'Delete photo'" tabindex="0" *ngIf="canEdit">
+        <fa-icon [icon]="faTrash"></fa-icon>
       </div>
       <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)" [matTooltip]="'Previous photo'"
            [matTooltipPosition]="'right'">
@@ -50,7 +54,7 @@ import {MatDialog} from '@angular/material/dialog';
            (swipe)="onSwipe($event)">
         <img *ngIf="photo.image_versions['screenHd']"
              #imgHost
-             [attr.src]="'storage/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
+             [attr.src]="'storage/'+photo.user_id+'/'+photo.image_versions['screenHd'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['screenHd'].relative_path: photo.image_versions['fullRes'].relative_path)"
              [attr.alt]="photo.title">
       </div>
       <individual-photo-info [photo]="photo" *ngIf="photo" [zoomLevel]="zoomLevel"></individual-photo-info>
@@ -92,9 +96,11 @@ import {MatDialog} from '@angular/material/dialog';
       user-select: none;
     }
 
-    .return-to-search:hover {
-      color: rgba(0, 0, 0, 1);
-      background-color: rgba(150, 150, 150, 1.0);
+    @media (hover) {
+      .return-to-search:hover {
+        color: rgba(0, 0, 0, 1);
+        background-color: rgba(150, 150, 150, 1.0);
+      }
     }
 
     .image-container {
@@ -122,9 +128,32 @@ import {MatDialog} from '@angular/material/dialog';
       user-select: none;
     }
 
-    .zoom-toggle:hover {
-      color: rgba(0, 0, 0, 1);
-      background-color: rgba(150, 150, 150, 1.0);
+    @media (hover) {
+      .zoom-toggle:hover {
+        color: rgba(0, 0, 0, 1);
+        background-color: rgba(150, 150, 150, 1.0);
+      }
+    }
+
+    .delete-photo {
+      position: fixed;
+      top: 10px;
+      right: 140px;
+      width: 30px;
+      height: 30px;
+      color: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      padding-top: 5px;
+      text-align: center;
+      font-weight: bold;
+      font-family: "Arial", sans-serif;
+      font-size: 18px;
+      background-color: rgba(150, 150, 150, 0.2);
+      transition-property: background-color, color;
+      transition-duration: 250ms;
+      cursor: pointer;
+      z-index: 20;
+      user-select: none;
     }
 
     .edit-details {
@@ -148,9 +177,16 @@ import {MatDialog} from '@angular/material/dialog';
       user-select: none;
     }
 
-    .edit-details:hover {
-      color: rgba(0, 0, 0, 1);
-      background-color: rgba(150, 150, 150, 1.0);
+    @media (hover) {
+      .delete-photo:hover {
+        color: #cb0101;
+        background-color: rgba(150, 150, 150, 1.0);
+      }
+
+      .edit-details:hover {
+        color: rgba(0, 0, 0, 1);
+        background-color: rgba(150, 150, 150, 1.0);
+      }
     }
 
     .navigation-button {
@@ -203,13 +239,14 @@ import {MatDialog} from '@angular/material/dialog';
       cursor: pointer;
     }
 
-    .navigation-button:hover {
-      background-color: rgba(200, 200, 200, 0.5);
-    }
+    @media (hover) {
+      .navigation-button:hover {
+        background-color: rgba(200, 200, 200, 0.5);
+      }
 
-    .navigation-button:hover .navigation-button-icon {
-      color: rgba(0, 0, 0, 1);
-
+      .navigation-button:hover .navigation-button-icon {
+        color: rgba(0, 0, 0, 1);
+      }
     }
 
     .photo-normal {
@@ -249,6 +286,7 @@ export class IndividualPhotoComponent {
   faChevronCircleLeft = faChevronCircleLeft;
   faChevronCircleRight = faChevronCircleRight;
   faEdit = faEdit;
+  faTrash = faTrash;
 
   params: any;
   queryParams: any;
@@ -269,6 +307,7 @@ export class IndividualPhotoComponent {
   lastPinchEvent = null;
 
   userName = null;
+  currentUser: UserInfo;
   canEdit = false;
   editOpen = false;
 
@@ -319,6 +358,7 @@ export class IndividualPhotoComponent {
     });
 
     this.userService.getCurrentUser$().subscribe((currentUser) => {
+      this.currentUser = currentUser;
       this.canEdit = this.userService.hasAccessToUser(currentUser, this.userName);
     });
   }
@@ -687,5 +727,24 @@ export class IndividualPhotoComponent {
       }
     }
     evt.preventDefault();
+  }
+
+  confirmDelete(evt) {
+    if (confirm('Are you sure you want to delete this photo?')) {
+      //TODO: call photo service to delete
+      this.photoService.deletePhotos(
+        this.userService.getCurrentUser$().getValue().authenticationToken,
+        this.userService.getCurrentUser$().getValue().userName,
+        [this.photo.time_id]).subscribe(() => {
+        //TODO: NEED TO TRIGGER REFRESH
+        this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
+          this.futurePhoto(evt);
+        });
+      }, () => {
+        console.error('FAILURE: failed while deleting individual photo! ', this.photo.time_id);
+      });
+
+
+    }
   }
 }

@@ -8,6 +8,7 @@ import {SearchQuery} from './helper/search-query';
 import {ISearchDateOutlineResult} from './helper/i-search-date-outline-result';
 import {PhotosForDay} from '../helper/photos-for-day';
 import {IUpdatePhotoResults} from './helper/i-update-photo-results';
+import {IDeletePhotoResults} from './helper/i-delete-photo-results';
 
 
 @Injectable()
@@ -56,6 +57,19 @@ export class PhotoService {
       headers: headers,
       responseType: 'json'
     }).pipe(retry(1), catchError(this.errorHandler));
+  }
+
+  deletePhotos(authorization: string, user: string, photoIds: Array<number>) {
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + encodeURIComponent(authorization)
+    });
+
+    return this.http.delete<IDeletePhotoResults>(this.configService.getApiRoot() + '/' + encodeURIComponent(user) + '/photo/' + photoIds.join(','), {
+      headers: headers,
+      responseType: 'json'
+    }).pipe(retry(1), catchError(this.errorHandler));
+
   }
 
 

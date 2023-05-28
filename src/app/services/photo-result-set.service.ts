@@ -65,6 +65,10 @@ export class PhotoResultSetService {
     }
   }
 
+  getSearch() {
+    return this.search;
+  }
+
   //when search updated, clear prior results
   async updateSearch(inSearch: SearchQuery, forcedRefresh: boolean = false) {
     //console.info("PhotoResultSet: Updating current query: ",inSearch, this.search, " Are same? "+(this.search && this.search.equals(inSearch)))

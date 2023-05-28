@@ -2,6 +2,7 @@ import {IImageVersion} from './i-image-version';
 
 export interface IPhoto {
   id: number;
+  user_id: number;
   title: string;
   description: string;
   time_id: number;

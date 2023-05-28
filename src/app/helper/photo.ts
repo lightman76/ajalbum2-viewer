@@ -4,6 +4,7 @@ import {JsonUtils} from './json-utils';
 
 export class Photo {
   id: number;
+  user_id: number;
   title: string;
   description: string;
   time_id: number;
@@ -26,6 +27,7 @@ export class Photo {
   public static fromIPhoto(i:IPhoto):Photo {
     let photo = new Photo();
     photo.id = i.id;
+    photo.user_id = i.user_id;
     photo.title = i.title;
     photo.description = i.description;
     photo.time_id = i.time_id;

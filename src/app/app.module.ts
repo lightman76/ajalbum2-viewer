@@ -41,6 +41,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatSliderModule} from '@angular/material/slider';
+import {DeletePhotoButtonComponent} from './components/delete-photo-button/delete-photo-button.component';
 
 
 @Injectable()
@@ -57,6 +58,7 @@ export class MyHammerConfig extends HammerGestureConfig {
     CreateTagDialogComponent,
     DefaultUserComponent,
     EditPhotoButtonComponent,
+    DeletePhotoButtonComponent,
     IndividualPhotoComponent,
     IndividualPhotoInfoComponent,
     LoginDialogComponent,

@@ -19,6 +19,11 @@ import {distinct} from 'rxjs/operators';
           [viewingUser]="currentSearch.userName"
           (photosUpdated)="onPhotosEdited($event)"
         ></edit-photo-button>
+        <delete-photo-button
+          [usageContext]="'multi'"
+          [viewingUser]="currentSearch.userName"
+          (afterDelete)="onPhotosEdited($event)"
+        ></delete-photo-button>
         <photo-selection-toggle></photo-selection-toggle>
         <login-indicator></login-indicator>
       </div>
