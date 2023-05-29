@@ -37,7 +37,16 @@ export class SearchQuery {
     }
   }
 
+  fixTagIds() {
+    if (this.tagIds) {
+      this.tagIds = this.tagIds.map((tid) => {
+        return typeof (tid) === 'string' ? parseInt(tid) : tid;
+      });
+    }
+  }
+
   toJsonHash() {
+    this.fixTagIds();
     return {
       user: this.userName,
       search_text: this.searchText,
@@ -90,6 +99,7 @@ export class SearchQuery {
   }
 
   equals(that) {
+    this.fixTagIds();
     if (!that) {
       return false;
     }
@@ -102,6 +112,7 @@ export class SearchQuery {
   }
 
   toQueryParamHash() {
+    this.fixTagIds();
     let queryHash = {};
     if (this.userName) {
       queryHash['userName'] = this.userName;
@@ -126,6 +137,7 @@ export class SearchQuery {
   }
 
   toQueryString() {
+    this.fixTagIds();
     let queryString = "";
     let firstTerm = true;
     /*
