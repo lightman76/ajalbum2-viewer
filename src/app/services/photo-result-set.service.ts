@@ -122,8 +122,7 @@ export class PhotoResultSetService {
           return;
         } else {
           //didn't find the photo in that date.  It's possible the date bucket was classified to the prior day so try that
-          //let day = PhotosForDay.dateToDayStr(new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000));
-          let day = PhotosForDay.dateToDayStr(photoTimeId);
+          let day = PhotosForDay.dateToDayStr(new Date(photoTimeId.getTime() - 12 * 60 * 60 * 1000));
           console.info('getPfdForPhotoId: RETRY: Looking up day=' + day + ' in hash', this.photosByDayHash);
           let pfd = this.photosByDayHash[day];
           //console.log('  getPhotoForId: pfd loaded=' + (pfd && pfd.photoResultsLoaded));
