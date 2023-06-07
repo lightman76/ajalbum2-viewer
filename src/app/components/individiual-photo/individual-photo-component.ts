@@ -365,7 +365,7 @@ export class IndividualPhotoComponent {
 
   returnToSearch(evt) {
     evt.preventDefault();
-    let curPhotoId = this.params.photoId;
+    let curPhotoId = parseInt(this.params.photoId);
     let newParams = {...this.queryParams};
     delete newParams['photoId'];
     this.router.navigate(['../../list'], {relativeTo: this.route, fragment: 'photo__' + curPhotoId, queryParams: newParams});
