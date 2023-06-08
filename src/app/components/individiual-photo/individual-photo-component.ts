@@ -4,7 +4,7 @@ import {PhotoService} from '../../services/photo.service';
 import {SearchQuery} from '../../services/helper/search-query';
 import {PhotoResultSetService} from '../../services/photo-result-set.service';
 import {Photo} from '../../helper/photo';
-import {faChevronCircleLeft, faChevronCircleRight, faEdit, faTimes, faTrash} from '@fortawesome/pro-solid-svg-icons';
+import {faChevronCircleLeft, faChevronCircleRight, faDownload, faEdit, faTimes, faTrash} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -17,6 +17,14 @@ import {UserInfo} from '../../services/helper/user-info';
     >
       <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'" tabindex="0">
         <fa-icon [icon]="faTimes"></fa-icon>
+      </div>
+      <div class="download-btn" *ngIf="photo">
+        <a target="_blank"
+           [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
+           [download]="photo.title"
+        >
+          <fa-icon [icon]="faDownload"></fa-icon>
+        </a>
       </div>
       <div class="zoom-toggle">
         <photo-zoom-control [zoomLevel]="zoomLevel" (updatedZoomLevel)="onZoomLevelUpdate($event)"></photo-zoom-control>
@@ -105,6 +113,27 @@ import {UserInfo} from '../../services/helper/user-info';
 
     .image-container {
       position: relative;
+    }
+
+    .download-btn {
+      position: fixed;
+      top: 10px;
+      right: 108px;
+      width: 50px;
+      height: 30px;
+      color: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      padding-top: 5px;
+      text-align: center;
+      font-weight: bold;
+      font-family: "Arial", sans-serif;
+      font-size: 18px;
+      background-color: rgba(150, 150, 150, 0.2);
+      transition-property: background-color, color;
+      transition-duration: 250ms;
+      cursor: pointer;
+      z-index: 20;
+      user-select: none;
     }
 
     .zoom-toggle {
@@ -287,7 +316,7 @@ export class IndividualPhotoComponent {
   faChevronCircleRight = faChevronCircleRight;
   faEdit = faEdit;
   faTrash = faTrash;
-
+  faDownload = faDownload;
   params: any;
   queryParams: any;
   photoId: number;
