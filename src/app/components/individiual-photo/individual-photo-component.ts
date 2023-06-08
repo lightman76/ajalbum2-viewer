@@ -496,9 +496,9 @@ export class IndividualPhotoComponent {
     }
     this.lastZoomEvent = null;
     let prevZoomLevel = this.zoomLevel;
-    this.zoomLevel += (-1 * event.deltaY) * 0.05;
-    if (this.zoomLevel < 0.05) {
-      this.zoomLevel = 0.05;
+    this.zoomLevel += (-1 * (event.deltaY * (this.zoomLevel < 1.0 ? 0.25 : 1.0))) * 0.05;
+    if (this.zoomLevel < 0.025) {
+      this.zoomLevel = 0.025;
     } else if (this.zoomLevel > 100) {
       this.zoomLevel = 100;
     }
@@ -654,11 +654,12 @@ export class IndividualPhotoComponent {
     this.lastPinchEvent = null;
     let prevZoomLevel = this.zoomLevel;
     this.zoomLevel = event.scale * this.pinchInitialZoom;
-    if (this.zoomLevel < 0.05) {
-      this.zoomLevel = 0.05;
+    if (this.zoomLevel < 0.025) {
+      this.zoomLevel = 0.025;
     } else if (this.zoomLevel > 100) {
       this.zoomLevel = 100;
     }
+    console.log('  #### Handling pinch zoom: ' + event.scale + ' * ' + this.pinchInitialZoom + ' results in ' + this.zoomLevel);
 
     let lastWidth = this.imgContainer.nativeElement.scrollWidth;
     let lastHeight = this.imgContainer.nativeElement.scrollHeight;
@@ -706,6 +707,9 @@ export class IndividualPhotoComponent {
     if (this.zoomLevel > 5) {
       inc = 0.4;
     }
+    if (this.zoomLevel < 0.5) {
+      inc = 0.025;
+    }
     this.onZoomLevelUpdate(this.zoomLevel + inc);
     evt.preventDefault();
 
@@ -719,9 +723,12 @@ export class IndividualPhotoComponent {
     if (this.zoomLevel > 5) {
       inc = 0.4;
     }
-    if (this.zoomLevel > 1) {
-      if (this.zoomLevel - inc < 1) {
-        this.onZoomLevelUpdate(1.0);
+    if (this.zoomLevel < 0.5) {
+      inc = 0.025;
+    }
+    if (this.zoomLevel > 0.025) {
+      if (this.zoomLevel - inc < 0.025) {
+        this.onZoomLevelUpdate(0.025);
       } else {
         this.onZoomLevelUpdate(this.zoomLevel - inc);
       }
