@@ -21,7 +21,7 @@ import {UserInfo} from '../../services/helper/user-info';
       <div class="download-btn" *ngIf="photo">
         <a target="_blank"
            [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
-           [download]="photo.title"
+           [download]="photo.date_bucket+'_'+photo.title"
         >
           <fa-icon [icon]="faDownload"></fa-icon>
         </a>
