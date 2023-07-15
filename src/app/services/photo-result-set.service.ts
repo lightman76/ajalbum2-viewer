@@ -400,6 +400,9 @@ export class PhotoResultSetService {
         var idx = this.photosByDayList.indexOf(pfd);
         if (idx >= 0 && idx < this.photosByDayList.length) {
           var prevDayPfd = this.photosByDayList[idx + 1];
+          if (!prevDayPfd) {
+            return null;
+          }
           prevDayPfd = await this.getLoadedPfdForDay(prevDayPfd.forDate, this.search.userName);
           return prevDayPfd ? prevDayPfd.getFirstPhoto() : null;
         }
