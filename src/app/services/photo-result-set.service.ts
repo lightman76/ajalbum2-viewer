@@ -107,7 +107,7 @@ export class PhotoResultSetService {
       console.log('    --> getLoadedPfdForDay: Found PFD 1 -- ' + dateBucket);
       return pfd;
     }
-    if (this.photosByDayList.length > 0) {
+    if (!pfd && this.photosByDayList.length > 0) {
       console.log('  getLoadedPfdForDay: checking in loaded range ', this.photosByDayList[0].forDate, dateBucketNum, this.photosByDayList[this.photosByDayList.length - 1].forDate);
       if (this.photosByDayList[0].forDate > dateBucketNum && this.photosByDayList[this.photosByDayList.length - 1].forDate < dateBucketNum) {
         console.log('   --> getLoadedPfdForDay: Found PFD 0 - already loaded range and this date isn\'t contained -- ' + dateBucketNum);
