@@ -187,7 +187,7 @@ export class IndividualPhotoInfoComponent implements OnChanges {
     if(changes && changes['photo']) {
       let change = changes['photo'];
       if(change.currentValue != null) {
-        console.log('photoInfo: Got photo change');
+        console.log('photoInfoComponent: Got photo change: ', change.currentValue);
         this.refreshPhotoInfo();
       }
     }
@@ -196,7 +196,7 @@ export class IndividualPhotoInfoComponent implements OnChanges {
   refreshPhotoInfo() {
     let tagsById = this.tagService.getTag$forIds(this.photo.tags);
     let tagArr = [];
-    console.log('Photo: retrieved tag subjects1 as ', tagsById);
+    console.log('photoInfoComponent: retrieved tag subjects1 as ', tagsById);
     Object.keys(tagsById).forEach((k) => {
       let tag = tagsById[k];
       tagArr.push(tag);

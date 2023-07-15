@@ -99,11 +99,19 @@ export class PhotoResultSetService {
     return this.photosByDay$;
   }
 
-  async getLoadedPfdForDay(dateBucket, userName) {
+  async getLoadedPfdForDay(dateBucket, userName: string) {
+    let dateBucketNum = parseInt(dateBucket);
     let pfd = this.photosByDayHash[dateBucket];
+    console.log('getLoadedPfdForDay: preparing to get PFD for ' + dateBucket + ' from ', Object.keys(this.photosByDayHash), pfd);
     if (pfd && pfd.photoResultsLoaded) {
       console.log('    --> getLoadedPfdForDay: Found PFD 1 -- ' + dateBucket);
       return pfd;
+    }
+    if (this.photosByDayList.length > 0) {
+      if (this.photosByDayList[0].forDate > dateBucketNum && this.photosByDayList[this.photosByDayList.length - 1].forDate < dateBucketNum) {
+        console.log('   --> getLoadedPfdForDay: Found PFD 0 - already loaded range and this date isn\'t contained -- ' + dateBucketNum);
+        return null;  //We've loaded through this range - the page doesn't exist
+      }
     }
     await this.fetchResultsOutline(dateBucket);
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -112,7 +120,7 @@ export class PhotoResultSetService {
       console.log('    --> getLoadedPfdForDay: Found PFD 2 -- ' + dateBucket);
       return pfd;
     }
-    let dateBucketNum = parseInt(dateBucket);
+
     console.log('    --> getLoadedPfdForDay: starting load of ' + dateBucketNum);
 
     await this.fetchStartingAtDay(dateBucketNum);

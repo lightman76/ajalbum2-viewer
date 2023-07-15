@@ -320,6 +320,7 @@ export class IndividualPhotoComponent {
   params: any;
   queryParams: any;
   photoId: number;
+  readyPhotoId: number;
   photo: Photo;
   zoomLevel = 1.0;
   aspectRatio = 1.0;
@@ -359,10 +360,12 @@ export class IndividualPhotoComponent {
 
     //have to wait for query params AND photo id
     let fetchResultsWhenReady = async () => {
-      console.log('Checking fetchResultsWhenReady', this.photoId, query);
-      if (this.photoId && query) {
+      console.log('Checking fetchResultsWhenReady ' + this.readyPhotoId, this.photoId, query);
+      if (this.photoId && query && this.readyPhotoId !== this.photoId) {
+        console.log(' fetchResultsWhenReady --- Running query: ' + this.readyPhotoId, this.photoId, query);
         await this.resultSetService.updateSearch(query);
         await this.reloadPhotoDetails();
+        this.readyPhotoId = this.photoId;
       }
     };
 
