@@ -19,6 +19,7 @@ export class SearchQuery {
     this.featureThreshold = SearchQuery.parseNumber(params['featureThreshold']);
     this.offsetDate = (params['offsetDate'] !== '' ? params['offsetDate'] : null) || null;
     this.timezoneOffsetMin = -1 * (new Date().getTimezoneOffset());
+    this.fixTagIds();
     //console.log("Parsed tagIds as ",this.tagIds)
   }
 

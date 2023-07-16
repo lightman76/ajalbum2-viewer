@@ -20,6 +20,7 @@ export class PhotoService {
   }
 
   getSearchResults(searchQuery: SearchQuery, dateOffset: number) {
+    console.log('getSearchResults: Requesting search results for ' + dateOffset, searchQuery);
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     let query = searchQuery.clone();
     if (!dateOffset) {
@@ -34,6 +35,7 @@ export class PhotoService {
   }
 
   getSearchDateOutline(searchQuery: SearchQuery, dateOffset: number) {
+    console.log('getSearchDateOutline: Requesting search outline for ' + dateOffset, searchQuery);
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     let query = searchQuery.clone();
     if (!dateOffset) {

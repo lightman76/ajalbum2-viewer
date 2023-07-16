@@ -71,7 +71,7 @@ export class PhotoResultSetService {
 
   //when search updated, clear prior results
   async updateSearch(inSearch: SearchQuery, forcedRefresh: boolean = false) {
-    //console.info("PhotoResultSet: Updating current query: ",inSearch, this.search, " Are same? "+(this.search && this.search.equals(inSearch)))
+    console.info('PhotoResultSet: Updating current query: ', inSearch, this.search, ' Are same? ' + (this.search && this.search.equals(inSearch)));
     if (!forcedRefresh && this.search && this.search.equals(inSearch)) {
       return;
     }
@@ -389,7 +389,7 @@ export class PhotoResultSetService {
 
   async getPastPhotoFromId(photoTimeIdNum: number): Promise<Photo> {
     let photoTimeId = new Date(photoTimeIdNum);
-    console.log('getFuturePhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId);
+    console.log('getPastPhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId);
 
     let pfd = await this.getPfdForPhotoId(this.search.userName, photoTimeIdNum);
     if (pfd) {
@@ -415,7 +415,7 @@ export class PhotoResultSetService {
 
   async getPastPhotoFromId__OLD(photoTimeIdNum: number): Promise<Photo> {
     let photoTimeId = new Date(photoTimeIdNum);
-    console.log('getFuturePhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId);
+    console.log('getPastPhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId);
 
     let pfd = await this.getPfdForPhotoId(this.search.userName, photoTimeIdNum);
     if (pfd) {
