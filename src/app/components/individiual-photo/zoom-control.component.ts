@@ -10,7 +10,7 @@ import {faSearchPlus, faTimes} from '@fortawesome/pro-solid-svg-icons';
       <span class="magnification-display">{{zoomLevel|number:"1.0-2"}}x</span>
     </div>
     <div class="zoom-toggle-dropdown" *ngIf="showingZoomControls">
-      <mat-slider step="0.05" showTickMarks min="-5" max="5">
+      <mat-slider step="0.05" showTickMarks min="0" max="5">
         <input matSliderThumb
                [value]="calculatedZoomLevel"
                (valueChange)="onZoomSliderChange($event)"
@@ -95,8 +95,8 @@ export class PhotoZoomControl {
 
   onZoomSliderChange(calcZoomLevel) {
     if (calcZoomLevel < 0) {
-      this.calculatedZoomLevel = calcZoomLevel;
-      this.zoomLevel = 1.0 / (Math.abs(calcZoomLevel) + 1);
+      this.calculatedZoomLevel = 0;
+      this.zoomLevel = 1;
       console.log('Updated zoom level1 ' + this.zoomLevel + '/' + this.calculatedZoomLevel);
       this.updatedZoomLevel.emit(this.zoomLevel);
     } else {

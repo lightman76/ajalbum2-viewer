@@ -529,8 +529,8 @@ export class IndividualPhotoComponent {
     this.lastZoomEvent = null;
     let prevZoomLevel = this.zoomLevel;
     this.zoomLevel += (-1 * (event.deltaY * (this.zoomLevel < 1.0 ? 0.25 : 1.0))) * 0.05;
-    if (this.zoomLevel < 0.025) {
-      this.zoomLevel = 0.025;
+    if (this.zoomLevel < 1) {
+      this.zoomLevel = 1;
     } else if (this.zoomLevel > 100) {
       this.zoomLevel = 100;
     }
