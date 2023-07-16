@@ -272,6 +272,7 @@ export class SearchComponent {
     newQuery.tagIds = tagIds;
     newQuery.startDate = startDate;
     newQuery.endDate = endDate;
+    newQuery.offsetDate = null;
     this.searchUpdated.emit(newQuery);
   }
 
