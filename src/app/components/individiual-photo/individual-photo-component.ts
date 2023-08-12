@@ -15,25 +15,27 @@ import {UserInfo} from '../../services/helper/user-info';
   template: `
     <div class="individual-photo-container"
     >
-      <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'" tabindex="0">
-        <fa-icon [icon]="faTimes"></fa-icon>
-      </div>
-      <div class="download-btn" *ngIf="photo">
-        <a target="_blank"
-           [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
-           [download]="photo.date_bucket+'_'+photo.title"
-        >
-          <fa-icon [icon]="faDownload"></fa-icon>
-        </a>
-      </div>
-      <div class="zoom-toggle">
-        <photo-zoom-control [zoomLevel]="zoomLevel" (updatedZoomLevel)="onZoomLevelUpdate($event)"></photo-zoom-control>
-      </div>
-      <div class="edit-details" (click)="openEdit($event)" [matTooltip]="'Edit details'" tabindex="0" *ngIf="canEdit">
-        <fa-icon [icon]="faEdit"></fa-icon>
-      </div>
-      <div class="delete-photo" (click)="confirmDelete($event)" [matTooltip]="'Delete photo'" tabindex="0" *ngIf="canEdit">
-        <fa-icon [icon]="faTrash"></fa-icon>
+      <div class="individual-photo-controls">
+        <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'" tabindex="0">
+          <fa-icon [icon]="faTimes"></fa-icon>
+        </div>
+        <div class="download-btn" *ngIf="photo">
+          <a target="_blank"
+             [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
+             [download]="photo.date_bucket+'_'+photo.title"
+          >
+            <fa-icon [icon]="faDownload"></fa-icon>
+          </a>
+        </div>
+        <div class="zoom-toggle">
+          <photo-zoom-control [zoomLevel]="zoomLevel" (updatedZoomLevel)="onZoomLevelUpdate($event)"></photo-zoom-control>
+        </div>
+        <div class="edit-details" (click)="openEdit($event)" [matTooltip]="'Edit details'" tabindex="0" *ngIf="canEdit">
+          <fa-icon [icon]="faEdit"></fa-icon>
+        </div>
+        <div class="delete-photo" (click)="confirmDelete($event)" [matTooltip]="'Delete photo'" tabindex="0" *ngIf="canEdit">
+          <fa-icon [icon]="faTrash"></fa-icon>
+        </div>
       </div>
       <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)" [matTooltip]="'Previous photo'"
            [matTooltipPosition]="'right'">
@@ -81,15 +83,26 @@ import {UserInfo} from '../../services/helper/user-info';
   styles: [`
     .individual-photo-container {
       position: relative;
+      width: 100vw;
+      height: 100vh;
     }
 
-    .return-to-search {
+    .individual-photo-controls {
       position: fixed;
       top: 10px;
       right: 20px;
+      height: 30px;
+      z-index: 20;
+
+      display: flex;
+      gap: 7px;
+      flex-direction: row-reverse;
+    }
+
+    .return-to-search {
+      color: rgba(0, 0, 0, 0.5);
       width: 30px;
       height: 30px;
-      color: rgba(0, 0, 0, 0.5);
       border-radius: 15px;
       padding-top: 5px;
       text-align: center;
@@ -100,7 +113,6 @@ import {UserInfo} from '../../services/helper/user-info';
       transition-property: background-color, color;
       transition-duration: 250ms;
       cursor: pointer;
-      z-index: 20;
       user-select: none;
     }
 
@@ -116,9 +128,6 @@ import {UserInfo} from '../../services/helper/user-info';
     }
 
     .download-btn {
-      position: fixed;
-      top: 10px;
-      right: 108px;
       width: 50px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
@@ -137,9 +146,6 @@ import {UserInfo} from '../../services/helper/user-info';
     }
 
     .zoom-toggle {
-      position: fixed;
-      top: 10px;
-      right: 50px;
       width: 50px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
@@ -165,9 +171,6 @@ import {UserInfo} from '../../services/helper/user-info';
     }
 
     .delete-photo {
-      position: fixed;
-      top: 10px;
-      right: 140px;
       width: 30px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
@@ -186,9 +189,6 @@ import {UserInfo} from '../../services/helper/user-info';
     }
 
     .edit-details {
-      position: fixed;
-      top: 10px;
-      right: 100px;
       width: 30px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
@@ -269,6 +269,16 @@ import {UserInfo} from '../../services/helper/user-info';
     }
 
     @media (hover) {
+      .navigation-button {
+        background-color: transparent;
+        color: transparent;
+      }
+
+      .navigation-button .navigation-button-icon {
+        background-color: transparent;
+        color: transparent;
+      }
+
       .navigation-button:hover {
         background-color: rgba(200, 200, 200, 0.5);
       }
@@ -770,20 +780,40 @@ export class IndividualPhotoComponent {
 
   confirmDelete(evt) {
     if (confirm('Are you sure you want to delete this photo?')) {
-      //TODO: call photo service to delete
-      this.photoService.deletePhotos(
-        this.userService.getCurrentUser$().getValue().authenticationToken,
-        this.userService.getCurrentUser$().getValue().userName,
-        [this.photo.time_id]).subscribe(() => {
-        //TODO: NEED TO TRIGGER REFRESH
-        this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
-          this.futurePhoto(evt);
-        });
-      }, () => {
-        console.error('FAILURE: failed while deleting individual photo! ', this.photo.time_id);
+      //transition to the future photo and THEN delete
+      this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
+        console.log('Future photo ', photo);
+        if (photo) {
+          this.resetView();
+          let newParams = {...this.queryParams};
+          delete newParams['photoId'];
+          this.router.navigate(['../', photo.time_id], {relativeTo: this.route, queryParams: newParams});
+          //now delete the photo
+          this.photoService.deletePhotos(
+            this.userService.getCurrentUser$().getValue().authenticationToken,
+            this.userService.getCurrentUser$().getValue().userName,
+            [this.photo.time_id]).subscribe(() => {
+            console.log('Successfully deleted photo');
+            this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
+              console.log('Refreshed after delete completed');
+            });
+          }, () => {
+            console.error('FAILURE: failed while deleting individual photo! ', this.photo.time_id);
+          });
+        } else {
+          this.photoService.deletePhotos(
+            this.userService.getCurrentUser$().getValue().authenticationToken,
+            this.userService.getCurrentUser$().getValue().userName,
+            [this.photo.time_id]).subscribe(() => {
+            console.log('Successfully deleted photo');
+            this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
+              console.log('Refreshed after delete completed');
+            });
+          }, () => {
+            console.error('FAILURE: failed while deleting individual photo! ', this.photo.time_id);
+          });
+        }
       });
-
-
     }
   }
 }

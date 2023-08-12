@@ -103,25 +103,26 @@ import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
         <div class="tag-edit-area" *ngIf="!singlePhotoEdit">
           <div class="tag-edit-area__title">Tags:</div>
-          <mat-form-field>
+          <mat-form-field appearance="fill">
             <mat-label>Add to all:</mat-label>
-            <mat-chip-listbox #tagChipList aria-label="Search tags">
-              <mat-chip-option *ngFor="let tagDetail of addTags"
-                               (removed)="removeTag($event, tagDetail)">
+            <mat-chip-grid #tagChipGrid aria-label="Search tags">
+              <mat-chip-row *ngFor="let tagDetail of addTags"
+                            [editable]="false"
+                            (removed)="removeTag($event, tagDetail)">
                 <tag [tagSubject]="tagDetail.tag$"
                      [tagActions]="tagDetail.originallyOnSome ? [tagActionLeaveUnchanged,tagActionRemoveFromAll] : [tagActionRemoveFromAll]"
                      (tagActionHandler)="onTagAction($event, addTags, tagDetail)"
                 ></tag>
-              </mat-chip-option>
+              </mat-chip-row>
               <input
                 placeholder="Search tags"
                 #searchTagInput
                 [formControl]="searchTags"
                 [matAutocomplete]="auto"
-                [matChipInputFor]="tagChipList"
+                [matChipInputFor]="tagChipGrid"
                 [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                 (matChipInputTokenEnd)="confirmAddTag($event)">
-            </mat-chip-listbox>
+            </mat-chip-grid>
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addSelectedTag($event)">
               <mat-option *ngFor="let tagSearchTerm of filterTags | async" [value]="tagSearchTerm">
                 <fa-icon [icon]="getIconForType(tagSearchTerm)"></fa-icon>&nbsp;
@@ -183,7 +184,7 @@ export class BulkPhotoEditDialogComponent {
   title: string = null;
   description: string = null;
   priority: number = null;
-  rotation: number = null;
+  rotation: number = 0;
 
   currentUser: UserInfo = null;
   forUserName: string = null;
@@ -208,9 +209,11 @@ export class BulkPhotoEditDialogComponent {
   allTags: Array<ITag>;
 
 
-  @ViewChild('titleInput') titleInput: ElementRef<HTMLInputElement>;
-  @ViewChild('descriptionInput') descriptionInput: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('rotationInput') rotationInput: ElementRef<HTMLInputElement>;
+  /*
+    @ViewChild('titleInput') titleInput: ElementRef<HTMLInputElement>;
+    @ViewChild('descriptionInput') descriptionInput: ElementRef<HTMLTextAreaElement>;
+    @ViewChild('rotationInput') rotationInput: ElementRef<HTMLInputElement>;
+  */
   @ViewChild('searchTagInput') searchTagInput: ElementRef<HTMLInputElement>;
 
   /** data parameter
@@ -245,6 +248,7 @@ export class BulkPhotoEditDialogComponent {
     this.form = this.fb.group({
       title: [this.title, []],
       description: [this.description, []],
+      priority: [this.priority, []],
       rotation: [this.rotation, []],
     });
     this.forUserName = this.data.forUserName;
@@ -269,11 +273,15 @@ export class BulkPhotoEditDialogComponent {
     this.form.get('description').valueChanges.subscribe((val) => {
       this.description = val;
     });
+    this.form.get('priority').valueChanges.subscribe((val) => {
+      this.priority = val;
+    });
+    this.refreshPhotoTags();
+
     this.form.get('rotation').valueChanges.subscribe((val) => {
       this.rotation = val;
     });
 
-    this.refreshPhotoTags();
   }
 
   async refreshPhotoTags() {
@@ -286,7 +294,7 @@ export class BulkPhotoEditDialogComponent {
     if (this.singlePhotoEdit) {
       let photo = await this.photoResultSetService.getPhotoForId(this.forUserName, this.photoIds[0]);
       this.photos.push(photo);
-      this.form.setValue({title: photo.title, description: photo.description});
+      this.form.setValue({title: photo.title, description: photo.description, priority: photo.feature_threshold, rotation: 0});
       this.priority = photo.feature_threshold;
       photo.tags.forEach((tid) => {
         let t$ = tag$sById[tid];
@@ -439,27 +447,11 @@ export class BulkPhotoEditDialogComponent {
         duration: 5000
       });
     });
-    /*
-        if (!username.value || !password.value) {
-          this.matSnackBar.open('Please provide a username and password', 'Dismiss', {
-            duration: 5000
-          });
-        }
-        this.userService.loginUser(username.value, password.value).then((userInfo: UserInfo) => {
-          this.matSnackBar.open('Successfully logged in', 'Dismiss', {
-            duration: 2000
-          });
-          this.dialogRef.close({userInfo: userInfo});
-        }, (reason: any) => {
-          this.matSnackBar.open('Invalid username or password.', 'Dismiss', {
-            duration: 5000
-          });
-        });
-    */
   }
 
-  onPriorityChange(evt) {
-    this.priority = evt.value || 0;
+  onPriorityChange(val) {
+    //console.log("OnPriorityChange: got value "+evt.value,evt)
+    this.priority = val || 0;
   }
 
   getIconForType(tag: ITag) {
