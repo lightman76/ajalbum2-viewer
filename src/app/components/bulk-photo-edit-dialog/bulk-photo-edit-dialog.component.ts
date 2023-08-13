@@ -184,7 +184,7 @@ export class BulkPhotoEditDialogComponent {
   title: string = null;
   description: string = null;
   priority: number = null;
-  rotation: number = 0;
+  rotation: number = null;
 
   currentUser: UserInfo = null;
   forUserName: string = null;
@@ -294,7 +294,7 @@ export class BulkPhotoEditDialogComponent {
     if (this.singlePhotoEdit) {
       let photo = await this.photoResultSetService.getPhotoForId(this.forUserName, this.photoIds[0]);
       this.photos.push(photo);
-      this.form.setValue({title: photo.title, description: photo.description, priority: photo.feature_threshold, rotation: 0});
+      this.form.setValue({title: photo.title, description: photo.description, priority: photo.feature_threshold, rotation: null});
       this.priority = photo.feature_threshold;
       photo.tags.forEach((tid) => {
         let t$ = tag$sById[tid];

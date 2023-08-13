@@ -15,26 +15,28 @@ import {UserInfo} from '../../services/helper/user-info';
   template: `
     <div class="individual-photo-container"
     >
+      <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'" tabindex="0">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </div>
+      <div class="zoom-toggle">
+        <photo-zoom-control [zoomLevel]="zoomLevel" (updatedZoomLevel)="onZoomLevelUpdate($event)"></photo-zoom-control>
+      </div>
       <div class="individual-photo-controls">
-        <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'" tabindex="0">
-          <fa-icon [icon]="faTimes"></fa-icon>
-        </div>
-        <div class="download-btn" *ngIf="photo">
-          <a target="_blank"
-             [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
-             [download]="photo.date_bucket+'_'+photo.title"
-          >
-            <fa-icon [icon]="faDownload"></fa-icon>
-          </a>
-        </div>
-        <div class="zoom-toggle">
-          <photo-zoom-control [zoomLevel]="zoomLevel" (updatedZoomLevel)="onZoomLevelUpdate($event)"></photo-zoom-control>
-        </div>
-        <div class="edit-details" (click)="openEdit($event)" [matTooltip]="'Edit details'" tabindex="0" *ngIf="canEdit">
-          <fa-icon [icon]="faEdit"></fa-icon>
-        </div>
-        <div class="delete-photo" (click)="confirmDelete($event)" [matTooltip]="'Delete photo'" tabindex="0" *ngIf="canEdit">
-          <fa-icon [icon]="faTrash"></fa-icon>
+        <div class="individual-photo-controls-body">
+          <div class="download-btn" *ngIf="photo">
+            <a target="_blank"
+               [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
+               [download]="photo.date_bucket+'_'+photo.title"
+            >
+              <fa-icon [icon]="faDownload"></fa-icon>
+            </a>
+          </div>
+          <div class="edit-details" (click)="openEdit($event)" [matTooltip]="'Edit details'" tabindex="0" *ngIf="canEdit">
+            <fa-icon [icon]="faEdit"></fa-icon>
+          </div>
+          <div class="delete-photo" (click)="confirmDelete($event)" [matTooltip]="'Delete photo'" tabindex="0" *ngIf="canEdit">
+            <fa-icon [icon]="faTrash"></fa-icon>
+          </div>
         </div>
       </div>
       <div class="navigation-button navigation-button-past" (click)="pastPhoto($event)" [matTooltip]="'Previous photo'"
@@ -91,15 +93,37 @@ import {UserInfo} from '../../services/helper/user-info';
       position: fixed;
       top: 10px;
       right: 20px;
-      height: 30px;
+      height: 40px;
       z-index: 20;
+    }
 
+    .individual-photo-controls-body {
+      height: 40px;
+      padding: 5px 100px 5px 10px;
+      border-radius: 7px;
       display: flex;
       gap: 7px;
       flex-direction: row-reverse;
+      transition-property: opacity, background-color;
+      transition-duration: 250ms;
+    }
+
+    @media (hover) {
+      .individual-photo-controls .individual-photo-controls-body {
+        opacity: 0;
+        background-color: rgba(200, 200, 200, 0.75);
+      }
+
+      .individual-photo-controls:hover .individual-photo-controls-body {
+        opacity: 1;
+      }
     }
 
     .return-to-search {
+      position: fixed;
+      top: 15px;
+      right: 25px;
+      z-index: 21;
       color: rgba(0, 0, 0, 0.5);
       width: 30px;
       height: 30px;
@@ -120,6 +144,10 @@ import {UserInfo} from '../../services/helper/user-info';
       .return-to-search:hover {
         color: rgba(0, 0, 0, 1);
         background-color: rgba(150, 150, 150, 1.0);
+      }
+
+      .return-to-search:hover ~ .individual-photo-controls .individual-photo-controls-body {
+        opacity: 1;
       }
     }
 
@@ -145,7 +173,18 @@ import {UserInfo} from '../../services/helper/user-info';
       user-select: none;
     }
 
+    @media (hover) {
+      .download-btn:hover {
+        color: rgba(0, 0, 0, 1);
+        background-color: rgba(150, 150, 150, 1.0);
+      }
+    }
+
     .zoom-toggle {
+      position: fixed;
+      top: 15px;
+      right: 65px;
+      z-index: 21;
       width: 50px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
@@ -159,7 +198,6 @@ import {UserInfo} from '../../services/helper/user-info';
       transition-property: background-color, color;
       transition-duration: 250ms;
       cursor: pointer;
-      z-index: 20;
       user-select: none;
     }
 
@@ -167,6 +205,10 @@ import {UserInfo} from '../../services/helper/user-info';
       .zoom-toggle:hover {
         color: rgba(0, 0, 0, 1);
         background-color: rgba(150, 150, 150, 1.0);
+      }
+
+      .zoom-toggle:hover ~ .individual-photo-controls .individual-photo-controls-body {
+        opacity: 1;
       }
     }
 
