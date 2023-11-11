@@ -25,6 +25,15 @@ import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
       <div class="individual-photo-controls">
         <div class="individual-photo-controls-body">
           <div class="download-btn" *ngIf="photo">
+            <transfer-photo-button
+              [usageContext]="'single'"
+              [photoTimeId]="photo.time_id"
+              [viewingUser]="userName"
+              (afterTransfer)="futurePhoto($event)"
+            ></transfer-photo-button>
+
+          </div>
+          <div class="download-btn" *ngIf="photo">
             <a target="_blank"
                [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
                [download]="photo.date_bucket+'_'+photo.title"
@@ -466,7 +475,9 @@ export class IndividualPhotoComponent {
   }
 
   futurePhoto(evt) {
-    evt.preventDefault();
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
     this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
       console.log('Future photo ', photo);
       if (photo) {

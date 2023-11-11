@@ -122,6 +122,7 @@ export class UserService {
         } else {
           //Valid - add it to the list
           signedInUsersInfo.addUserInfo(new UserInfo(username, token));
+          console.log('  AJAlbum current users: adding user ' + username);
         }
       }
     });
