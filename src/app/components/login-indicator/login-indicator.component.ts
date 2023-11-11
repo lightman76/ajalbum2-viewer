@@ -1,9 +1,10 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {faUser} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
 import {LoginDialogComponent} from '../login-dialog/login-dialog-component';
 import {MatDialog} from '@angular/material/dialog';
+import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
 
 @Component({
   selector: 'login-indicator',
@@ -36,6 +37,9 @@ import {MatDialog} from '@angular/material/dialog';
 })
 export class LoginIndicatorComponent {
   faUser = faUser;
+
+  @Input() public viewingUser: string = null;
+  currentUsers: SignedInUsersInfo = null;
   currentUser: UserInfo = null;
 
   constructor(private userService: UserService,
@@ -43,8 +47,10 @@ export class LoginIndicatorComponent {
   }
 
   ngOnInit() {
-    this.userService.getCurrentUser$().subscribe((currentUser) => {
-      this.currentUser = currentUser;
+    this.userService.getCurrentUsers$().subscribe((currentUsers) => {
+      this.currentUsers = currentUsers;
+      this.currentUser = this.currentUsers.userInfosByName[this.viewingUser];
+
     });
   }
 

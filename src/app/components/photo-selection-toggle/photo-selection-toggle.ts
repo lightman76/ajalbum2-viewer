@@ -1,9 +1,10 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {faToggleOff, faToggleOn} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {UserInfo} from '../../services/helper/user-info';
 import {SelectionService} from '../../services/selection.service';
 import {MatDialog} from '@angular/material/dialog';
+import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
 
 @Component({
   selector: 'photo-selection-toggle',
@@ -38,7 +39,10 @@ export class PhotoSelectionToggle {
   faToggleOn = faToggleOn;
   faToggleOff = faToggleOff;
 
+  @Input() public viewingUser: string = null;
+
   toggleState: boolean = false;
+  currentUsers: SignedInUsersInfo = null;
   currentUser: UserInfo = null;
 
   constructor(private userService: UserService,
@@ -47,8 +51,10 @@ export class PhotoSelectionToggle {
   }
 
   ngOnInit() {
-    this.userService.getCurrentUser$().subscribe((currentUser) => {
-      this.currentUser = currentUser;
+    this.userService.getCurrentUsers$().subscribe((currentUsers) => {
+      this.currentUsers = currentUsers;
+      this.currentUser = this.currentUsers.userInfosByName[this.viewingUser];
+
     });
     this.selectionService.getSelectionEnabled$().subscribe((selectionEnabled) => {
       this.toggleState = selectionEnabled;

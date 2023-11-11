@@ -9,6 +9,7 @@ import {UserService} from '../../services/user.service';
 import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {UserInfo} from '../../services/helper/user-info';
+import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
 
 @Component({
   selector: 'individual-photo',
@@ -389,6 +390,7 @@ export class IndividualPhotoComponent {
   lastPinchEvent = null;
 
   userName = null;
+  currentUsers: SignedInUsersInfo;
   currentUser: UserInfo;
   canEdit = false;
   editOpen = false;
@@ -441,9 +443,11 @@ export class IndividualPhotoComponent {
       }
     });
 
-    this.userService.getCurrentUser$().subscribe((currentUser) => {
-      this.currentUser = currentUser;
-      this.canEdit = this.userService.hasAccessToUser(currentUser, this.userName);
+    this.userService.getCurrentUsers$().subscribe((currentUsers) => {
+      this.currentUsers = currentUsers;
+      this.currentUser = this.currentUsers.userInfosByName[this.userName];
+
+      this.canEdit = !!this.currentUser; //this.userService.hasAccessToUser(this.currentUser, this.userName);
     });
   }
 
@@ -832,8 +836,8 @@ export class IndividualPhotoComponent {
           this.router.navigate(['../', photo.time_id], {relativeTo: this.route, queryParams: newParams});
           //now delete the photo
           this.photoService.deletePhotos(
-            this.userService.getCurrentUser$().getValue().authenticationToken,
-            this.userService.getCurrentUser$().getValue().userName,
+            this.currentUser.authenticationToken,
+            this.currentUser.userName,
             [this.photo.time_id]).subscribe(() => {
             console.log('Successfully deleted photo');
             this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
@@ -844,8 +848,8 @@ export class IndividualPhotoComponent {
           });
         } else {
           this.photoService.deletePhotos(
-            this.userService.getCurrentUser$().getValue().authenticationToken,
-            this.userService.getCurrentUser$().getValue().userName,
+            this.currentUser.authenticationToken,
+            this.currentUser.userName,
             [this.photo.time_id]).subscribe(() => {
             console.log('Successfully deleted photo');
             this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
