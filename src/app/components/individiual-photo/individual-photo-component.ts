@@ -45,7 +45,7 @@ import {SelectionService} from '../../services/selection.service';
       </div>
       <div class="individual-photo-controls">
         <div class="individual-photo-controls-body">
-          <div class="download-btn" *ngIf="photo">
+          <div class="transfer-btn" *ngIf="photo">
             <transfer-photo-button
               [usageContext]="'single'"
               [photoTimeId]="photo.time_id"
@@ -241,7 +241,7 @@ import {SelectionService} from '../../services/selection.service';
       position: relative;
     }
 
-    .download-btn {
+    .download-btn, .transfer-btn {
       width: 50px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
@@ -257,6 +257,12 @@ import {SelectionService} from '../../services/selection.service';
       cursor: pointer;
       z-index: 20;
       user-select: none;
+    }
+
+    .transfer-btn transfer-photo-button {
+      top: -25px;
+      display: block;
+      position: relative;
     }
 
     @media (hover) {

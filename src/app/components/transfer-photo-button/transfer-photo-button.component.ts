@@ -34,7 +34,7 @@ import {Photo} from '../../helper/photo';
       <form method="dialog" *ngIf="otherUsersList.length > 0">
         <h2>Transfer photo{{selectionCount > 1 ? 's' : ''}} to another account</h2>
         <p>
-          <label for="toUser">To account</label>
+          <label for="toUser">To account</label>&nbsp;
           <select name="toAccount" class="transfer-photo-button__to-account-selector">
             <option></option>
             <option *ngFor="let acct of otherUsersList"
@@ -42,10 +42,22 @@ import {Photo} from '../../helper/photo';
             >{{acct.userName}}</option>
           </select>
         </p>
-        <p>
-          <button class="btn btn-primary" (click)="doTransfer($event)">Transfer</button>&nbsp;&nbsp;
-          <button class="btn btn-link" (click)="cancelTransfer($event)">Cancel</button>
-        </p>
+        <br>
+        <div>
+          <div class="mdc-touch-target-wrapper">
+            <button class="mdc-button mdc-button--touch" type="button" (click)="doTransfer($event)">
+              <span class="mdc-button__ripple"></span>
+              <span class="mdc-button__touch"></span>
+              <span class="mdc-button__label">Transfer</span>
+            </button>
+            &nbsp;
+            <button class="mdc-button mdc-button--touch" type="button" (click)="cancelTransfer($event)">
+              <span class="mdc-button__ripple"></span>
+              <span class="mdc-button__touch"></span>
+              <span class="mdc-button__label">Cancel</span>
+            </button>
+          </div>
+        </div>
       </form>
       <div *ngIf="otherUsersList.length === 0">
         <p>
@@ -65,6 +77,10 @@ import {Photo} from '../../helper/photo';
       padding: 20px 10px 10px 10px;
       color: #3f51b5;
       display: inline-block;
+    }
+
+    .transfer-photo-button__to-account-selector {
+      min-width: 150px;
     }
 
   `],
