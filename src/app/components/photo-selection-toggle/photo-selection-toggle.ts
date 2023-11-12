@@ -12,6 +12,7 @@ import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
     <div class="photo-selection-toggle"
          [class.loggedIn]="!!currentUser"
          tabindex="0">
+      <span *ngIf="toggleState" class="photo-selection__count">{{selectionCount}}</span>
       <fa-icon
         (click)="toggleSelection($event)"
         [matTooltip]="toggleState ? 'Photo selection enabled' : 'Photo selection disabled'"
@@ -23,7 +24,7 @@ import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
   styles: [`
     .photo-selection-toggle {
       box-sizing: border-box;
-      width: 50px;
+      width: auto;
       height: 50px;
       padding: 30px 10px 10px 10px;
       color: #888;
@@ -32,6 +33,12 @@ import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
 
     .photo-selection-toggle.loggedIn {
       display: inline-block;
+    }
+
+    .photo-selection__count {
+      height: 50px;
+      padding-left: 15px;
+      padding-right: 7px;
     }
   `],
 })
@@ -44,6 +51,7 @@ export class PhotoSelectionToggle {
   toggleState: boolean = false;
   currentUsers: SignedInUsersInfo = null;
   currentUser: UserInfo = null;
+  selectionCount: number = 0;
 
   constructor(private userService: UserService,
               private selectionService: SelectionService,
@@ -58,6 +66,9 @@ export class PhotoSelectionToggle {
     });
     this.selectionService.getSelectionEnabled$().subscribe((selectionEnabled) => {
       this.toggleState = selectionEnabled;
+    });
+    this.selectionService.getSelectedPhotosById$().subscribe((selectionEnabled) => {
+      this.selectionCount = Object.keys(this.selectionService.getSelectedPhotosById$().getValue()).length;
     });
   }
 

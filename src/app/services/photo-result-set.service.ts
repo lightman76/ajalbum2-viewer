@@ -86,7 +86,7 @@ export class PhotoResultSetService {
     this.photosByDayList = [];
     this.photosByDayHash = {};
     this.photosByDay$.next(this.photosByDayList);
-    this.selectionService.clearSelections();
+    //this.selectionService.clearSelections();
     //TODO: probably need to push out on the subjects...
     this.search = inSearch.clone();
     this.outlineNextOffsetDate = null;

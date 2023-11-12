@@ -6,6 +6,7 @@ import {SelectionService} from '../../services/selection.service';
 import {MatDialog} from '@angular/material/dialog';
 import {PhotoService} from '../../services/photo.service';
 import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
+import {Photo} from '../../helper/photo';
 
 @Component({
   selector: 'delete-photo-button',
@@ -54,7 +55,7 @@ export class DeletePhotoButtonComponent {
       this.currentUsers = currentUsers;
       this.currentUser = this.currentUsers.userInfosByName[this.viewingUser];
     });
-    this.selectionService.getSelectedPhotosById$().subscribe((curIds: { [id: string]: number }) => {
+    this.selectionService.getSelectedPhotosById$().subscribe((curIds: { [id: string]: Photo }) => {
       this.selectionCount = curIds && Object.keys(curIds).length || 0;
       console.log('Got updated current IDs: ', curIds);
     });
@@ -74,6 +75,7 @@ export class DeletePhotoButtonComponent {
           this.currentUser.userName,
           deletePhotoIds).subscribe(() => {
           //TODO: then call afterDelete
+          this.selectionService.clearSelections(); //they should be deleted now, so clear them
           this.afterDelete.emit(deletePhotoIds);
         }, () => {
           console.error('FAILURE: failed while deleting photos! ', deletePhotoIds);
