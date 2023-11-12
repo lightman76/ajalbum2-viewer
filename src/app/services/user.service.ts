@@ -5,19 +5,20 @@ import {UserInfo} from './helper/user-info';
 import {BehaviorSubject} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import {AJHelpers} from './helper/ajhelpers';
+import {SignedInUsersInfo} from './helper/signed-in-users-info';
 
 @Injectable()
 export class UserService {
-  currentUser$: BehaviorSubject<UserInfo>;
+  currentUsersInfo$: BehaviorSubject<SignedInUsersInfo>;
 
   constructor(private configService: ConfigService,
               private http: HttpClient) {
-    this.currentUser$ = new BehaviorSubject<UserInfo>(null);
+    this.currentUsersInfo$ = new BehaviorSubject<SignedInUsersInfo>(new SignedInUsersInfo());
     this.loadFromLocalStorage();
   }
 
-  getCurrentUser$() {
-    return this.currentUser$;
+  getCurrentUsers$() {
+    return this.currentUsersInfo$;
   }
 
   hasAccessToUser(currentUser: UserInfo, onBehalfOfUser: string) {
@@ -40,57 +41,102 @@ export class UserService {
       req.subscribe((data) => {
         let userInfo = new UserInfo(username, data['token']);
         this.updateLocalStorage(username, userInfo);
-        this.currentUser$.next(userInfo);
         resolve(userInfo);
       }, (err) => {
-        if (this.currentUser$.getValue()) {
-          this.updateLocalStorage(null, null);
-          this.currentUser$.next(null);
-        }
+        this.updateLocalStorage(username, null);
         reject(err);
       });
     });
 
-
     return p;
   }
 
-  logoutUser() {
-    this.updateLocalStorage(null, null);
-    this.currentUser$.next(null);
+  logoutUser(username: string = null) {
+    if (username) {
+      //just log out this user
+      this.updateLocalStorage(username, null);
+    } else {
+      //log out of all users
+      let usernamesStr = localStorage.getItem('usernames');
+      if (usernamesStr) {
+        let usernames = JSON.parse(usernamesStr);
+        usernames.forEach((username) => {
+          this.updateLocalStorage(username, null);
+        });
+      }
+    }
   }
 
-  private updateLocalStorage(username, userInfo) {
+  private updateLocalStorage(username, userInfo: UserInfo) {
     if (userInfo) {
-      localStorage.setItem('username', username);
-      localStorage.setItem('loginAuthToken', userInfo.authenticationToken);
+      let usernamesStr = localStorage.getItem('usernames');
+      let usernames = [];
+      if (usernamesStr) {
+        usernames = JSON.parse(usernamesStr);
+      }
+      if (usernames.indexOf(username) < 0) {
+        usernames.push(username);
+        localStorage.setItem('usernames', JSON.stringify(usernames));
+      }
+      localStorage.setItem('loginAuthToken_' + username, userInfo.authenticationToken);
+      let signedInUsers = this.currentUsersInfo$.getValue();
+      signedInUsers.addUserInfo(userInfo);
+      this.currentUsersInfo$.next(signedInUsers);
     } else {
-      localStorage.removeItem('username');
-      localStorage.removeItem('loginAuthToken');
+      localStorage.removeItem('loginAuthToken_' + username);
+      let usernamesStr = localStorage.getItem('usernames');
+      if (usernamesStr) {
+        let usernames = JSON.parse(usernamesStr);
+        let idx = usernames.indexOf(username);
+        if (idx >= 0) {
+          usernames.splice(idx, 1);
+          localStorage.setItem('usernames', JSON.stringify(usernames));
+        }
+      }
+      let signedInUsers = this.currentUsersInfo$.getValue();
+      signedInUsers.removeUserInfo(username);
+      this.currentUsersInfo$.next(signedInUsers);
+
     }
   }
 
   private loadFromLocalStorage() {
-    let username = localStorage.getItem('username');
-    let token = localStorage.getItem('loginAuthToken');
-    if (username && token) {
-      //TODO: Need to check date on token to ensure still valid...
-      let parsedToken = this.jwtDecode(token);
-      if (parsedToken.payload.aud !== 'AJAlbumServer' ||
-        parsedToken.payload.iss !== 'AJAlbumServer' ||
-        parsedToken.payload.exp < new Date().getTime() / 1000
-      ) {
-        //invalid JWT - remove from storage
-        console.log('Expiring invalid JWT', parsedToken);
-        localStorage.removeItem('username');
-        localStorage.removeItem('loginAuthToken');
-        this.currentUser$.next(null);
-        return;
-      }
-      this.currentUser$.next(new UserInfo(username, token));
-    } else {
-      this.currentUser$.next(null);
+    let usernamesStr = localStorage.getItem('usernames');
+    let usernames = [];
+    let invalidNames = [];
+    let signedInUsersInfo = new SignedInUsersInfo();
+    if (usernamesStr) {
+      usernames = JSON.parse(usernamesStr);
     }
+    usernames.forEach((username) => {
+      let token = localStorage.getItem('loginAuthToken_' + username);
+      if (username && token) {
+        //TODO: Need to check date on token to ensure still valid...
+        let parsedToken = this.jwtDecode(token);
+        if (parsedToken.payload.aud !== 'AJAlbumServer' ||
+          parsedToken.payload.iss !== 'AJAlbumServer' ||
+          parsedToken.payload.exp < new Date().getTime() / 1000
+        ) {
+          //invalid JWT - remove from storage
+          invalidNames.push(username);
+        } else {
+          //Valid - add it to the list
+          signedInUsersInfo.addUserInfo(new UserInfo(username, token));
+          console.log('  AJAlbum current users: adding user ' + username);
+        }
+      }
+    });
+    if (invalidNames.length > 0) {
+      invalidNames.forEach((invalidName) => {
+        let idx = usernames.indexOf(invalidName);
+        if (idx >= 0) {
+          usernames.splice(idx, 1);
+        }
+        localStorage.removeItem('loginAuthToken_' + invalidName);
+      });
+      localStorage.setItem('usernames', JSON.stringify(usernames));
+    }
+    this.currentUsersInfo$.next(signedInUsersInfo);
   }
 
   private jwtDecode(t) {

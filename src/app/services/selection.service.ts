@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
 import {PhotoService} from './photo.service';
 import {BehaviorSubject} from 'rxjs';
+import {Photo} from '../helper/photo';
 
 @Injectable()
 export class SelectionService {
-  private selectedPhotosById$: BehaviorSubject<any>;
+  private selectedPhotosById$: BehaviorSubject<{ [id: string]: Photo }>;
   private selectionEnabled$: BehaviorSubject<boolean>;
 
   constructor(

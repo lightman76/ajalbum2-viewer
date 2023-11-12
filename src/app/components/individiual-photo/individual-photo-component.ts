@@ -4,17 +4,39 @@ import {PhotoService} from '../../services/photo.service';
 import {SearchQuery} from '../../services/helper/search-query';
 import {PhotoResultSetService} from '../../services/photo-result-set.service';
 import {Photo} from '../../helper/photo';
-import {faChevronCircleLeft, faChevronCircleRight, faDownload, faEdit, faTimes, faTrash} from '@fortawesome/pro-solid-svg-icons';
+import {
+  faCheckCircle,
+  faChevronCircleLeft,
+  faChevronCircleRight,
+  faCircle,
+  faDownload,
+  faEdit,
+  faTimes,
+  faTrash
+} from '@fortawesome/pro-solid-svg-icons';
 import {UserService} from '../../services/user.service';
 import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {UserInfo} from '../../services/helper/user-info';
+import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
+import {SelectionService} from '../../services/selection.service';
 
 @Component({
   selector: 'individual-photo',
   template: `
     <div class="individual-photo-container"
     >
+      <div class="photo-selection-container"
+           [class.individual-photo__selection-enabled]="isSelectionEnabled"
+           [class.individual-photo__selected]="isSelected"
+      >
+        <span class="photo-selected__indicator" (click)="onSelectClick($event)">
+          <fa-icon [icon]="faCheckCircle" [size]="'2x'" [matTooltip]="'Unselect this photo'"></fa-icon>
+        </span>
+        <span class="photo-unselected__indicator" (click)="onSelectClick($event)">
+          <fa-icon [icon]="faCircle" [size]="'2x'" [matTooltip]="'Select this photo'"></fa-icon>
+        </span>
+      </div>
       <div class="return-to-search" (click)="returnToSearch($event)" [matTooltip]="'Return to search results'" tabindex="0">
         <fa-icon [icon]="faTimes"></fa-icon>
       </div>
@@ -23,6 +45,15 @@ import {UserInfo} from '../../services/helper/user-info';
       </div>
       <div class="individual-photo-controls">
         <div class="individual-photo-controls-body">
+          <div class="transfer-btn" *ngIf="photo">
+            <transfer-photo-button
+              [usageContext]="'single'"
+              [photoTimeId]="photo.time_id"
+              [viewingUser]="userName"
+              (afterTransfer)="futurePhoto($event)"
+            ></transfer-photo-button>
+
+          </div>
           <div class="download-btn" *ngIf="photo">
             <a target="_blank"
                [href]="'storage/'+photo.user_id+'/'+photo.image_versions['original'].root_store+'/'+(zoomLevel === 1.0 ? photo.image_versions['original'].relative_path: photo.image_versions['original'].relative_path)"
@@ -108,6 +139,61 @@ import {UserInfo} from '../../services/helper/user-info';
       transition-duration: 250ms;
     }
 
+    .photo-selection-container {
+      position: fixed;
+      top: 10px;
+      left: 20px;
+      height: 33px;
+      width: 33px;
+      z-index: 20;
+      display: none;
+    }
+
+    .photo-selected__indicator {
+      width: 33px;
+      height: 33px;
+      padding-left: 2px;
+      padding-top: 1px;
+      color: aqua;
+      background-color: white;
+      border: 1px solid white;
+      box-shadow: 0 0 4px 2px #fff;
+      border-radius: 17px;
+      z-index: 2;
+      display: none;
+    }
+
+    .photo-unselected__indicator {
+      width: 33px;
+      height: 33px;
+      padding-left: 2px;
+      padding-top: 1px;
+      color: #aaa;
+      background-color: white;
+      border: 1px solid white;
+      box-shadow: 0 0 4px 2px #fff;
+      border-radius: 17px;
+      z-index: 2;
+      display: none;
+    }
+
+    .photo-selection-container.individual-photo__selection-enabled {
+      display: block;
+    }
+
+    .photo-selection-container.individual-photo__selection-enabled .photo-unselected__indicator {
+      display: block;
+    }
+
+    .photo-selection-container.individual-photo__selection-enabled.individual-photo__selected .photo-selected__indicator {
+      display: block;
+    }
+
+    .photo-selection-container.individual-photo__selection-enabled.individual-photo__selected .photo-unselected__indicator {
+      display: none;
+    }
+
+
     @media (hover) {
       .individual-photo-controls .individual-photo-controls-body {
         opacity: 0;
@@ -155,7 +241,7 @@ import {UserInfo} from '../../services/helper/user-info';
       position: relative;
     }
 
-    .download-btn {
+    .download-btn, .transfer-btn {
       width: 50px;
       height: 30px;
       color: rgba(0, 0, 0, 0.5);
@@ -171,6 +257,12 @@ import {UserInfo} from '../../services/helper/user-info';
       cursor: pointer;
       z-index: 20;
       user-select: none;
+    }
+
+    .transfer-btn transfer-photo-button {
+      top: -25px;
+      display: block;
+      position: relative;
     }
 
     @media (hover) {
@@ -389,62 +481,28 @@ export class IndividualPhotoComponent {
   lastPinchEvent = null;
 
   userName = null;
+  currentUsers: SignedInUsersInfo;
   currentUser: UserInfo;
   canEdit = false;
   editOpen = false;
+  isSelected: boolean = false;
+  isSelectionEnabled: boolean = false;
 
   @ViewChild('imgContainer') imgContainer: ElementRef<HTMLDivElement>;
   @ViewChild('imgHost') imgHost: ElementRef<HTMLImageElement>;
+  protected readonly faCircle = faCircle;
+  protected readonly faCheckCircle = faCheckCircle;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private photoService: PhotoService,
     private resultSetService: PhotoResultSetService,
+    private selectionService: SelectionService,
     private userService: UserService,
     private elRef: ElementRef,
     private dialog: MatDialog,
   ) {
-  }
-
-  ngOnInit() {
-    let query = null;
-
-    //have to wait for query params AND photo id
-    let fetchResultsWhenReady = async () => {
-      console.log('Checking fetchResultsWhenReady ' + this.readyPhotoId, this.photoId, query);
-      if (this.photoId && query && this.readyPhotoId !== this.photoId) {
-        console.log(' fetchResultsWhenReady --- Running query: ' + this.readyPhotoId, this.photoId, query);
-        await this.resultSetService.updateSearch(query);
-        await this.reloadPhotoDetails();
-        this.readyPhotoId = this.photoId;
-      }
-    };
-
-    this.route.queryParams.subscribe(queryParams => {
-      //TODO: get linked search params from here
-      this.queryParams = queryParams;
-      query = new SearchQuery(queryParams);
-      fetchResultsWhenReady();
-    });
-
-    this.route.params.subscribe(params => {
-      //TODO: get linked search params from here
-      this.params = params;
-      if (params.photoId) {
-        this.userName = params['userName'];
-        console.log('  IndividualPhoto: Got PhotoID as ' + params['photoId']);
-        this.photoId = parseInt(params['photoId']);
-        fetchResultsWhenReady();
-      } else {
-        console.error('  IndividualPhoto: No photoId found!', params);
-      }
-    });
-
-    this.userService.getCurrentUser$().subscribe((currentUser) => {
-      this.currentUser = currentUser;
-      this.canEdit = this.userService.hasAccessToUser(currentUser, this.userName);
-    });
   }
 
   returnToSearch(evt) {
@@ -462,7 +520,9 @@ export class IndividualPhotoComponent {
   }
 
   futurePhoto(evt) {
-    evt.preventDefault();
+    if (evt.preventDefault) {
+      evt.preventDefault();
+    }
     this.resultSetService.getFuturePhotoFromId(this.photoId).then((photo) => {
       console.log('Future photo ', photo);
       if (photo) {
@@ -832,8 +892,8 @@ export class IndividualPhotoComponent {
           this.router.navigate(['../', photo.time_id], {relativeTo: this.route, queryParams: newParams});
           //now delete the photo
           this.photoService.deletePhotos(
-            this.userService.getCurrentUser$().getValue().authenticationToken,
-            this.userService.getCurrentUser$().getValue().userName,
+            this.currentUser.authenticationToken,
+            this.currentUser.userName,
             [this.photo.time_id]).subscribe(() => {
             console.log('Successfully deleted photo');
             this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
@@ -844,8 +904,8 @@ export class IndividualPhotoComponent {
           });
         } else {
           this.photoService.deletePhotos(
-            this.userService.getCurrentUser$().getValue().authenticationToken,
-            this.userService.getCurrentUser$().getValue().userName,
+            this.currentUser.authenticationToken,
+            this.currentUser.userName,
             [this.photo.time_id]).subscribe(() => {
             console.log('Successfully deleted photo');
             this.resultSetService.updateSearch(this.resultSetService.getSearch(), true).then(() => {
@@ -856,6 +916,79 @@ export class IndividualPhotoComponent {
           });
         }
       });
+    }
+  }
+
+  ngOnInit() {
+    let query = null;
+
+    //have to wait for query params AND photo id
+    let fetchResultsWhenReady = async () => {
+      console.log('Checking fetchResultsWhenReady ' + this.readyPhotoId, this.photoId, query);
+      if (this.photoId && query && this.readyPhotoId !== this.photoId) {
+        console.log(' fetchResultsWhenReady --- Running query: ' + this.readyPhotoId, this.photoId, query);
+        await this.resultSetService.updateSearch(query);
+        await this.reloadPhotoDetails();
+        this.readyPhotoId = this.photoId;
+        this.refreshSelectionStatus();
+      }
+    };
+
+    this.route.queryParams.subscribe(queryParams => {
+      //TODO: get linked search params from here
+      this.queryParams = queryParams;
+      query = new SearchQuery(queryParams);
+      fetchResultsWhenReady();
+    });
+
+    this.route.params.subscribe(params => {
+      //TODO: get linked search params from here
+      this.params = params;
+      if (params.photoId) {
+        this.userName = params['userName'];
+        console.log('  IndividualPhoto: Got PhotoID as ' + params['photoId']);
+        this.photoId = parseInt(params['photoId']);
+        fetchResultsWhenReady();
+      } else {
+        console.error('  IndividualPhoto: No photoId found!', params);
+      }
+    });
+
+    this.userService.getCurrentUsers$().subscribe((currentUsers) => {
+      this.currentUsers = currentUsers;
+      this.currentUser = this.currentUsers.userInfosByName[this.userName];
+
+      this.canEdit = !!this.currentUser; //this.userService.hasAccessToUser(this.currentUser, this.userName);
+    });
+
+    this.selectionService.getSelectionEnabled$().subscribe((selectionEnabled) => {
+      this.isSelectionEnabled = selectionEnabled;
+    });
+    this.refreshSelectionStatus();
+  }
+
+  refreshSelectionStatus() {
+    this.selectionService.getSelectedPhotosById$().subscribe((selectedPhotos) => {
+      if (selectedPhotos && this.photo && this.photo.time_id) {
+        this.isSelected = !!selectedPhotos[this.photo.time_id];
+      }
+    });
+  }
+
+  onSelectClick(evt) {
+    if (this.isSelectionEnabled) {
+      if (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+      }
+      //selection is enabled - click is to toggle select photo
+      let photosById = {...this.selectionService.getSelectedPhotosById$().getValue()};
+      if (this.isSelected) {
+        delete photosById[this.photo.time_id];
+      } else {
+        photosById[this.photo.time_id] = this.photo;
+      }
+      this.selectionService.getSelectedPhotosById$().next(photosById);
     }
   }
 }

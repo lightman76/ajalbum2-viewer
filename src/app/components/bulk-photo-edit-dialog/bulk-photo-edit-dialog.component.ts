@@ -18,6 +18,7 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
 
 @Component({
   selector: 'bulk-photo-edit-dialog',
@@ -186,6 +187,7 @@ export class BulkPhotoEditDialogComponent {
   priority: number = null;
   rotation: number = null;
 
+  currentUsers: SignedInUsersInfo = null;
   currentUser: UserInfo = null;
   forUserName: string = null;
 
@@ -263,8 +265,9 @@ export class BulkPhotoEditDialogComponent {
     });
 
 
-    this.userService.getCurrentUser$().subscribe((currentUser) => {
-      this.currentUser = currentUser;
+    this.userService.getCurrentUsers$().subscribe((currentUsers) => {
+      this.currentUsers = currentUsers;
+      this.currentUser = this.currentUsers.userInfosByName[this.forUserName];
     });
 
     this.form.get('title').valueChanges.subscribe((val) => {

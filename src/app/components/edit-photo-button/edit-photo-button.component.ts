@@ -5,6 +5,8 @@ import {UserInfo} from '../../services/helper/user-info';
 import {SelectionService} from '../../services/selection.service';
 import {BulkPhotoEditDialogComponent} from '../bulk-photo-edit-dialog/bulk-photo-edit-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import {SignedInUsersInfo} from '../../services/helper/signed-in-users-info';
+import {Photo} from '../../helper/photo';
 
 @Component({
   selector: 'edit-photo-button',
@@ -37,6 +39,7 @@ export class EditPhotoButtonComponent {
   @Input() public usageContext: string = 'multi';
   @Input() public viewingUser: string = null;
   @Output() public photosUpdated: EventEmitter<Array<number>>;
+  currentUsers: SignedInUsersInfo = null;
   currentUser: UserInfo = null;
   selectionCount: number = 0;
 
@@ -47,10 +50,11 @@ export class EditPhotoButtonComponent {
   }
 
   ngOnInit() {
-    this.userService.getCurrentUser$().subscribe((currentUser) => {
-      this.currentUser = currentUser;
+    this.userService.getCurrentUsers$().subscribe((currentUsers) => {
+      this.currentUsers = currentUsers;
+      this.currentUser = this.currentUsers.userInfosByName[this.viewingUser];
     });
-    this.selectionService.getSelectedPhotosById$().subscribe((curIds: { [id: string]: number }) => {
+    this.selectionService.getSelectedPhotosById$().subscribe((curIds: { [id: string]: Photo }) => {
       this.selectionCount = curIds && Object.keys(curIds).length || 0;
       console.log('Got updated current IDs: ', curIds);
     });
