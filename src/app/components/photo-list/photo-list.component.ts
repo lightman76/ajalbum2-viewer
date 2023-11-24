@@ -9,7 +9,7 @@ import {distinct} from 'rxjs/operators';
 @Component({
   selector: 'photo-list',
   template: `
-    <div class="control-bar">
+    <div class="control-bar" *ngIf="currentSearch">
       <div class="control-bar-search">
         <photo-search [searchQuery]="currentSearch" (searchUpdated)="onSearchUpdated($event)"></photo-search>
       </div>
@@ -85,6 +85,8 @@ export class PhotoListComponent {
   currentSearch: SearchQuery;
   private fragment;
   private userName;
+  private currentDay: string = null;
+  private initialLoad = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -98,6 +100,7 @@ export class PhotoListComponent {
   ngOnInit() {
     this.route.fragment.subscribe(fragment => {
       this.fragment = fragment;
+      //console.log("     INspecting fragment: "+fragment)
       if (this.fragment) {
         if (this.currentSearch) {
           const photoIdRegEx = /photo__([0-9]+)/.exec(this.fragment);
@@ -106,11 +109,41 @@ export class PhotoListComponent {
             this.focusPhotoId = parseInt(photoId);
             const date = new Date(parseInt(photoId));
             this.currentSearch.offsetDate = parseInt(PhotosForDay.dateToDayStr(date));
-            this.resultSetService.updateSearch(this.currentSearch);
+            this.resultSetService.updateSearch(this.currentSearch).then((results) => {
+              this.handleUpdateSearchComplete(results);
+            });
             let wl = window.location;
             //window.location.replace(wl.protocol+wl.hostname+wl.pathname+wl.search)
+          } else {
+            this.focusPhotoId = null;
           }
         }
+        const dayIdRegEx = /day__([-0-9]+)/.exec(this.fragment);
+        if (dayIdRegEx) {
+          const dayOffset = dayIdRegEx[1];
+          //console.log("Found day ID param: "+dayOffset, this.currentDay)
+          if (dayOffset === this.currentDay) {
+            return;
+          }
+          this.currentDay = dayOffset;
+          //console.log("   Updated currentDay 2 = "+this.currentDay);
+          if (!this.currentSearch) {
+            //console.log("  Deferring query with current day: Query not ready yet", this.currentDay);
+          } else {
+            //console.log("  Preparing to query with current day: "+ this.currentDay, this.currentSearch);
+            let lastSearch = this.currentSearch.clone();
+            this.currentSearch.offsetDate = parseInt(dayOffset.replace(/-/g, ''));
+            if (!lastSearch.equals(this.currentSearch) || this.initialLoad) {
+              this.resultSetService.updateSearch(this.currentSearch).then((results) => {
+                this.handleUpdateSearchComplete(results);
+              });
+            }
+          }
+
+          let wl = window.location;
+          //window.location.replace(wl.protocol+wl.hostname+wl.pathname+wl.search)
+        }
+
       } else {
         this.focusPhotoId = null;
       }
@@ -126,6 +159,9 @@ export class PhotoListComponent {
         this.photosByDate = photosByDate;
       });
       let q = new SearchQuery(params);
+      if (this.currentDay && this.initialLoad) {
+        q.offsetDate = parseInt(this.currentDay.replace(/-/g, ''));
+      }
       if (q.equals(this.currentSearch)) {
         return;
       }
@@ -140,12 +176,48 @@ export class PhotoListComponent {
           this.currentSearch.offsetDate = parseInt(PhotosForDay.dateToDayStr(date));
           let wl = window.location;
           setTimeout(() => {
-            window.history.replaceState(null, null, wl.protocol + '//' + wl.hostname + wl.pathname + wl.search);
+            let hash = '';
+            if (this.currentDay) {
+              hash = 'day__' + this.currentDay;
+            }
+            console.log('    After photo ID: preparing to repopulate date ID');
+            this.resultSetService.getLoadedPfdForDay((this.currentDay ? this.currentDay.replace(/-/g, '') : ''), this.userName).then((pfd) => {
+              if (pfd) {
+                console.log('  #1 Updating state with hash ' + hash);
+                window.history.replaceState(null, null, wl.protocol + '//' + wl.hostname + wl.pathname + wl.search + '#' + hash);
+                (<HTMLDivElement> document.getElementsByClassName('results')[0]).scrollTop = pfd.offsetFromTop;
+              }
+            });
+
           }, 1500);
         }
       }
       console.log('  PhotoList: query params updated: ', this.currentSearch);
-      this.resultSetService.updateSearch(this.currentSearch);
+      this.resultSetService.updateSearch(this.currentSearch).then((results) => {
+        this.handleUpdateSearchComplete(results);
+      });
+    });
+    this.resultSetService.getCurrentPfd$().subscribe((pfd) => {
+      console.log('  Updating current PFD to ' + (pfd ? pfd.forDate : 'null'));
+      if (pfd && !this.currentDay && !this.initialLoad) {
+        this.currentDay = '' + pfd.forDateParts[0] + '-' + this.padLeading(pfd.forDateParts[1]) + '-' + this.padLeading(pfd.forDateParts[2]);
+        //console.log("   Updated currentDay 1a = "+this.currentDay, pfd.forDateParts);
+        //window.location.hash = "day__"+(pfd.forDateParts[0]+"-"+pfd.forDateParts[1]+"-"+pfd.forDateParts[2]);
+        let wl = window.location;
+        let hash = 'day__' + this.currentDay;
+        //console.log("  #2 Updating state with hash "+hash);
+        window.history.replaceState(null, null, wl.protocol + '//' + wl.hostname + wl.pathname + wl.search + '#' + hash);
+      } else if (pfd && (this.currentDay && this.currentDay.replace(/-/g, '') !== pfd.forDateParts.map((a) => {
+        return a.toString();
+      }).join('')) && !this.initialLoad) {
+        this.currentDay = '' + pfd.forDateParts[0] + '-' + this.padLeading(pfd.forDateParts[1], 2) + '-' + this.padLeading(pfd.forDateParts[2], 2);
+        //console.log("   Updated currentDay 1b = "+this.currentDay, pfd.forDateParts);
+        //window.location.hash = "day__"+(pfd.forDateParts[0]+"-"+pfd.forDateParts[1]+"-"+pfd.forDateParts[2]);
+        let wl = window.location;
+        let hash = 'day__' + this.currentDay;
+        //console.log("  #2 Updating state with hash "+hash);
+        window.history.replaceState(null, null, wl.protocol + '//' + wl.hostname + wl.pathname + wl.search + '#' + hash);
+      }
     });
   }
 
@@ -160,7 +232,9 @@ export class PhotoListComponent {
       relativeTo: this.route,
       queryParams: queryParams, //note, can use queryParamsHandling: "merge" to merge with existing rather than replace
     });
-    this.resultSetService.updateSearch(query, forcedRefresh);
+    this.resultSetService.updateSearch(query, forcedRefresh).then((results) => {
+      this.handleUpdateSearchComplete(results);
+    });
     if (this.focusPhotoId === null) {
       //Need to scroll results back to top
       try {
@@ -168,6 +242,35 @@ export class PhotoListComponent {
       } catch (e) {
       }
     }
+  }
+
+  handleUpdateSearchComplete(results) {
+    this.initialLoad = false;
+    let hash = '';
+
+    if (this.currentDay) {
+      hash = 'day__' + this.currentDay;
+    }
+    //console.log("Preparing to retrieve current day PFD: "+this.currentDay)
+    this.resultSetService.getLoadedPfdForDay((this.currentDay ? this.currentDay.replace(/-/g, '') : ''), this.currentSearch.userName).then((pfd) => {
+      //console.log("   Retrieved current day PFD: "+this.currentDay, pfd)
+      if (pfd) {
+        //console.log("   Retrieved current day PFD found - updating scrollTop to "+pfd.offsetFromTop+": "+this.currentDay, pfd);
+        (<HTMLDivElement> document.getElementsByClassName('results')[0]).scrollTop = pfd.offsetFromTop;
+        //window.history.replaceState(null, null, wl.protocol + '//' + wl.hostname + wl.pathname + wl.search + "#" + hash);
+      }
+    });
+    return results;
+  }
+
+  private padLeading(str, leading = 2) {
+    str = str.toString();
+    let ret = '';
+    for (let i = str.length; i < leading; i++) {
+      ret += '0';
+    }
+    ret += str;
+    return ret;
   }
 
   onPhotosEdited(editedIds) {

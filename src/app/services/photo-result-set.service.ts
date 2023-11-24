@@ -24,6 +24,7 @@ export class PhotoResultSetService {
   private viewerHeight$: BehaviorSubject<number>;
   private thumbnailDims$: BehaviorSubject<RectangleDimensions>;
   private scrollOffset$: BehaviorSubject<number>;
+  private currentPfd$: BehaviorSubject<PhotosForDay>;
   private debouncedRecomputeDateHeightOffsets: any;
   private resultsAreLoading: boolean = false;
   private initialLoadUpToDate: number = null;
@@ -41,6 +42,7 @@ export class PhotoResultSetService {
     this.viewerHeight$ = new BehaviorSubject<number>(window.innerHeight);
     this.thumbnailDims$ = new BehaviorSubject<RectangleDimensions>(new RectangleDimensions(270, 270));
     this.scrollOffset$ = new BehaviorSubject<number>(0);
+    this.currentPfd$ = new BehaviorSubject<PhotosForDay>(null);
     this.searchSpecificSubscriptions = [];
     this.scrollOffset$.subscribe((offset) => {
       this.recomputePagesInViewForOffset(offset);
@@ -97,6 +99,10 @@ export class PhotoResultSetService {
 
   getPhotosByDay$() {
     return this.photosByDay$;
+  }
+
+  getCurrentPfd$() {
+    return this.currentPfd$;
   }
 
   async getLoadedPfdForDay(dateBucket, userName: string) {
@@ -477,6 +483,7 @@ export class PhotoResultSetService {
     //console.log("  Reprocessing offset " + scrollOffset);
     let vpHeight = this.viewerHeight$.getValue();
     let rangeTop = scrollOffset - 2 * vpHeight;
+    let curPageOffsetPoint = scrollOffset + 0.5 * vpHeight;
     let rangeBottom = scrollOffset + 3 * vpHeight;
     //console.log("    Reprocessing range=" + rangeTop + "/" + rangeBottom);
 
@@ -486,6 +493,13 @@ export class PhotoResultSetService {
         pfd.offsetFromTop + pfd.getDisplayHeight$().getValue() < rangeTop ||
         pfd.offsetFromTop > rangeBottom
       )) {
+        //check if it's the current page
+        if (pfd.displayHeight$.getValue() > 200 && pfd.offsetFromTop < curPageOffsetPoint && pfd.offsetFromTop + pfd.displayHeight$.getValue() >= curPageOffsetPoint) {
+          if (this.currentPfd$.getValue() !== pfd) {
+            console.log('   Updating current page: ' + pfd.forDate + ' - offsetTop=' + pfd.offsetFromTop + ' < ' + curPageOffsetPoint + ' < ' + (pfd.offsetFromTop + pfd.displayHeight$.getValue()));
+            this.currentPfd$.next(pfd);
+          }
+        }
         //It's in the view area
         pfd.dateInViewRange = true;
         if (this.photosByDayList.length === idx + 1 && this.outlineNextOffsetDate) {
@@ -543,12 +557,14 @@ export class PhotoResultSetService {
     return new Promise<boolean>((resolve, reject) => {
       this.photoService.getSearchDateOutline(this.search, offsetDate).subscribe(async (results) => {
         this.parseOutlineResults(results);
+        this.recomputeDateHeightOffsets();
         this.recomputePagesInViewForOffset(this.scrollOffset$.getValue());
         if (this.initialLoadUpToDate) {
           let earliestDate = this.photosByDayList[this.photosByDayList.length - 1].forDate;
           let loadToDate = this.initialLoadUpToDate;
           console.log('   ## Looking for initial load date of ' + loadToDate + '.  Currently at ' + earliestDate + '.  Next offset date=' + this.outlineNextOffsetDate);
-          if (earliestDate > loadToDate) {
+          if (earliestDate > loadToDate && this.outlineNextOffsetDate) {
+            console.log('   #### Fetching outline for Next offset date=' + this.outlineNextOffsetDate);
             await this.fetchResultsOutline(this.outlineNextOffsetDate);
           } else {
             resolve(true);
