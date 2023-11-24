@@ -221,17 +221,22 @@ export class PhotoListComponent {
     });
   }
 
-  onSearchUpdated(query, forcedRefresh: boolean = false) {
+  onSearchUpdated(query, forcedRefresh: boolean = false, currentDay: string) {
     if (!forcedRefresh && query.equals(this.currentSearch)) {
       return;
     }
     console.log('  PhotoList: Search Updated: forcedRefresh=' + forcedRefresh, query);
     this.currentSearch = query;
     const queryParams: Params = this.currentSearch.toQueryParamHash();
-    this.router.navigate([], {
+    let navParams = {
       relativeTo: this.route,
       queryParams: queryParams, //note, can use queryParamsHandling: "merge" to merge with existing rather than replace
-    });
+    };
+    if (currentDay) {
+      this.initialLoad = true;
+      navParams['fragment'] = 'day__' + currentDay;
+    }
+    this.router.navigate([], navParams);
     this.resultSetService.updateSearch(query, forcedRefresh).then((results) => {
       this.handleUpdateSearchComplete(results);
     });
@@ -276,7 +281,7 @@ export class PhotoListComponent {
   onPhotosEdited(editedIds) {
     console.log('onPhotosEdited got ', editedIds);
     this.focusPhotoId = editedIds ? editedIds[0] : null;
-    this.onSearchUpdated(this.currentSearch, true);
+    this.onSearchUpdated(this.currentSearch, true, this.currentDay);
   }
 
   handleScroll(evt) {
