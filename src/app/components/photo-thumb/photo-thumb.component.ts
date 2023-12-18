@@ -4,6 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {SearchQuery} from '../../services/helper/search-query';
 import {SelectionService} from '../../services/selection.service';
 import {faCheckCircle, faCircle} from '@fortawesome/pro-solid-svg-icons';
+import {PhotoResultSetService} from '../../services/photo-result-set.service';
 
 @Component({
   selector: 'photo-thumb',
@@ -14,10 +15,10 @@ import {faCheckCircle, faCircle} from '@fortawesome/pro-solid-svg-icons';
          [class.photo-thumb__selected]="isSelected"
          tabindex="0"
          [attr.id]="'photo_thumb_'+photo.time_id">
-      <span class="photo-selected__indicator" (click)="onSelectClick($event)">
+      <span class="photo-selected__indicator" (click)="onSelectClick($event)" tabindex="0">
         <fa-icon [icon]="faCheckCircle" [size]="'2x'"></fa-icon>
       </span>
-      <span class="photo-unselected__indicator" (click)="onSelectClick($event)">
+      <span class="photo-unselected__indicator" (click)="onSelectClick($event)" tabindex="0">
         <fa-icon [icon]="faCircle" [size]="'2x'"></fa-icon>
       </span>
       <img *ngIf="photo.image_versions['thumb']"
@@ -118,6 +119,7 @@ export class PhotoThumbComponent {
 
   constructor(private router: Router,
               private selectionService: SelectionService,
+              private photoResultSetService: PhotoResultSetService,
               private route: ActivatedRoute) {
   }
 
@@ -138,7 +140,7 @@ export class PhotoThumbComponent {
     this.router.navigate(['/' + this.currentQuery.userName + '/photo', this.photo.time_id], {queryParams: params});
   }
 
-  onSelectClick(evt) {
+  async onSelectClick(evt) {
     if (this.isSelectionEnabled) {
       if (evt) {
         evt.stopPropagation();
@@ -147,11 +149,26 @@ export class PhotoThumbComponent {
       //selection is enabled - click is to toggle select photo
       let photosById = {...this.selectionService.getSelectedPhotosById$().getValue()};
       if (this.isSelected) {
-        delete photosById[this.photo.time_id];
+        if (evt.shiftKey && this.selectionService.getLastSelectedPhotoId$().getValue()) {
+          let selPhotoIds = await this.photoResultSetService.getPhotosBetween(this.currentQuery.userName, this.selectionService.getLastSelectedPhotoId$().getValue(), this.photo.time_id);
+          selPhotoIds.forEach((photo) => {
+            delete photosById[photo.time_id];
+          });
+        } else {
+          delete photosById[this.photo.time_id];
+        }
       } else {
-        photosById[this.photo.time_id] = this.photo;
+        if (evt.shiftKey && this.selectionService.getLastSelectedPhotoId$().getValue()) {
+          let selPhotoIds = await this.photoResultSetService.getPhotosBetween(this.currentQuery.userName, this.selectionService.getLastSelectedPhotoId$().getValue(), this.photo.time_id);
+          selPhotoIds.forEach((photo) => {
+            photosById[photo.time_id] = photo;
+          });
+        } else {
+          photosById[this.photo.time_id] = this.photo;
+        }
       }
       this.selectionService.getSelectedPhotosById$().next(photosById);
+      this.selectionService.getLastSelectedPhotoId$().next(this.photo.time_id);
     }
   }
 }

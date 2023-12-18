@@ -317,6 +317,51 @@ export class PhotoResultSetService {
     throw new Error('Photo not found');
   }
 
+  async getPhotosBetween(userName: string, photoTimeId1: number, photoTimeId2: number) {
+    let startId = photoTimeId1;
+    let endId = photoTimeId2;
+    if (endId < startId) {
+      startId = photoTimeId2;
+      endId = photoTimeId1;
+    }
+
+    let startPfd = await this.getPfdForPhotoId(userName, startId);
+    let endPfd = await this.getPfdForPhotoId(userName, endId);
+
+    let photos: Array<Photo> = [];
+
+    let endPhotos = endPfd.getPhotoList$().getValue();
+    var foundStart = false;
+    endPhotos.forEach((p) => {
+      if (p.time_id <= endId && p.time_id >= startId) {
+        photos.push(p);
+      }
+      if (!foundStart && p.time_id === startId) {
+        foundStart = true;
+      }
+    });
+
+    if (startPfd !== endPfd && !foundStart) {
+      let curPfdIdx = this.photosByDayList.indexOf(endPfd);
+      if (curPfdIdx >= 0) {
+        while (!foundStart && curPfdIdx < this.photosByDayList.length) {
+          curPfdIdx += 1;
+          let curPfd = this.photosByDayList[curPfdIdx];
+          curPfd.getPhotoList$().getValue().forEach((p) => {
+            if (p.time_id <= endId && p.time_id >= startId) {
+              photos.push(p);
+            }
+            if (!foundStart && p.time_id === startId) {
+              foundStart = true;
+            }
+          });
+        }
+      }
+    }
+
+    return photos;
+  }
+
   async getFuturePhotoFromId(photoTimeIdNum: number): Promise<Photo> {
     let photoTimeId = new Date(photoTimeIdNum);
     console.log('getFuturePhotoForId: Preparing to getphoto ' + photoTimeIdNum + ' date=' + photoTimeId);

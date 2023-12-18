@@ -23,6 +23,7 @@ import {SearchQuery} from '../../services/helper/search-query';
   styles: [`
     :host {
       display: block;
+      user-select: none;
     }
 
     .date-header {

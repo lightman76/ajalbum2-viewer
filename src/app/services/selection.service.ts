@@ -6,12 +6,14 @@ import {Photo} from '../helper/photo';
 @Injectable()
 export class SelectionService {
   private selectedPhotosById$: BehaviorSubject<{ [id: string]: Photo }>;
+  private lastSelectedPhotoId$: BehaviorSubject<number>;
   private selectionEnabled$: BehaviorSubject<boolean>;
 
   constructor(
     private photoService: PhotoService,
   ) {
     this.selectedPhotosById$ = new BehaviorSubject<any>({});
+    this.lastSelectedPhotoId$ = new BehaviorSubject<number>(null);
     this.selectionEnabled$ = new BehaviorSubject<boolean>(false);
   }
 
@@ -21,6 +23,10 @@ export class SelectionService {
 
   getSelectedPhotosById$() {
     return this.selectedPhotosById$;
+  }
+
+  getLastSelectedPhotoId$() {
+    return this.lastSelectedPhotoId$;
   }
 
   clearSelections() {
